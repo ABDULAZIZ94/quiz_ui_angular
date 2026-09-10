@@ -1,0 +1,6 @@
+<div class="controls">
+  <button class="nav-btn" [disabled]="flashcardService.currentIndex() === 0" (click)="flashcardService.prev()">←</button>
+  <span class="counter">{{ flashcardService.currentIndex() + 1 }} / {{ flashcardService.total }}</span>
+  <button class="nav-btn" [disabled]="flashcardService.currentIndex() === flashcardService.total - 1" (click)="flashcardService.next()">→</button>
+</div>
+<button class="flip-btn" (click)="flashcardService.flip()">Flip Card</button>

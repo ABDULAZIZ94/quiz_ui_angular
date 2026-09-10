@@ -1,0 +1,7 @@
+:host {
+  display: block;
+  margin-top: 40px;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.85em;
+}

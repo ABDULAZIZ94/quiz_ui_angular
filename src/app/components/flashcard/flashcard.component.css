@@ -1,0 +1,133 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.card-container {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.card {
+  width: 100%;
+  height: 340px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+  cursor: pointer;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+.card-front {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+}
+
+.card-back {
+  background: var(--card-bg);
+  color: var(--text);
+  transform: rotateY(180deg);
+  border: 2px solid var(--accent);
+}
+
+.arabic-text {
+  font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
+  font-size: 4.5em;
+  line-height: 1.4;
+  direction: rtl;
+}
+
+.card-front .arabic-text {
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 10px;
+}
+
+.card-front .hint {
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-top: 15px;
+  letter-spacing: 1px;
+}
+
+.card-back .english {
+  font-size: 2.2em;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.card-back .translit {
+  font-size: 1.3em;
+  color: var(--accent);
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.card-back .category {
+  font-size: 0.85em;
+  color: var(--text-light);
+  background: #f0ebe0;
+  padding: 5px 16px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.card-back .example {
+  font-size: 0.95em;
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.card-back .example :strong {
+  color: var(--primary-dark);
+}
+
+.speak-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.3em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.speak-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 600px) {
+  .arabic-text { font-size: 3.5em; }
+  .card { height: 300px; }
+}

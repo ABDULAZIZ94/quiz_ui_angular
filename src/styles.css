@@ -1,0 +1,27 @@
+/* Global styles */
+:root {
+  --primary: #0d7a5f;
+  --primary-dark: #095c46;
+  --accent: #d4af37;
+  --bg: #f5f0e6;
+  --card-bg: #ffffff;
+  --text: #2c2c2c;
+  --text-light: #666;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+}

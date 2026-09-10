@@ -1,0 +1,15 @@
+<div class="card-container">
+  <div class="card" [class.flipped]="flashcardService.isFlipped()" (click)="flashcardService.flip()">
+    <div class="card-face card-front">
+      <div class="arabic-text">{{ flashcardService.currentWord.arabic }}</div>
+      <div class="hint">Tap to reveal meaning</div>
+    </div>
+    <div class="card-face card-back">
+      <div class="english">{{ flashcardService.currentWord.english }}</div>
+      <div class="translit">{{ flashcardService.currentWord.translit }}</div>
+      <div class="category">{{ flashcardService.currentWord.category }}</div>
+      <div class="example" [innerHTML]="flashcardService.currentWord.example"></div>
+      <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()">🔊</button>
+    </div>
+  </div>
+</div>

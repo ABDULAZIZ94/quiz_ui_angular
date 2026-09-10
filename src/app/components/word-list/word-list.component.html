@@ -1,0 +1,14 @@
+<div class="word-list">
+  <h2>All Words — Quick Reference</h2>
+  <div class="word-grid">
+    @for (w of flashcardService.words(); track $index; let i = $index) {
+      <div class="word-item" (click)="selectWord(i)">
+        <div>
+          <div class="w-arabic">{{ w.arabic }}</div>
+          <div class="w-english">{{ w.english }} · <em>{{ w.translit }}</em></div>
+        </div>
+        <button class="w-mini-speak" (click)="speakWord($event, i)">🔊</button>
+      </div>
+    }
+  </div>
+</div>

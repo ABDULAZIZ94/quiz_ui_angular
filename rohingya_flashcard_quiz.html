@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rohingya Flashcard Quiz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:#eee;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;}
+h1{margin:20px 0 5px;font-size:2em;text-align:center;background:linear-gradient(90deg,#e94560,#f5a623,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.subtitle{text-align:center;color:#aaa;margin-bottom:20px;font-size:0.95em;}
+.stats{display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;justify-content:center;}
+.stat-box{background:rgba(255,255,255,0.08);padding:10px 20px;border-radius:12px;text-align:center;min-width:90px;}
+.stat-box .num{font-size:1.6em;font-weight:bold;color:#f5a623;}
+.stat-box .lbl{font-size:0.75em;color:#aaa;text-transform:uppercase;letter-spacing:1px;}
+.controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;justify-content:center;}
+.btn{padding:10px 22px;border:none;border-radius:10px;font-size:0.95em;cursor:pointer;transition:all .2s;font-weight:600;}
+.btn-primary{background:linear-gradient(135deg,#e94560,#c73650);color:#fff;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(233,69,96,0.4);}
+.btn-secondary{background:rgba(255,255,255,0.1);color:#eee;border:1px solid rgba(255,255,255,0.2);}
+.btn-secondary:hover{background:rgba(255,255,255,0.2);}
+.btn-success{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;}
+.btn-danger{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;}
+.btn:active{transform:scale(0.96);}
+.card-container{perspective:1000px;width:420px;max-width:90vw;height:280px;margin:10px 0 30px;}
+.flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .6s;cursor:pointer;}
+.flashcard.flipped{transform:rotateY(180deg);}
+.card-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;}
+.card-front{background:linear-gradient(135deg,#0f3460,#533483);border:2px solid rgba(245,166,35,0.3);}
+.card-back{background:linear-gradient(135deg,#1a1a2e,#3a1c5e);border:2px solid rgba(233,69,96,0.3);transform:rotateY(180deg);}
+.card-label{font-size:0.8em;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;}
+.rohingya-word{font-size:2.2em;font-weight:bold;color:#fff;margin-bottom:10px;line-height:1.3;}
+.translation{font-size:1.3em;color:#e0e0e0;margin-bottom:8px;}
+.example{font-size:0.9em;color:#aaa;font-style:italic;margin-top:10px;line-height:1.4;}
+.tap-hint{font-size:0.75em;color:#666;margin-top:15px;}
+.progress-bar{width:420px;max-width:90vw;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-bottom:15px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#f5a623,#e94560);border-radius:4px;transition:width .3s;}
+.nav-buttons{display:flex;gap:10px;margin-bottom:15px;}
+.nav-btn{width:45px;height:45px;border-radius:50%;border:none;font-size:1.2em;cursor:pointer;background:rgba(255,255,255,0.1);color:#eee;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.nav-btn:hover{background:rgba(255,255,255,0.25);}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.mode-selector{display:flex;gap:8px;margin-bottom:15px;flex-wrap:wrap;justify-content:center;}
+.mode-btn{padding:8px 16px;border:1px solid rgba(255,255,255,0.2);border-radius:20px;background:transparent;color:#aaa;cursor:pointer;font-size:0.85em;transition:all .2s;}
+.mode-btn.active{background:linear-gradient(135deg,#e94560,#c73650);color:#fff;border-color:transparent;}
+.quiz-feedback{margin-top:15px;font-size:1.1em;font-weight:bold;min-height:30px;text-align:center;}
+.correct{color:#2ecc71;}
+.wrong{color:#e74c3c;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;width:420px;max-width:90vw;margin-top:15px;}
+.quiz-option{padding:15px;border:2px solid rgba(255,255,255,0.15);border-radius:12px;background:rgba(255,255,255,0.05);color:#eee;font-size:1.05em;cursor:pointer;transition:all .2s;text-align:center;}
+.quiz-option:hover{border-color:#f5a623;background:rgba(245,166,35,0.1);}
+.quiz-option.selected-correct{border-color:#2ecc71;background:rgba(46,204,113,0.15);}
+.quiz-option.selected-wrong{border-color:#e74c3c;background:rgba(231,76,60,0.15);}
+.card-number{position:absolute;top:15px;right:20px;font-size:0.8em;color:rgba(255,255,255,0.4);}
+.hidden{display:none!important;}
+.result-screen{text-align:center;padding:30px;}
+.result-screen h2{font-size:2em;margin-bottom:15px;color:#f5a623;}
+.result-screen .score{font-size:3em;font-weight:bold;color:#e94560;margin:15px 0;}
+.result-screen .msg{color:#aaa;margin-bottom:25px;font-size:1.1em;}
+</style>
+</head>
+<body>
+
+<h1>🃏 Rohingya Flashcard Quiz</h1>
+<p class="subtitle">Belajar bahasa Rohingya — 100 entri interaktif</p>
+
+<div class="mode-selector">
+  <button class="mode-btn active" onclick="setMode('flashcard')">📖 Mode Flashcard</button>
+  <button class="mode-btn" onclick="setMode('quiz')">📝 Mode Kuiz</button>
+</div>
+
+<div class="stats">
+  <div class="stat-box"><div class="num" id="statTotal">100</div><div class="lbl">Jumlah</div></div>
+  <div class="stat-box"><div class="num" id="statCurrent">1</div><div class="lbl">Semasa</div></div>
+  <div class="stat-box"><div class="num" id="statKnown">0</div><div class="lbl">Dikuasai</div></div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:1%"></div></div>
+
+<div class="controls">
+  <button class="btn btn-secondary" onclick="shuffleCards()">🔀 Kocok</button>
+  <button class="btn btn-secondary" onclick="resetAll()">🔄 Reset</button>
+  <button class="btn btn-success" onclick="markKnown()">✓ Tahu</button>
+  <button class="btn btn-danger" onclick="markUnknown()">✗ Tak Tahu</button>
+</div>
+
+<!-- Flashcard Mode -->
+<div id="flashcardMode">
+  <div class="card-container" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="card-face card-front">
+        <div class="card-number" id="cardNum">1/100</div>
+        <div class="card-label">Rohingya</div>
+        <div class="rohingya-word" id="rohingyaWord">—</div>
+        <div class="tap-hint">👆 Ketuk untuk flip</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-number" id="cardNumBack">1/100</div>
+        <div class="card-label">Maksud (Malay / English)</div>
+        <div class="translation" id="translation">—</div>
+        <div class="example" id="example">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-buttons" style="justify-content:center;display:flex;">
+    <button class="nav-btn" id="prevBtn" onclick="prevCard()">◀</button>
+    <button class="nav-btn" id="nextBtn" onclick="nextCard()">▶</button>
+  </div>
+</div>
+
+<!-- Quiz Mode -->
+<div id="quizMode" class="hidden">
+  <div class="card-container" style="height:auto;min-height:180px;">
+    <div class="card-face card-front" style="position:relative;transform:none;backface-visibility:visible;">
+      <div class="card-label">Apa maksud perkataan ini?</div>
+      <div class="rohingya-word" id="quizWord">—</div>
+    </div>
+  </div>
+  <div class="quiz-options" id="quizOptions"></div>
+  <div class="quiz-feedback" id="quizFeedback"></div>
+  <div class="nav-buttons" style="justify-content:center;display:flex;">
+    <button class="nav-btn" onclick="prevQuiz()">◀</button>
+    <button class="nav-btn" onclick="nextQuiz()">▶</button>
+  </div>
+</div>
+
+<!-- Result Screen (for quiz end) -->
+<div id="resultScreen" class="hidden result-screen">
+  <h2>🎉 Kuiz Selesai!</h2>
+  <div class="score" id="finalScore">0/0</div>
+  <div class="msg" id="resultMsg"></div>
+  <button class="btn btn-primary" onclick="resetAll()">🔄 Mula Semula</button>
+</div>
+
+<script>
+const cards = [
+  {ro:"Assalamualaikum",ms:"Salam sejahtera",en:"Peace be upon you (greeting)",ex:"Assalamualaikum, ki haal? = Hello, how are you?"},
+  {ro:"Ki haal?",ms:"Apa khabar?",en:"How are you?",ex:"Ki haal, tu? = How are you?"},
+  {ro:"Bala",ms:"Baik",en:"Good / Fine",ex:"Ei bala = This is good"},
+  {ro:"Aada",ms:"Datang",en:"Come",ex:"Aada ekhane = Come here"},
+  {ro:"Zaa",ms:"Pergi",en:"Go",ex:"Zaa ghor = Go home"},
+  {ro:"Ghor",ms:"Rumah",en:"House / Home",ex:"Amar ghor = My house"},
+  {ro:"Manus",ms:"Manusia",en:"Human / Person",ex:"Ei manus = This person"},
+  {ro:"Paani",ms:"Air",en:"Water",ex:"Paani aan = Bring water"},
+  {ro:"Bhaat",ms:"Nasi",en:"Rice (cooked)",ex:"Bhaat kha = Eat rice"},
+  {ro:"Kha",ms:"Makan",en:"Eat",ex:"Ki kha? = What did you eat?"},
+  {ro:"Dekho",ms:"Lihat",en:"See / Look",ex:"Ei dekho = Look at this"},
+  {ro:"Kotha",ms:"Cakap / Perkataan",en:"Word / Speech",ex:"Kotha ko = Speak"},
+  {ro:"Ko",ms:"Cakap / Berkata",en:"Say / Speak",ex:"Ki ko? = What did you say?"},
+  {ro:"Suno",ms:"Dengar",en:"Listen / Hear",ex:"Suno amar kotha = Listen to me"},
+  {ro:"Likho",ms:"Tulis",en:"Write",ex:"Likho ei = Write this"},
+  {ro:"Porho",ms:"Baca",en:"Read",ex:"Porho kitab = Read the book"},
+  {ro:"Kitab",ms:"Buku",en:"Book",ex:"Ei kitab porho = Read this book"},
+  {ro:"Amar",ms:"Saya / Punya saya",en:"My / Mine",ex:"Amar naam = My name"},
+  {ro:"Tor",ms:"Awak / Punya awak",en:"Your (informal)",ex:"Tor naam ki? = What's your name?"},
+  {ro:"Tar",ms:"Dia / Punya dia",en:"His / Her",ex:"Tar ghor = His house"},
+  {ro:"Naam",ms:"Nama",en:"Name",ex:"Amar naam Abdul = My name is Abdul"},
+  {ro:"Ki",ms:"Apa",en:"What",ex:"Ki ei? = What is this?"},
+  {ro:"Kontah",ms:"Siapa",en:"Who",ex:"Kontah ei? = Who is this?"},
+  {ro:"Khu",ms:"Mana",en:"Where",ex:"Khu ghor? = Where is the house?"},
+  {ro:"Kokhono",ms:"Bila",en:"When",ex:"Kokhono aada? = When will you come?"},
+  {ro:"Keno",ms:"Kenapa",en:"Why",ex:"Keno zaa? = Why go?"},
+  {ro:"Kivabe",ms:"Bagaimana",en:"How",ex:"Kivabe koro? = How to do it?"},
+  {ro:"Koto",ms:"Berapa",en:"How much / How many",ex:"Koto taka? = How much money?"},
+  {ro:"Taka",ms:"Wang / Ringgit",en:"Money / Taka",ex:"Taka lagbe = Need money"},
+  {ro:"Lagbe",ms:"Perlu",en:"Need",ex:"Paani lagbe = Need water"},
+  {ro:"Ache",ms:"Ada / Wujud",en:"Is / There is",ex:"Paani ache = There is water"},
+  {ro:"Nei",ms:"Tiada",en:"Not / There is not",ex:"Paani nei = There is no water"},
+  {ro:"Ho",ms:"Ya / Benar",en:"Yes",ex:"Ho, ei = Yes, this"},
+  {ro:"Na",ms:"Tidak",en:"No / Not",ex:"Na, na = No no"},
+  {ro:"Ei",ms:"Ini",en:"This",ex:"Ei kitab = This book"},
+  {ro:"Ota",ms:"Itu",en:"That",ex:"Ota ghor = That house"},
+  {ro:"Erekhan",ms:"Ini (jamak)",en:"These",ex:"Erekhan manus = These people"},
+  {ro:"Orekhan",ms:"Itu (jamak)",en:"Those",ex:"Orekhan kitab = Those books"},
+  {ro:"Ek",ms:"Satu",en:"One",ex:"Ek taaka = One taka"},
+  {ro:"Dui",ms:"Dua",en:"Two",ex:"Dui manus = Two people"},
+  {ro:"Tin",ms:"Tiga",en:"Three",ex:"Tin bhaat = Three rice plates"},
+  {ro:"Char",ms:"Empat",en:"Four",ex:"Char kitab = Four books"},
+  {ro:"Pach",ms:"Lima",en:"Five",ex:"Pach ghor = Five houses"},
+  {ro:"Choy",ms:"Enam",en:"Six",ex:"Choy manus = Six people"},
+  {ro:"Haat",ms:"Tujuh",en:"Seven",ex:"Haat taka = Seven taka"},
+  {ro:"Aat",ms:"Lapan",en:"Eight",ex:"Aat paani = Eight waters"},
+  {ro:"No",ms:"Sembilan",en:"Nine",ex:"No ghor = Nine houses"},
+  {ro:"Dosh",ms:"Sepuluh",en:"Ten",ex:"Dosh kitab = Ten books"},
+  {ro:"Bara",ms:"Besar",en:"Big / Large",ex:"Bara ghor = Big house"},
+  {ro:"Choto",ms:"Kecil",en:"Small",ex:"Choto kitab = Small book"},
+  {ro:"Lomba",ms:"Panjang",en:"Long / Tall",ex:"Lomba manus = Tall person"},
+  {ro:"Choto lomba",ms:"Pendek",en:"Short",ex:"Choto lomba manus = Short person"},
+  {ro:"Moja",ms:"Satu (satu)",en:"One (single)",ex:"Moja manus = One person"},
+  {ro:"Beshi",ms:"Banyak / Lebih",en:"More / Many",ex:"Beshi kotha = Too many words"},
+  {ro:"Kom",ms:"Sikit / Kurang",en:"Less / Few",ex:"Kom paani = Less water"},
+  {ro:"Sob",ms:"Semua",en:"All / Everything",ex:"Sob manus = All people"},
+  {ro:"Kichu",ms:"Sesuatu / Sedikit",en:"Something / Some",ex:"Kichu kha = Eat something"},
+  {ro:"Anek",ms:"Ramai / Banyak",en:"Many / Much",ex:"Anek manus = Many people"},
+  {ro:"Ekhan",ms:"Sekarang",en:"Now",ex:"Ekhan zaa = Go now"},
+  {ro:"Agor",ms:"Tadi / Sebelum ini",en:"Before / Earlier",ex:"Agor kotha = Earlier talk"},
+  {ro:"Pore",ms:"Kemudian",en:"After / Later",ex:"Pore aada = Come later"},
+  {ro:"Hota",ms:"Semalam",en:"Yesterday",ex:"Hota zaa = Went yesterday"},
+  {ro:"Aij",ms:"Hari ini",en:"Today",ex:"Aij kha = Eat today"},
+  {ro:"Aij kal",ms:"Esok",en:"Tomorrow",ex:"Aij kal aada = Come tomorrow"},
+  {ro:"Din",ms:"Hari",en:"Day",ex:"Ei din = This day"},
+  {ro:"Raath",ms:"Malam",en:"Night",ex:"Raath zaa = Go at night"},
+  {ro:"Sokal",ms:"Pagi",en:"Morning",ex:"Sokal aada = Come in morning"},
+  {ro:"Dupur",ms:"Tengah hari",en:"Noon / Afternoon",ex:"Dupur bhaat = Lunch"},
+  {ro:"Bikalo",ms:"Petang",en:"Evening",ex:"Bikalo kotha = Evening talk"},
+  {ro:"Bochor",ms:"Tahun",en:"Year",ex:"Ei bochor = This year"},
+  {ro:"Mash",ms:"Bulan",en:"Month",ex:"Ei mash = This month"},
+  {ro:"Haftha",ms:"Minggu",en:"Week",ex:"Haftha pore = After a week"},
+  {ro:"Gorom",ms:"Panas",en:"Hot",ex:"Paani gorom = Hot water"},
+  {ro:"Thanda",ms:"Sejuk",en:"Cold",ex:"Paani thanda = Cold water"},
+  {ro:"Borsha",ms:"Hujan",en:"Rain",ex:"Borsha hoche = It's raining"},
+  {ro:"Dupo",ms:"Matahari",en:"Sun",ex:"Dupo gorom = Sun is hot"},
+  {ro:"Chando",ms:"Bulan (langit)",en:"Moon",ex:"Chando dekho = Look at the moon"},
+  {ro:"Tara",ms:"Bintang",en:"Star",ex:"Tara dekho = Look at the stars"},
+  {ro:"Aakaash",ms:"Langit",en:"Sky",ex:"Aakaash borsha = Sky rain"},
+  {ro:"Zameen",ms:"Tanah / Bumi",en:"Ground / Earth",ex:"Zameen porho = Read the ground"},
+  {ro:"Bati",ms:"Piring",en:"Plate",ex:"Bati bhaat = Plate of rice"},
+  {ro:"Gilaas",ms:"Gelas",en:"Glass / Cup",ex:"Gilaas paani = Glass of water"},
+  {ro:"Chamoch",ms:"Sudu",en:"Spoon",ex:"Chamoch kha = Eat with spoon"},
+  {ro:"Haath",ms:"Tangan",en:"Hand",ex:"Haath dho = Wash hands"},
+  {ro:"Pa",ms:"Kaki",en:"Foot / Leg",ex:"Pa dukho = Foot hurts"},
+  {ro:"Mukh",ms:"Mulut",en:"Mouth",ex:"Mukh kholo = Open mouth"},
+  {ro:"Noyor",ms:"Mata",en:"Eye",ex:"Noyor dekho = See with eyes"},
+  {ro:"Kaan",ms:"Telinga",en:"Ear",ex:"Kaan suno = Listen with ear"},
+  {ro:"Naak",ms:"Hidung",en:"Nose",ex:"Naak = Nose"},
+  {ro:"Dant",ms:"Gigi",en:"Tooth / Teeth",ex:"Dath dho = Brush teeth"},
+  {ro:"Kesa",ms:"Rambut",en:"Hair",ex:"Kesa kato = Cut hair"},
+  {ro:"Buk",ms:"Dada / Badan",en:"Chest / Body",ex:"Buk dukho = Chest pain"},
+  {ro:"Manu",ms:"Saya (saya sendiri)",en:"I / Me",ex:"Manu zaa = I go"},
+  {ro:"Tu",ms:"Awak",en:"You (informal)",ex:"Tu kha = You eat"},
+  {ro:"E",ms:"Dia",en:"He / She",ex:"E zaa = He goes"},
+  {ro:"Amra",ms:"Kita",en:"We",ex:"Amra kha = We eat"},
+  {ro:"Tomra",ms:"Korang",en:"You (plural)",ex:"Tomra aada = You all come"},
+  {ro:"Ora",ms:"Mereka",en:"They",ex:"Ora kotha ko = They speak"},
+  {ro:"Bhalo",ms:"Bagus / Baik",en:"Good / Well",ex:"Bhalo ache = Doing well"},
+  {ro:"Kharap",ms:"Buruk / Jahat",en:"Bad / Evil",ex:"Kharap manus = Bad person"},
+  {ro:"Shukria",ms:"Terima kasih",en:"Thank you",ex:"Shukria tu = Thank you"},
+  {ro:"Maf koro",ms:"Maaf",en:"Sorry / Forgive",ex:"Maf koro manu = Forgive me"}
+];
+
+let currentMode = 'flashcard';
+let currentIndex = 0;
+let knownSet = new Set();
+let isFlipped = false;
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let quizOrder = [];
+
+// Initialize quiz order
+function initQuizOrder() {
+  quizOrder = [...Array(cards.length).keys()];
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (mode === 'flashcard') {
+    document.getElementById('flashcardMode').classList.remove('hidden');
+    document.getElementById('quizMode').classList.add('hidden');
+    document.getElementById('resultScreen').classList.add('hidden');
+    showCard();
+  } else {
+    document.getElementById('flashcardMode').classList.add('hidden');
+    document.getElementById('quizMode').classList.remove('hidden');
+    document.getElementById('resultScreen').classList.add('hidden');
+    quizIndex = 0;
+    quizScore = 0;
+    initQuizOrder();
+    showQuiz();
+  }
+}
+
+function showCard() {
+  const card = cards[currentIndex];
+  document.getElementById('rohingyaWord').textContent = card.ro;
+  document.getElementById('translation').innerHTML = `<strong>${card.ms}</strong><br><span style="color:#f5a623">${card.en}</span>`;
+  document.getElementById('example').textContent = card.ex;
+  document.getElementById('cardNum').textContent = `${currentIndex + 1}/${cards.length}`;
+  document.getElementById('cardNumBack').textContent = `${currentIndex + 1}/${cards.length}`;
+  document.getElementById('statCurrent').textContent = currentIndex + 1;
+  document.getElementById('progressFill').style.width = `${((currentIndex + 1) / cards.length) * 100}%`;
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  document.getElementById('nextBtn').disabled = currentIndex === cards.length - 1;
+  isFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function nextCard() {
+  if (currentIndex < cards.length - 1) {
+    currentIndex++;
+    showCard();
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showCard();
+  }
+}
+
+function markKnown() {
+  knownSet.add(currentIndex);
+  document.getElementById('statKnown').textContent = knownSet.size;
+  if (currentIndex < cards.length - 1) nextCard();
+}
+
+function markUnknown() {
+  knownSet.delete(currentIndex);
+  document.getElementById('statKnown').textContent = knownSet.size;
+  if (currentIndex < cards.length - 1) nextCard();
+}
+
+function shuffleCards() {
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  currentIndex = 0;
+  knownSet.clear();
+  document.getElementById('statKnown').textContent = 0;
+  if (currentMode === 'flashcard') showCard();
+  else { quizIndex = 0; quizScore = 0; initQuizOrder(); showQuiz(); }
+}
+
+function resetAll() {
+  currentIndex = 0;
+  knownSet.clear();
+  document.getElementById('statKnown').textContent = 0;
+  document.getElementById('resultScreen').classList.add('hidden');
+  if (currentMode === 'flashcard') {
+    document.getElementById('flashcardMode').classList.remove('hidden');
+    document.getElementById('quizMode').classList.add('hidden');
+    showCard();
+  } else {
+    document.getElementById('flashcardMode').classList.add('hidden');
+    document.getElementById('quizMode').classList.remove('hidden');
+    quizIndex = 0;
+    quizScore = 0;
+    initQuizOrder();
+    showQuiz();
+  }
+}
+
+// Quiz mode
+function showQuiz() {
+  if (quizIndex >= cards.length) {
+    showResult();
+    return;
+  }
+  quizAnswered = false;
+  const idx = quizOrder[quizIndex];
+  const card = cards[idx];
+  document.getElementById('quizWord').textContent = card.ro;
+  document.getElementById('quizFeedback').textContent = '';
+  document.getElementById('quizFeedback').className = 'quiz-feedback';
+
+  // Generate 4 options
+  const correct = card.ms;
+  const wrongs = [];
+  const used = new Set([correct]);
+  while (wrongs.length < 3) {
+    const r = cards[Math.floor(Math.random() * cards.length)].ms;
+    if (!used.has(r)) {
+      used.add(r);
+      wrongs.push(r);
+    }
+  }
+  const options = [correct, ...wrongs].sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('quizOptions');
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'quiz-option';
+    div.textContent = opt;
+    div.onclick = function() { answerQuiz(this, opt, correct); };
+    container.appendChild(div);
+  });
+}
+
+function answerQuiz(el, chosen, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const allOpts = document.querySelectorAll('.quiz-option');
+  allOpts.forEach(o => {
+    o.onclick = null;
+    if (o.textContent === correct) o.classList.add('selected-correct');
+  });
+  if (chosen === correct) {
+    quizScore++;
+    document.getElementById('quizFeedback').textContent = '✓ Betul!';
+    document.getElementById('quizFeedback').className = 'quiz-feedback correct';
+  } else {
+    el.classList.add('selected-wrong');
+    document.getElementById('quizFeedback').textContent = `✗ Jawapan: ${correct}`;
+    document.getElementById('quizFeedback').className = 'quiz-feedback wrong';
+  }
+}
+
+function nextQuiz() {
+  if (quizIndex < cards.length - 1) {
+    quizIndex++;
+    showQuiz();
+  } else {
+    showResult();
+  }
+}
+
+function prevQuiz() {
+  if (quizIndex > 0) {
+    quizIndex--;
+    showQuiz();
+  }
+}
+
+function showResult() {
+  document.getElementById('quizMode').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = `${quizScore}/${cards.length}`;
+  const pct = (quizScore / cards.length) * 100;
+  let msg = '';
+  if (pct >= 90) msg = '🏆 Hebat! Anda hampir menguasai bahasa Rohingya!';
+  else if (pct >= 70) msg = '👍 Bagus! Teruskan berlatih!';
+  else if (pct >= 50) msg = '💪 Tidak bad! Cuba lagi sekali.';
+  else msg = '📚 Jangan berputus asa! Latihan menjadikan sempurna.';
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+// Keyboard support
+document.addEventListener('keydown', function(e) {
+  if (currentMode === 'flashcard') {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+    else if (e.key === 'y' || e.key === 'Y') markKnown();
+    else if (e.key === 'n' || e.key === 'N') markUnknown();
+  } else {
+    if (e.key === 'ArrowRight') nextQuiz();
+    else if (e.key === 'ArrowLeft') prevQuiz();
+  }
+});
+
+// Init
+showCard();
+</script>
+</body>
+</html>
