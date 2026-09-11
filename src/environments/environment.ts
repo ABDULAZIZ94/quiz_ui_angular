@@ -3,7 +3,8 @@ export const environment = {
 
   // Golang backend API endpoints
   ssoApiUrl: 'http://localhost:8014',   // SSO service (auth)
-  quizApiUrl: 'http://localhost:8025',  // Quiz service
+  // quizApiUrl: 'http://localhost:8025',  // Quiz service
+  quizApiUrl: '/quizapi',  // Quiz service
 
   // App config
   appEnv: 'dev',
