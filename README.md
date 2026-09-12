@@ -61,3 +61,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 docker build -t angular-app .
 docker run -d -p 8080:80 --name angular-app angular-app
+
+docker tag angular-app zizi94/angular-app:latest
+
+docker push zizi94/angular-app:latest
