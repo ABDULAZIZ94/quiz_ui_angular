@@ -1,0 +1,73 @@
+.landing {
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.navbar {
+  height: 70px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.login-btn {
+  padding: 10px 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.hero {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.hero-content {
+  max-width: 700px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(42px, 7vw, 72px);
+  line-height: 1.05;
+}
+
+h1 span {
+  display: block;
+  color: #2563eb;
+}
+
+p {
+  margin: 25px 0;
+  color: #64748b;
+  font-size: 18px;
+}
+
+.start-btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.start-btn:hover {
+  background: #1d4ed8;
+}
