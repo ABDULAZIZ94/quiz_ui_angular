@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { QuizComponent } from './components/quiz/quiz.component';
 import { LandingComponent } from './pages/guest/landing/landing.component';
+import { NotFoundComponent } from './components/404/404.component';
 
 export const routes: Routes = [
   {
@@ -13,4 +14,7 @@ export const routes: Routes = [
     path: 'quiz',
     component: QuizComponent
   }
+  ,
+  // Wildcard Route (404 Page) - Perlu berada paling bawah!
+  { path: '**', component: NotFoundComponent }
 ];
