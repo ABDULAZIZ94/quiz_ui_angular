@@ -65,3 +65,9 @@ docker run -d -p 8080:80 --name angular-app angular-app
 docker tag angular-app zizi94/angular-app:latest
 
 docker push zizi94/angular-app:latest
+
+
+# push angular webpage ke firebase hosting
+ng build
+firebase init hosting
+firebase deploy --only hosting

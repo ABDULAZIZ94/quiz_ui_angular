@@ -67,7 +67,7 @@ export class FlashcardService {
           category: item.category,
           example: item.example,
         }));
-        // Merge: static words + API words
+        // Concat, Merge: static words + API words
         this.words.set([...this.staticWords, ...apiWords]);
         this.loading.set(false);
       },
