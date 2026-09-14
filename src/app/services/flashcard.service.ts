@@ -2,6 +2,19 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Word, VocabularyItem, VocabularyListResponse } from '../models/word.model';
 import { environment } from '../../environments/environment';
+import { switchMap, catchError, map } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+// Interface untuk data CSV Google Sheet
+interface CsvWord {
+  arabic: string;
+  english: string;
+  translit: string;
+  category: string;
+  example: string;
+}
+
+
 
 @Injectable({ providedIn: 'root' })
 export class FlashcardService {
@@ -50,35 +63,69 @@ export class FlashcardService {
 
   readonly progress = computed(() => ((this.currentIndex() + 1) / this.words().length) * 100);
 
-  /**
-   * Fetch vocabulary from API (http://localhost:8025/vocabulary/list)
-   * and merge with static words. Call this on app init.
-   */
-  loadVocabulary(): void {
-    this.loading.set(true);
-    this.error.set(null);
 
-    this.http.get<VocabularyListResponse>(`${this.quizApiUrl}/vocabulary/list`).subscribe({
-      next: (res) => {
-        const apiWords: Word[] = (res.data ?? []).map((item: VocabularyItem) => ({
-          arabic: item.arabic,
-          english: item.english,
-          translit: item.transliteration,
-          category: item.category,
-          example: item.example,
-        }));
-        // Concat, Merge: static words + API words
-        this.words.set([...this.staticWords, ...apiWords]);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Failed to load vocabulary from API:', err);
-        this.error.set('Failed to load vocabulary from API');
-        this.loading.set(false);
-        // Keep static words on error
-      },
-    });
-  }
+loadVocabulary(): void {
+  this.loading.set(true);
+  this.error.set(null);
+
+  const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?output=csv';
+
+  this.http.get<VocabularyListResponse>(`${this.quizApiUrl}/vocabulary/list`).pipe(
+    // Chain ke HTTP call kedua (Google Sheets CSV)
+    switchMap((res) => {
+      const apiWords: Word[] = (res.data ?? []).map((item: VocabularyItem) => ({
+        arabic: item.arabic,
+        english: item.english,
+        translit: item.transliteration,
+        category: item.category,
+        example: item.example,
+      }));
+
+      // Fetch CSV sebagai text
+      return this.http.get(csvUrl, { responseType: 'text' }).pipe(
+        map((csvData) => {
+          const sheetWords = this.parseCsv(csvData);
+          // Cantum: staticWords + apiWords + sheetWords
+          return [...this.staticWords, ...apiWords, ...sheetWords];
+        }),
+        catchError((sheetErr) => {
+          console.error('Failed to load Google Sheet CSV:', sheetErr);
+          // Jika CSV gagal, teruskan dengan staticWords + apiWords
+          return of([...this.staticWords, ...apiWords]);
+        })
+      );
+    })
+  ).subscribe({
+    next: (allWords) => {
+      this.words.set(allWords);
+      this.loading.set(false);
+    },
+    error: (err) => {
+      console.error('Failed to load API vocabulary:', err);
+      this.error.set('Failed to load vocabulary');
+      this.loading.set(false);
+    },
+  });
+}
+
+// Helper method untuk parse text CSV ke Word[]
+private parseCsv(csvText: string): Word[] {
+  const lines = csvText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  if (lines.length <= 1) return []; // Abort jika fail kosong atau header sahaja
+
+  // Asumsi susunan lajur CSV: arabic, english, transliteration, category, example
+  // Abaikan baris pertama (header)
+  return lines.slice(1).map((line) => {
+    const cols = line.split(',').map(col => col.replace(/^"|"$/g, '').trim());
+    return {
+      arabic: cols[0] || '',
+      english: cols[1] || '',
+      translit: cols[2] || '',
+      category: cols[3] || '',
+      example: cols[4] || '',
+    };
+  });
+}
 
   next(): void {
     if (this.currentIndex() < this.words().length - 1) {
