@@ -7,7 +7,7 @@
   height: 100vh;
   min-height: 100vh;
   margin: 0;
-  padding: 4px; /* Padding host ditipiskan semaksimum mungkin */
+  padding: 5px; /* Padding host ditipiskan semaksimum mungkin */
   box-sizing: border-box;
   overflow: hidden; /* Mencegah timbulnya scrollbar */
 }
@@ -67,7 +67,7 @@
 /* Teks Arab (Muka Depan) - Extra Large & Dinamik */
 .arabic-text {
   font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
-  font-size: clamp(4rem, 15vh, 9em); /* Ekstra besar tetapi terkawal mengikut tinggi skrin */
+  font-size: clamp(8rem, 30vh, 22em); /* Ekstra besar tetapi terkawal mengikut tinggi skrin */
   line-height: 1.1;
   direction: rtl;
   font-weight: 700;
@@ -91,7 +91,7 @@
 
 /* Muka Belakang Kad - Extra Large Font */
 .card-back .english {
-  font-size: clamp(2.2rem, 6vh, 4em); /* Ekstra besar */
+  font-size: clamp(12.2rem, 18vh, 8em); /* Ekstra besar */
   font-weight: 800;
   color: var(--primary-dark);
   margin-bottom: 4px; /* Margin ditipiskan */
@@ -100,7 +100,7 @@
 }
 
 .card-back .translit {
-  font-size: clamp(1.4rem, 4vh, 2.5em); /* Ekstra besar */
+  font-size: clamp(3.4rem, 4vh, 2.5em); /* Ekstra besar */
   color: var(--accent);
   font-style: italic;
   font-weight: 600;
@@ -109,7 +109,7 @@
 }
 
 .card-back .category {
-  font-size: clamp(0.9rem, 2vh, 1.3em);
+  font-size: clamp(1.9rem, 2vh, 1.3em);
   font-weight: 600;
   color: var(--text-light);
   background: #f0ebe0;
@@ -119,7 +119,7 @@
 }
 
 .card-back .example {
-  font-size: clamp(1.1rem, 3.2vh, 1.8em); /* Ekstra besar */
+  font-size: clamp(5.1rem, 3.2vh, 1.8em); /* Ekstra besar */
   color: var(--text);
   text-align: center;
   line-height: 1.3;
@@ -159,7 +159,7 @@
 /* Penyelarasan Khusus Mobil */
 @media (max-width: 600px) {
   :host {
-    padding: 2px;
+    padding: 2px 0px;
   }
 
   .card-face {
