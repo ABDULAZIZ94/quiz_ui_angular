@@ -1,18 +1,31 @@
 :host {
-  display: block;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden; /* Elak timbul scrollbar */
 }
 
 .card-container {
   perspective: 1200px;
   width: 100%;
-  max-width: 500px;
+  height: 100%;
+  max-width: 100%; /* Buang had 650px supaya memenuhi lebar skrin */
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .card {
   width: 100%;
-  height: 340px;
+  height: 100%; /* Kad memenuhi keseluruhan ruang bekasnya */
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -28,13 +41,14 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 20px;
+  border-radius: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  padding: 40px 24px;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
 }
 
 .card-front {
@@ -46,88 +60,121 @@
   background: var(--card-bg);
   color: var(--text);
   transform: rotateY(180deg);
-  border: 2px solid var(--accent);
+  border: 4px solid var(--accent);
 }
 
+/* Teks Arab (Muka Depan) - Saiz Maksimum */
 .arabic-text {
   font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
-  font-size: 4.5em;
-  line-height: 1.4;
+  font-size: 7em; /* Dibesarkan lagi mengikut saiz skrin penuh */
+  line-height: 1.2;
   direction: rtl;
+  font-weight: 700;
+  text-align: center;
 }
 
 .card-front .arabic-text {
   color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  margin-bottom: 10px;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
 }
 
 .card-front .hint {
-  font-size: 0.85em;
-  opacity: 0.7;
-  margin-top: 15px;
-  letter-spacing: 1px;
+  font-size: 1.4em;
+  opacity: 0.9;
+  margin-top: 24px;
+  letter-spacing: 1.5px;
+  font-weight: 500;
 }
 
+/* Muka Belakang Kad */
 .card-back .english {
-  font-size: 2.2em;
-  font-weight: 700;
+  font-size: 3.5em;
+  font-weight: 800;
   color: var(--primary-dark);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .card-back .translit {
-  font-size: 1.3em;
+  font-size: 2.2em;
   color: var(--accent);
   font-style: italic;
-  margin-bottom: 15px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .card-back .category {
-  font-size: 0.85em;
+  font-size: 1.25em;
+  font-weight: 600;
   color: var(--text-light);
   background: #f0ebe0;
-  padding: 5px 16px;
-  border-radius: 20px;
-  margin-bottom: 15px;
+  padding: 10px 28px;
+  border-radius: 30px;
+  margin-bottom: 24px;
 }
 
 .card-back .example {
-  font-size: 0.95em;
-  color: var(--text-light);
+  font-size: 1.6em;
+  color: var(--text);
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width: 85%;
 }
 
-.card-back .example :strong {
+.card-back .example strong {
   color: var(--primary-dark);
+  font-weight: 700;
 }
 
+/* Butang Audio */
 .speak-btn {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 30px;
+  right: 30px;
   background: var(--accent);
   color: white;
   border: none;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  font-size: 1.3em;
+  font-size: 1.8em;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 .speak-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
+/* Penyelarasan Responsif Telefon Bimbit */
 @media (max-width: 600px) {
-  .arabic-text { font-size: 3.5em; }
-  .card { height: 300px; }
+  .arabic-text {
+    font-size: 4.8em;
+  }
+
+  .card-back .english {
+    font-size: 2.5em;
+  }
+
+  .card-back .translit {
+    font-size: 1.7em;
+  }
+
+  .card-back .example {
+    font-size: 1.2em;
+  }
+
+  .speak-btn {
+    width: 54px;
+    height: 54px;
+    bottom: 20px;
+    right: 20px;
+  }
 }

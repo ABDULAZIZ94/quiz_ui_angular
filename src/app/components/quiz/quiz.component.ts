@@ -6,7 +6,7 @@ import { WordListComponent } from '../word-list/word-list.component';
 import { FlashcardService } from '../../services/flashcard.service';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-quiz',
   imports: [
     ProgressBarComponent,
     FlashcardComponent,

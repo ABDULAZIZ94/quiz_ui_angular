@@ -7,14 +7,20 @@ import { NotFoundComponent } from './components/404/404.component';
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'landing',
+    pathMatch: 'full' // Memastikan laluan utama dipencongkan dengan tepat ke landing
+  },
+  {
+    path: 'landing',
     component: LandingComponent
   },
-
   {
     path: 'quiz',
     component: QuizComponent
+  },
+  // Wildcard Route (404 Page) - Mesti berada paling bawah!
+  { 
+    path: '**', 
+    component: NotFoundComponent 
   }
-  ,
-  // Wildcard Route (404 Page) - Perlu berada paling bawah!
-  { path: '**', component: NotFoundComponent }
 ];
