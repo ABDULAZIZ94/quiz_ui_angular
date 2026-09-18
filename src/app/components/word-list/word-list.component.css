@@ -42,12 +42,12 @@
 
 .w-arabic {
   font-family: 'Amiri', 'Traditional Arabic', serif;
-  font-size: 1.6em;
+  font-size: 2.6em;
   color: var(--primary-dark);
 }
 
 .w-english {
-  font-size: 0.95em;
+  font-size: 1.95em;
   color: var(--text-light);
 }
 
