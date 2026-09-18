@@ -7,17 +7,17 @@
   height: 100vh;
   min-height: 100vh;
   margin: 0;
-  padding: 16px;
+  padding: 4px; /* Padding host ditipiskan semaksimum mungkin */
   box-sizing: border-box;
-  overflow: hidden; /* Elak timbul scrollbar */
+  overflow: hidden; /* Mencegah timbulnya scrollbar */
 }
 
 .card-container {
   perspective: 1200px;
   width: 100%;
   height: 100%;
-  max-width: 100%; /* Buang had 650px supaya memenuhi lebar skrin */
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0; /* Margin dibuang sepenuhnya */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,7 +25,7 @@
 
 .card {
   width: 100%;
-  height: 100%; /* Kad memenuhi keseluruhan ruang bekasnya */
+  height: 100%;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -41,14 +41,15 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 28px;
+  border-radius: 16px; /* Dikecilkan sedikit agar memberi lebih ruang */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 8px 12px; /* Padding kad ditipiskan secara drastik */
   box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .card-front {
@@ -60,67 +61,69 @@
   background: var(--card-bg);
   color: var(--text);
   transform: rotateY(180deg);
-  border: 4px solid var(--accent);
+  border: 3px solid var(--accent);
 }
 
-/* Teks Arab (Muka Depan) - Saiz Maksimum */
+/* Teks Arab (Muka Depan) - Extra Large & Dinamik */
 .arabic-text {
   font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
-  font-size: 7em; /* Dibesarkan lagi mengikut saiz skrin penuh */
-  line-height: 1.2;
+  font-size: clamp(4rem, 15vh, 9em); /* Ekstra besar tetapi terkawal mengikut tinggi skrin */
+  line-height: 1.1;
   direction: rtl;
   font-weight: 700;
   text-align: center;
+  margin-bottom: 6px; /* Margin ditipiskan */
+  word-break: break-word;
 }
 
 .card-front .arabic-text {
   color: white;
   text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  margin-bottom: 20px;
 }
 
 .card-front .hint {
-  font-size: 1.4em;
+  font-size: clamp(1rem, 2.5vh, 1.5em);
   opacity: 0.9;
-  margin-top: 24px;
-  letter-spacing: 1.5px;
+  margin-top: 6px; /* Margin ditipiskan */
+  letter-spacing: 1px;
   font-weight: 500;
 }
 
-/* Muka Belakang Kad */
+/* Muka Belakang Kad - Extra Large Font */
 .card-back .english {
-  font-size: 3.5em;
+  font-size: clamp(2.2rem, 6vh, 4em); /* Ekstra besar */
   font-weight: 800;
   color: var(--primary-dark);
-  margin-bottom: 12px;
+  margin-bottom: 4px; /* Margin ditipiskan */
   text-align: center;
+  line-height: 1.1;
 }
 
 .card-back .translit {
-  font-size: 2.2em;
+  font-size: clamp(1.4rem, 4vh, 2.5em); /* Ekstra besar */
   color: var(--accent);
   font-style: italic;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 8px; /* Margin ditipiskan */
   text-align: center;
 }
 
 .card-back .category {
-  font-size: 1.25em;
+  font-size: clamp(0.9rem, 2vh, 1.3em);
   font-weight: 600;
   color: var(--text-light);
   background: #f0ebe0;
-  padding: 10px 28px;
-  border-radius: 30px;
-  margin-bottom: 24px;
+  padding: 4px 16px; /* Padding komponen ditipiskan */
+  border-radius: 20px;
+  margin-bottom: 10px; /* Margin ditipiskan */
 }
 
 .card-back .example {
-  font-size: 1.6em;
+  font-size: clamp(1.1rem, 3.2vh, 1.8em); /* Ekstra besar */
   color: var(--text);
   text-align: center;
-  line-height: 1.6;
-  max-width: 85%;
+  line-height: 1.3;
+  max-width: 95%;
 }
 
 .card-back .example strong {
@@ -131,15 +134,15 @@
 /* Butang Audio */
 .speak-btn {
   position: absolute;
-  bottom: 30px;
-  right: 30px;
+  bottom: 12px; /* Margin ke bawah ditipiskan */
+  right: 12px; /* Margin ke kanan ditipiskan */
   background: var(--accent);
   color: white;
   border: none;
-  width: 64px;
-  height: 64px;
+  width: clamp(48px, 8vh, 60px);
+  height: clamp(48px, 8vh, 60px);
   border-radius: 50%;
-  font-size: 1.8em;
+  font-size: 1.6em;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -153,28 +156,18 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Penyelarasan Responsif Telefon Bimbit */
+/* Penyelarasan Khusus Mobil */
 @media (max-width: 600px) {
-  .arabic-text {
-    font-size: 4.8em;
+  :host {
+    padding: 2px;
   }
 
-  .card-back .english {
-    font-size: 2.5em;
-  }
-
-  .card-back .translit {
-    font-size: 1.7em;
-  }
-
-  .card-back .example {
-    font-size: 1.2em;
+  .card-face {
+    padding: 6px;
   }
 
   .speak-btn {
-    width: 54px;
-    height: 54px;
-    bottom: 20px;
-    right: 20px;
+    bottom: 8px;
+    right: 8px;
   }
 }
