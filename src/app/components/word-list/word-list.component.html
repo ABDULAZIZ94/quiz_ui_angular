@@ -5,7 +5,7 @@
       <div class="word-item" (click)="selectWord(i)">
         <div>
           <div class="w-arabic">{{ w.arabic }}</div>
-          <div class="w-english">{{ w.english }} · <em>{{ w.translit }}</em></div>
+          <div class="w-english">{{ w.english }} · <em>{{ w.transliteration }}</em></div>
         </div>
         <button class="w-mini-speak" (click)="speakWord($event, i)">🔊</button>
       </div>

@@ -1,9 +1,37 @@
+<!-- Bahagian Filter 1-10 & Balloon/Badge Jumlah Kad -->
+<div class="filter-container">
+  <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === null"
+    (click)="flashcardService.setDifficulty(null)">
+    Semua
+    <span class="badge">{{ flashcardService.totalWordsCount() }}</span>
+  </button>
+
+
+@for (level of levels; track level) {
+<button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
+  (click)="flashcardService.setDifficulty(level)">
+  Tahap {{ level }}
+  <span class="badge">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
+</button>
+}
+
+</div>
+
+<!-- Container Utama Kad Flashcard -->
 <div class="card-container">
   @if (flashcardService.currentWord; as word) {
   <div class="card" [class.flipped]="flashcardService.isFlipped()" (click)="flashcardService.flip()">
 
     <!-- Muka Depan Kad -->
     <div class="card-face card-front">
+
+      <!-- Paparan Gambar (Jika imageUrl Wujud) -->
+      @if (word.imageUrl) {
+      <div class="image-wrapper">
+        <img [src]="word.imageUrl" [alt]="word.english" class="card-image" />
+      </div>
+      }
+
       <div class="arabic-text">{{ word.arabic }}</div>
       <div class="hint">Tap to reveal meaning</div>
     </div>
@@ -11,9 +39,12 @@
     <!-- Muka Belakang Kad -->
     <div class="card-face card-back">
       <div class="english">{{ word.english }}</div>
-      <div class="translit">{{ word.translit }}</div>
+      <div class="english">{{ word.malay }}</div>
+      <div class="english">{{ word.rohingya }}</div>
+      <div class="translit">{{ word.transliteration }}</div>
       <div class="category">{{ word.category }}</div>
-      <div class="example" [innerHTML]="word.example"></div>
+      <div class="example" [innerHTML]="word.exampleArabic"></div>
+      <div class="example" [innerHTML]="word.exampleMalay"></div>
       <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()">🔊</button>
     </div>
 

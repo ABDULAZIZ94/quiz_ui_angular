@@ -9,4 +9,7 @@ import { FlashcardService } from '../../services/flashcard.service';
 })
 export class FlashcardComponent {
   flashcardService = inject(FlashcardService);
+
+  // Buat array [1, 2, 3, ..., 100]
+  readonly levels = Array.from({ length: 100 }, (_, i) => i + 1);
 }

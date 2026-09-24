@@ -8,81 +8,90 @@ import { of } from 'rxjs';
 export class FlashcardService {
   private http = inject(HttpClient);
 
-  // Static words (fallback jika CSV gagal atau sebagai data asas)
-  private readonly staticWords: Word[] = [
-    { arabic: 'مَرْحَبًا', english: 'Hello', translit: 'Marhaban', category: 'Greeting', example: '<strong>مَرْحَبًا</strong> — used to greet someone warmly' },
-    { arabic: 'سَلَام', english: 'Peace', translit: 'Salam', category: 'Greeting', example: '<strong>السَّلَامُ عَلَيْكُم</strong> — Peace be upon you' },
-    { arabic: 'شُكْرًا', english: 'Thank you', translit: 'Shukran', category: 'Expression', example: '<strong>شُكْرًا جَزِيلًا</strong> — Thank you very much' },
-    { arabic: 'نَعَم', english: 'Yes', translit: "Na'am", category: 'Basic', example: '<strong>نَعَم</strong> — affirmative response' },
-    { arabic: 'لَا', english: 'No', translit: 'La', category: 'Basic', example: '<strong>لَا</strong> — negative response' },
-    { arabic: 'كِتَاب', english: 'Book', translit: 'Kitab', category: 'Noun', example: '<strong>هَذَا كِتَاب</strong> — This is a book' },
-    { arabic: 'مَاء', english: 'Water', translit: "Ma'", category: 'Noun', example: '<strong>أُرِيدُ مَاء</strong> — I want water' },
-    { arabic: 'بَيْت', english: 'House', translit: 'Bayt', category: 'Noun', example: '<strong>بَيْتِي</strong> — My house' },
-    { arabic: 'رَجُل', english: 'Man', translit: 'Rajul', category: 'Noun', example: '<strong>رَجُل كَبِير</strong> — An old man' },
-    { arabic: 'اِمْرَأَة', english: 'Woman', translit: "Imra'ah", category: 'Noun', example: '<strong>اِمْرَأَة جَمِيلَة</strong> — A beautiful woman' },
-    { arabic: 'يَوْم', english: 'Day', translit: 'Yawm', category: 'Time', example: '<strong>يَوْم جَمِيل</strong> — A beautiful day' },
-    { arabic: 'لَيْل', english: 'Night', translit: 'Layl', category: 'Time', example: '<strong>لَيْل سَاكِن</strong> — A quiet night' },
-    { arabic: 'شَمْس', english: 'Sun', translit: 'Shams', category: 'Nature', example: '<strong>الشَّمْس مُشْرِقَة</strong> — The sun is shining' },
-    { arabic: 'قَمَر', english: 'Moon', translit: 'Qamar', category: 'Nature', example: '<strong>الْقَمَر جَمِيل</strong> — The moon is beautiful' },
-    { arabic: 'حُب', english: 'Love', translit: 'Hubb', category: 'Feeling', example: '<strong>أُحِبُّك</strong> — I love you' },
-    { arabic: 'جَيِّد', english: 'Good', translit: 'Jayyid', category: 'Adjective', example: '<strong>وَلَد جَيِّد</strong> — A good boy' },
-    { arabic: 'صَدِيق', english: 'Friend', translit: 'Sadiq', category: 'Noun', example: '<strong>صَدِيقِي</strong> — My friend' },
-    { arabic: 'طَعَام', english: 'Food', translit: "Ta'am", category: 'Noun', example: '<strong>الطَّعَام لَذِيذ</strong> — The food is delicious' },
-    { arabic: 'عِلْم', english: 'Knowledge', translit: 'Ilm', category: 'Noun', example: '<strong>طَلَبُ الْعِلْم</strong> — Seeking knowledge' },
-    { arabic: 'جَزَاكَ اللهُ خَيْرًا', english: 'May Allah reward you', translit: 'Jazakallahu Khayran', category: 'Expression', example: '<strong>جَزَاكَ اللهُ خَيْرًا</strong> — a common way to say thank you' },
-  ];
+  // Senarai asal semua perkataan yang dimuatkan dari CSV
+  readonly allWords = signal<Word[]>([]);
 
-  readonly words = signal<Word[]>([]);
+  // State penapis tahap kesukaran (null = Semua Tahap, 1 - 10 = Tahap Spesifik)
+  readonly selectedDifficulty = signal<number | null>(null);
+
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
   readonly currentIndex = signal(0);
   readonly isFlipped = signal(false);
 
+  // 1. Senarai perkataan yang telah ditapis mengikut selectedDifficulty
+  readonly words = computed(() => {
+    const diff = this.selectedDifficulty();
+    const list = this.allWords();
+    if (diff === null) return list;
+    return list.filter((w) => w.difficulty === diff);
+  });
+
+  // 2. Perkataan semasa berpandukan senarai yang telah ditapis
   get currentWord(): Word | null {
     const list = this.words();
     const index = this.currentIndex();
     return list.length > 0 && index < list.length ? list[index] : null;
   }
 
+  // 3. Jumlah perkataan dalam senarai penapis semasa
   get total(): number {
     return this.words().length;
   }
 
+  // 4. Jumlah keseluruhan perkataan tanpa tapisan
+  readonly totalWordsCount = computed(() => this.allWords().length);
+
+  // 5. Peratusan kemajuan (Progress bar)
   readonly progress = computed(() => {
     const totalWords = this.words().length;
     return totalWords > 0 ? ((this.currentIndex() + 1) / totalWords) * 100 : 0;
   });
 
+  // 6. Mengira bilangan perkataan mengikut tahap kesukaran (Untuk balloon/badge)
+  getWordCountByDifficulty(level: number): number {
+    return this.allWords().filter((w) => w.difficulty === level).length;
+  }
+
+  // 7. Menukar tahap kesukaran dan menetapkan semula indeks kad ke 0
+  setDifficulty(level: number | null): void {
+    this.selectedDifficulty.set(level);
+    this.currentIndex.set(0);
+    this.isFlipped.set(false);
+  }
+
   loadVocabulary(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=0&single=true&output=csv';
+    const csvUrl =
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
 
-    // Ambil data terus daripada Google Sheet CSV
-    this.http.get(csvUrl, { responseType: 'text' }).pipe(
-      map((csvData) => {
-        const sheetWords = this.parseCsv(csvData);
-        // Cantumkan staticWords + sheetWords dan tapis sebarang duplikasi
-        return this.removeDuplicates([...this.staticWords, ...sheetWords]);
-      }),
-      catchError((sheetErr) => {
-        console.error('Gagal memuatkan Google Sheet CSV:', sheetErr);
-        this.error.set('Gagal memuatkan data dari Google Sheet.');
-        // Jika CSV gagal, sekurang-kurangnya pulangkan staticWords
-        return of(this.removeDuplicates([...this.staticWords]));
-      })
-    ).subscribe({
-      next: (allWords) => {
-        this.words.set(allWords);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Ralat tidak dijangka:', err);
-        this.loading.set(false);
-      }
-    });
+    this.http
+      .get(csvUrl, { responseType: 'text' })
+      .pipe(
+        map((csvData) => {
+          const sheetWords = this.parseCsv(csvData);
+          return this.removeDuplicates(sheetWords);
+        }),
+        catchError((sheetErr) => {
+          console.error('Gagal memuatkan Google Sheet CSV:', sheetErr);
+          this.error.set('Gagal memuatkan data dari Google Sheet.');
+          return of([]);
+        })
+      )
+      .subscribe({
+        next: (wordsFromCsv) => {
+          this.allWords.set(wordsFromCsv);
+          this.currentIndex.set(0);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Ralat tidak dijangka:', err);
+          this.loading.set(false);
+        },
+      });
   }
 
   // Helper untuk membuang perkataan berulang
@@ -98,27 +107,73 @@ export class FlashcardService {
     return Array.from(uniqueMap.values());
   }
 
-  // Helper untuk parse CSV dengan sokongan pembersihan watak \r\n
   private parseCsv(csvText: string): Word[] {
     if (!csvText) return [];
 
-    const lines = csvText
-      .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+    const parseRows = (text: string): string[][] => {
+      const rows: string[][] = [];
+      let currentRow: string[] = [];
+      let currentCell = '';
+      let inQuotes = false;
 
-    if (lines.length <= 1) return [];
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
 
-    return lines.slice(1).map((line) => {
-      const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      const cleanCols = cols.map(col => col.replace(/^"|"$/g, '').trim());
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            currentCell += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          currentRow.push(currentCell.trim());
+          currentCell = '';
+        } else if ((char === '\r' || char === '\n') && !inQuotes) {
+          if (char === '\r' && nextChar === '\n') {
+            i++;
+          }
+          currentRow.push(currentCell.trim());
+          if (currentRow.some((cell) => cell.length > 0)) {
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentCell = '';
+        } else {
+          currentCell += char;
+        }
+      }
+
+      if (currentCell || currentRow.length > 0) {
+        currentRow.push(currentCell.trim());
+        if (currentRow.some((cell) => cell.length > 0)) {
+          rows.push(currentRow);
+        }
+      }
+
+      return rows;
+    };
+
+    const allRows = parseRows(csvText);
+
+    if (allRows.length <= 1) return [];
+
+    return allRows.slice(1).map((cols) => {
+      const cleanCols = cols.map((col) => col.replace(/^"|"$/g, '').trim());
 
       return {
         arabic: cleanCols[0] || '',
         english: cleanCols[1] || '',
-        translit: cleanCols[2] || '',
-        category: cleanCols[3] || '',
-        example: cleanCols[4] || '',
+        malay: cleanCols[2] || '',
+        rohingya: cleanCols[3] || '',
+        urdu: cleanCols[4] || '',
+        transliteration: cleanCols[5] || '',
+        category: cleanCols[6] || '',
+        exampleArabic: cleanCols[7] || '',
+        exampleMalay: cleanCols[8] || '',
+        difficulty: parseInt(cleanCols[9], 10) || 0,
+        imageUrl: cleanCols[10] || '',
       };
     });
   }
