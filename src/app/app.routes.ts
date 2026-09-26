@@ -5,6 +5,7 @@ import { LandingComponent } from './pages/guest/landing/landing.component';
 import { NotFoundComponent } from './components/404/404.component';
 import { TestabcdComponent } from './components/testabcd/testabcd.component';
 import { QuestionComponent } from './components/question/question.component';
+import { ScoreComponent } from './components/score/score.component';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,10 @@ export const routes: Routes = [
   {
     path: 'question',
     component: QuestionComponent
+  },
+  {
+    path: 'highscore',
+    component: ScoreComponent
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 

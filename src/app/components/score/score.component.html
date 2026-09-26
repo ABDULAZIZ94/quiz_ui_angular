@@ -1,0 +1,47 @@
+<div class="score-container">
+    <h2>Papan Skor</h2>
+
+    <div class="controls">
+        <!-- Tapisan Subjek -->
+        <select [(ngModel)]="selectedSubject" (ngModelChange)="onFilterChange()" class="filter-select">
+            <option value="">-- Semua Subjek --</option>
+            <option *ngFor="let subject of availableSubjects" [value]="subject">
+                {{ subject }}
+            </option>
+        </select>
+
+        <!-- Carian Nama -->
+        <input type="text" placeholder="Cari nama pengguna..." [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()" class="search-input" />
+
+        <!-- Butang Susunan Tarikh -->
+        <button (click)="toggleSort()" class="sort-btn">
+            Susun Tarikh/Masa:
+            <strong>{{ sortAscending ? 'Menaik' : 'Menurun' }}</strong>
+        </button>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">Sedang memuat turun data...</div>
+
+    <table *ngIf="!isLoading">
+        <thead>
+            <tr>
+                <th>Tarikh & Masa</th>
+                <th>Nama Pengguna</th>
+                <th>Subjek</th>
+                <th>Skor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let record of filteredData">
+                <td>{{ record.timestamp }}</td>
+                <td>{{ record.name }}</td>
+                <td><span class="subject-badge">{{ record.subject }}</span></td>
+                <td><strong>{{ record.score }}</strong></td>
+            </tr>
+            <tr *ngIf="filteredData.length === 0">
+                <td colspan="4" class="no-data">Tiada rekod dijumpai berdasarkan carian/tapisan ini.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
