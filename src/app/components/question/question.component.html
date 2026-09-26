@@ -1,0 +1,96 @@
+<div class="quiz-container">
+
+    <!-- BAHAGIAN 1: SETUP -->
+    <div *ngIf="state === 'setup'" class="setup-section">
+        <h2>Sistem Kuiz</h2>
+
+        <div>
+            <label>Nama Anda:</label>
+            <input type="text" [(ngModel)]="playerName" placeholder="Masukkan nama (Cth: Ahmad)" />
+        </div>
+
+        <div>
+            <label>Pilih Kuiz (Subjek):</label>
+            <select [(ngModel)]="selectedSubject">
+                <option value="" disabled>-- Pilih Subjek --</option>
+                <option *ngFor="let subject of availableSubjects" [value]="subject">{{ subject }}</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Masa Diberikan:</label>
+            <select [(ngModel)]="selectedTime">
+                <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
+            </select>
+        </div>
+
+        <button (click)="startQuiz()" [disabled]="!playerName || !selectedSubject">Mula Kuiz</button>
+    </div>
+
+    <!-- BAHAGIAN 2: MOD BERMAIN (PLAYING) -->
+    <div *ngIf="state === 'playing'" class="playing-section">
+        <div class="header">
+            <h3>Kuiz: {{ selectedSubject }}</h3>
+            <div class="timer">Masa Berbaki: {{ formattedTime }}</div>
+        </div>
+
+        <div *ngFor="let q of quizQuestions; let i = index" class="question-card">
+            <p><strong>Soalan {{ i + 1 }}:</strong> {{ q.Question }} (Kesusahan: {{ q.Dificulity }})</p>
+
+            <div class="options">
+                <label>
+                    <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'A')"
+                        [checked]="userAnswers[i] === 'A'" />
+                    A. {{ q.A }}
+                </label><br>
+                <label>
+                    <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'B')"
+                        [checked]="userAnswers[i] === 'B'" />
+                    B. {{ q.B }}
+                </label><br>
+                <label>
+                    <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'C')"
+                        [checked]="userAnswers[i] === 'C'" />
+                    C. {{ q.C }}
+                </label><br>
+                <label>
+                    <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'D')"
+                        [checked]="userAnswers[i] === 'D'" />
+                    D. {{ q.D }}
+                </label>
+            </div>
+        </div>
+
+        <button (click)="finishAttempt()" class="btn-finish">Hantar Jawapan</button>
+    </div>
+
+    <!-- BAHAGIAN 3: SEMAKAN JAWAPAN (REVIEW) -->
+    <div *ngIf="state === 'review'" class="review-section">
+        <h2>Semakan Kuiz</h2>
+        <h3 class="score-display">Markah Anda: {{ score }} / 100</h3>
+
+        <div *ngFor="let q of quizQuestions; let i = index" class="question-card">
+            <p><strong>Soalan {{ i + 1 }}:</strong> {{ q.Question }}</p>
+
+            <p>
+                Jawapan Anda:
+                <span [style.color]="userAnswers[i] === q.Answer ? 'green' : 'red'">
+                    {{ userAnswers[i] ? userAnswers[i] : 'Tiada Jawapan' }}
+                </span>
+            </p>
+            <p *ngIf="userAnswers[i] !== q.Answer" style="color: green;">
+                Jawapan Betul: {{ q.Answer }}
+            </p>
+        </div>
+
+        <button (click)="submitHighscore()" class="btn-submit">Simpan Highscore</button>
+    </div>
+
+    <!-- BAHAGIAN 4: BERJAYA DISUMBIT -->
+    <div *ngIf="state === 'submitted'" class="submitted-section">
+        <h2>Tahniah, {{ playerName }}!</h2>
+        <p>Skor {{ score }} anda untuk kuiz "{{ selectedSubject }}" telah berjaya disimpan.</p>
+        <button (click)="reset()">Kembali ke Muka Utama</button>
+    </div>
+
+</div>

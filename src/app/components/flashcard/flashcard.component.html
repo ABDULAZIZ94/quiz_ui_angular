@@ -6,15 +6,13 @@
     <span class="badge">{{ flashcardService.totalWordsCount() }}</span>
   </button>
 
-
-@for (level of levels; track level) {
-<button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
-  (click)="flashcardService.setDifficulty(level)">
-  Tahap {{ level }}
-  <span class="badge">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
-</button>
-}
-
+  @for (level of levels; track level) {
+  <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
+    (click)="flashcardService.setDifficulty(level)">
+    Tahap {{ level }}
+    <span class="badge">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
+  </button>
+  }
 </div>
 
 <!-- Container Utama Kad Flashcard -->
@@ -33,18 +31,27 @@
       }
 
       <div class="arabic-text">{{ word.arabic }}</div>
-      <div class="hint">Tap to reveal meaning</div>
+      <div class="hint">Sentuh untuk lihat maksud</div>
     </div>
 
     <!-- Muka Belakang Kad -->
     <div class="card-face card-back">
-      <div class="english">{{ word.english }}</div>
-      <div class="english">{{ word.malay }}</div>
-      <div class="english">{{ word.rohingya }}</div>
-      <div class="translit">{{ word.transliteration }}</div>
-      <div class="category">{{ word.category }}</div>
-      <div class="example" [innerHTML]="word.exampleArabic"></div>
-      <div class="example" [innerHTML]="word.exampleMalay"></div>
+      <!-- Label ditambah di sini -->
+      <div class="english"><strong>Inggeris:</strong> {{ word.english }}</div>
+      <div class="english"><strong>Melayu:</strong> {{ word.malay }}</div>
+      <div class="english"><strong>Rohingya:</strong> {{ word.rohingya }}</div>
+
+      <div class="translit"><strong>Sebutan:</strong> {{ word.transliteration }}</div>
+      <div class="category"><strong>Kategori:</strong> {{ word.category }}</div>
+
+      <!-- Label untuk innerHTML diasingkan ke dalam span -->
+      <div class="example">
+        <strong>Contoh (Arab):</strong> <span [innerHTML]="word.exampleArabic"></span>
+      </div>
+      <div class="example">
+        <strong>Contoh (Melayu):</strong> <span [innerHTML]="word.exampleMalay"></span>
+      </div>
+
       <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()">🔊</button>
     </div>
 

@@ -1,0 +1,90 @@
+.game-container {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: #f9f9f9;
+  text-align: center;
+}
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+input, select, button {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s;
+}
+button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  background: #eee;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1.1em;
+}
+.timer {
+  font-weight: bold;
+  color: green;
+}
+.timer.warning {
+  color: red;
+  animation: blink 1s infinite;
+}
+.word {
+  font-size: 2em;
+  color: #333;
+  margin: 20px 0;
+}
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.options-grid button {
+  padding: 15px;
+  background-color: #28a745;
+  font-weight: bold;
+}
+.options-grid button:hover {
+  background-color: #218838;
+}
+.final-score {
+  font-size: 1.5em;
+  color: #007bff;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+/* Tambah ini di fail sedia ada */
+.image-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.question-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15); /* Logik: Memberikan efek kad tiga dimensi */
+  border: 2px solid #ddd;
+}

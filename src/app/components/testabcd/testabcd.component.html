@@ -1,0 +1,55 @@
+<div class="game-container">
+    <h1>Kuiz Bahasa: Time Attack</h1>
+
+    <!-- Skrin Mula -->
+    <div *ngIf="gameState === 'start'" class="screen">
+        <label>Nama Pemain:</label>
+        <input type="text" [(ngModel)]="playerName" placeholder="Masukkan nama anda" />
+
+        <label>Tahap Kesukaran:</label>
+        <select [(ngModel)]="difficulty">
+            <option value="easy">Mudah (Masa lebih panjang, Markah x1)</option>
+            <option value="medium">Sederhana (Masa sederhana, Markah x2)</option>
+            <option value="hard">Sukar (Masa singkat, Markah x3)</option>
+        </select>
+
+        <button (click)="startGame()" [disabled]="!playerName || words.length === 0">
+            {{ words.length === 0 ? 'Sedang memuat turun data...' : 'Mula Permainan' }}
+        </button>
+    </div>
+
+    <!-- Skrin Permainan -->
+    <div *ngIf="gameState === 'playing'" class="screen">
+        <div class="header-info">
+            <span>Pemain: <strong>{{ playerName }}</strong></span>
+            <span>Markah: <strong>{{ score }}</strong></span>
+            <span class="timer" [class.warning]="timeLeft <= 5">Masa: {{ timeLeft }}s</span>
+        </div>
+
+        <div class="question-box" *ngIf="currentQuestion">
+            <h2>Apakah maksud perkataan ini dalam Bahasa Melayu?</h2>
+
+            <!-- LOGIK: Bahagian ini ditambah untuk memaparkan gambar -->
+            <div class="image-container" *ngIf="currentQuestion.imageUrl">
+                <img [src]="currentQuestion.imageUrl" alt="Gambar rujukan soalan" class="question-image" />
+            </div>
+
+            <h3 class="word">{{ currentQuestion.questionWord }}</h3>
+
+            <div class="options-grid">
+                <button *ngFor="let option of currentQuestion.options; let i = index" (click)="submitAnswer(option)">
+                    {{ getLabel(i) }}. {{ option }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skrin Tamat -->
+    <div *ngIf="gameState === 'gameover'" class="screen">
+        <h2>Masa Tamat!</h2>
+        <p>Tahniah, <strong>{{ playerName }}</strong>!</p>
+        <p>Tahap: <strong>{{ difficulty | titlecase }}</strong></p>
+        <p class="final-score">Markah Akhir Anda: <strong>{{ score }}</strong></p>
+        <button (click)="resetGame()">Main Semula</button>
+    </div>
+</div>
