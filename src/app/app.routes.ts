@@ -37,5 +37,10 @@ export const routes: Routes = [
   { 
     path: '**', 
     component: NotFoundComponent 
+  },
+    // Wildcard Route (404 Page) - Mesti berada paling bawah!
+  { 
+    path: '404', 
+    component: NotFoundComponent 
   }
 ];
