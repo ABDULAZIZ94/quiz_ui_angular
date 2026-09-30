@@ -66,8 +66,8 @@ export class FlashcardService {
     this.error.set(null);
 
     const csvUrl =
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
-
+      // 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
+      'https://quizapi.ezcigu.online';
     this.http
       .get(csvUrl, { responseType: 'text' })
       .pipe(
