@@ -1,0 +1,71 @@
+<div class="quiz-card">
+    <!-- Tajuk & Subtajuk -->
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                </path>
+            </svg>
+            Jana Kuiz Baru
+        </h2>
+        <p class="card-subtitle">
+            Tetapkan parameter di bawah untuk menjana soalan kuiz secara automatik.
+        </p>
+    </div>
+
+    <form (ngSubmit)="submitForm()" #quizForm="ngForm" class="form-container">
+
+        <!-- Subjek -->
+        <div class="form-group">
+            <label class="form-label">Subjek / Topik</label>
+            <input type="text" [(ngModel)]="formData.subject" name="subject" required class="form-input"
+                placeholder="Contoh: Hafazan juz amma">
+        </div>
+
+        <div class="form-grid">
+            <!-- Bilangan Soalan -->
+            <div class="form-group">
+                <label class="form-label">Bilangan Soalan</label>
+                <input type="number" [(ngModel)]="formData.no_questions" name="no_questions" min="1" max="100" required
+                    class="form-input">
+            </div>
+
+            <!-- Tahap Kesukaran -->
+            <div class="form-group">
+                <label class="form-label">Tahap Kesukaran</label>
+                <select [(ngModel)]="formData.difficulty" name="difficulty" class="form-input">
+                    <option value="Senang">Senang</option>
+                    <option value="Sederhana">Sederhana</option>
+                    <option value="Susah">Susah</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Arahan Terperinci -->
+        <div class="form-group">
+            <label class="form-label">Arahan Terperinci</label>
+            <textarea [(ngModel)]="formData.detailed_instruction" name="detailed_instruction" rows="3"
+                class="form-input form-textarea" placeholder="Masukkan arahan khusus untuk kuiz..."></textarea>
+        </div>
+
+        <!-- Mesej Maklum Balas -->
+        <div *ngIf="responseMessage" [ngClass]="isSuccess ? 'alert-success' : 'alert-error'" class="alert-box">
+            <span>{{ responseMessage }}</span>
+        </div>
+
+        <!-- Butang Hantar -->
+        <button type="submit" [disabled]="isLoading || !quizForm.valid" class="btn-submit">
+
+            <!-- Spinner Loading -->
+            <svg *ngIf="isLoading" class="spinner" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+
+            <span>{{ isLoading ? 'Sedang Menjana...' : 'Hantar & Jana Kuiz' }}</span>
+        </button>
+    </form>
+</div>
