@@ -1,0 +1,74 @@
+<div #sliderContainer class="presentation-container">
+    <div class="toolbar">
+        <div class="topic-selector" *ngIf="slideNames.length > 0">
+            <label for="nameSelect"><strong>Pilih Nama Slaid:</strong></label>
+            <select id="nameSelect" [(ngModel)]="selectedName" (change)="onNameChange()">
+                <option value="ALL">Semua Nama ({{ allSlides.length }} slaid)</option>
+                <option *ngFor="let name of slideNames" [value]="name">
+                    {{ name }}
+                </option>
+            </select>
+        </div>
+
+        <div class="toolbar-actions">
+            <button (click)="toggleFullscreen()" class="btn btn-secondary">🖥 Skrin Penuh</button>
+            <button (click)="printToPdf()" [disabled]="loading || filteredSlides.length === 0" class="btn btn-primary">
+                📄 Cetak PDF
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="status-card">
+        <p>Memuat turun data pembentangan...</p>
+    </div>
+    <div *ngIf="errorMessage" class="status-card error">{{ errorMessage }}</div>
+
+    <div *ngIf="!loading && filteredSlides.length > 0" class="slide-card">
+        <div class="slide-header">
+            <div class="header-badges">
+                <span class="name-badge" *ngIf="filteredSlides[currentIndex].name">
+                    {{ filteredSlides[currentIndex].name }}
+                </span>
+                <span class="topic-badge">
+                    {{ filteredSlides[currentIndex].topic }}
+                </span>
+            </div>
+            <span class="slide-counter">
+                Slaid {{ currentIndex + 1 }} daripada {{ filteredSlides.length }}
+            </span>
+        </div>
+
+        <div class="slide-body">
+            <!-- Tajuk Slaid (Menyokong Format SafeHtml) -->
+            <h2 class="slide-title" [innerHTML]="filteredSlides[currentIndex].title"></h2>
+
+            <!-- Kandungan Utama (Menyokong <h1>, <br>, <b> dll.) -->
+            <div class="slide-content" *ngIf="filteredSlides[currentIndex].content"
+                [innerHTML]="filteredSlides[currentIndex].content"></div>
+
+            <!-- Senarai Poin Tambahan -->
+            <div *ngIf="filteredSlides[currentIndex].bulletPoints?.length" class="bullet-list">
+                <ol *ngIf="filteredSlides[currentIndex].isNumbered">
+                    <li *ngFor="let point of filteredSlides[currentIndex].bulletPoints" [innerHTML]="point"></li>
+                </ol>
+                <ul *ngIf="!filteredSlides[currentIndex].isNumbered">
+                    <li *ngFor="let point of filteredSlides[currentIndex].bulletPoints" [innerHTML]="point"></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="slide-footer">
+            <button (click)="prevSlide()" [disabled]="currentIndex === 0" class="btn-nav">
+                &laquo; Sebelum
+            </button>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="((currentIndex + 1) / filteredSlides.length) * 100"></div>
+            </div>
+
+            <button (click)="nextSlide()" [disabled]="currentIndex === filteredSlides.length - 1" class="btn-nav">
+                Seterusnya &raquo;
+            </button>
+        </div>
+    </div>
+</div>
