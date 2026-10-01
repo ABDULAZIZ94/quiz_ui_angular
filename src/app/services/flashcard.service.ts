@@ -67,7 +67,8 @@ export class FlashcardService {
 
     const csvUrl =
       // 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
-      'https://quizapi.ezcigu.online';
+      // 'https://quizapi.ezcigu.online';
+      'https://quizapi.ezcigu.online/quizcsv';
     this.http
       .get(csvUrl, { responseType: 'text' })
       .pipe(

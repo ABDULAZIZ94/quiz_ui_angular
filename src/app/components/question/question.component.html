@@ -17,6 +17,14 @@
             </select>
         </div>
 
+        <!-- TAMBAHAN: Selector untuk Jumlah Soalan -->
+        <div>
+            <label>Jumlah Soalan:</label>
+            <select [(ngModel)]="selectedQuestionCount">
+                <option *ngFor="let count of questionCountOptions" [value]="count">{{ count }} Soalan</option>
+            </select>
+        </div>
+
         <div>
             <label>Masa Diberikan:</label>
             <select [(ngModel)]="selectedTime">
