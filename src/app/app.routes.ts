@@ -6,6 +6,10 @@ import { NotFoundComponent } from './components/404/404.component';
 import { TestabcdComponent } from './components/testabcd/testabcd.component';
 import { QuestionComponent } from './components/question/question.component';
 import { ScoreComponent } from './components/score/score.component';
+import { QuizGeneratorComponent } from './components/quizgenerator/quizgenerator.component';
+import { authGuard } from './auth.guard';
+import { LoginComponent } from './components/login/login.component';
+import { QuizSliderComponent } from './components/quizslider/quiz-slider.component';
 
 export const routes: Routes = [
   {
@@ -16,6 +20,10 @@ export const routes: Routes = [
   {
     path: 'landing',
     component: LandingComponent
+  },
+    {
+    path: 'login',
+    component: LoginComponent
   },
   {
     path: 'quiz',
@@ -32,6 +40,14 @@ export const routes: Routes = [
   {
     path: 'highscore',
     component: ScoreComponent
+  },
+  {
+    path: 'quizgenerator',
+    component: QuizGeneratorComponent,
+  },
+  {
+    path: 'quizslider',
+    component: QuizSliderComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
