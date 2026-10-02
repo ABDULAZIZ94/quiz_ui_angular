@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // 1. Import FormsModule di sini
 
 @Component({
   selector: 'app-generateslide',
   templateUrl: './generateslide.component.html',
-  standalone: true, // Jika komponen anda adalah standalone
-  imports: [CommonModule], // 2. Tambah CommonModule di sini
+  standalone: true, // Komponen adalah standalone
+  imports: [
+    CommonModule, 
+    FormsModule // 2. Tambah FormsModule di sini
+  ],
   styleUrls: ['./generateslide.component.css']
 })
 export class GenerateSlideComponent {
@@ -16,7 +20,7 @@ export class GenerateSlideComponent {
   responseMessage: string = '';
   isSuccess: boolean = false;
 
-  // Data JSON mengikut spesifikasi
+  // Data ini kini boleh dikemas kini secara langsung daripada HTML melalui [(ngModel)]
   payload = {
     topic: 'Grammar grade 8',
     description: 'Sediakan mengikut tajuk, berikan perincian dan huraian dan contoh',

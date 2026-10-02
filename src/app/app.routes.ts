@@ -46,7 +46,7 @@ export const routes: Routes = [
   {
     path: 'quizgenerator',
     component: QuizGeneratorComponent,
-    canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
+    // canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'quizslider',
@@ -55,7 +55,7 @@ export const routes: Routes = [
   {
     path: 'generateslide',
     component: GenerateSlideComponent,
-    canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
+    // canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'flashcard2',

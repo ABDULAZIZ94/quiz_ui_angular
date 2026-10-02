@@ -3,9 +3,22 @@
 
     <div class="payload-preview">
         <h3>Data yang akan dihantar:</h3>
-        <p><strong>Topik:</strong> {{ payload.topic }}</p>
-        <p><strong>Penerangan:</strong> {{ payload.description }}</p>
-        <p><strong>Jumlah Slaid:</strong> {{ payload.total_slides }}</p>
+
+        <div class="form-group">
+            <label for="topic"><strong>Topik:</strong></label>
+            <input type="text" id="topic" [(ngModel)]="payload.topic" class="form-control" placeholder="Masukkan topik">
+        </div>
+
+        <div class="form-group">
+            <label for="description"><strong>Penerangan:</strong></label>
+            <textarea id="description" [(ngModel)]="payload.description" class="form-control" rows="3"
+                placeholder="Masukkan penerangan"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="total_slides"><strong>Jumlah Slaid:</strong></label>
+            <input type="number" id="total_slides" [(ngModel)]="payload.total_slides" class="form-control" min="1">
+        </div>
     </div>
 
     <button class="btn-submit" (click)="sendPostRequest()" [disabled]="isLoading">
