@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 
 export interface LoginPayload {
@@ -10,8 +10,11 @@ export interface LoginPayload {
 }
 
 export interface AuthResponse {
-  status: string;
+  status?: string;
+  result?: string;
   message?: string;
+  success?: boolean;
+  [key: string]: any;
 }
 
 @Component({
@@ -37,44 +40,70 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  onLogin() {
+  onLogin(form?: NgForm) {
+    if (form && form.invalid) {
+      this.errorMessage = 'Silakan isi nama pengguna dan kata sandi.';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = null;
 
-    // Menghantar header text/plain untuk mengelakkan CORS OPTIONS preflight
+    // Menggunakan text/plain untuk mengontrol CORS Preflight di Google Apps Script
     const headers = new HttpHeaders({
       'Content-Type': 'text/plain;charset=utf-8'
     });
 
     const payload = JSON.stringify(this.credentials);
 
-    // Menggunakan responseType: 'text' untuk mengelakkan ralat JSON parsing dari pautan lencongan (redirect) Google Apps Script
     this.http.post(this.apiUrl, payload, { headers, responseType: 'text' }).subscribe({
       next: (responseText: string) => {
         this.isLoading = false;
+        console.log('Respons mentah dari server:', responseText);
+
+        // 1. Cek jika respons mengembalikan HTML (biasanya halaman error Google atau login Google)
+        if (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE html>')) {
+          console.error('Menerima respons HTML alih-alih JSON:', responseText);
+          this.errorMessage = 'Akses Google Apps Script ditolak atau mengembalikan halaman HTML. Pastikan deployment diatur ke "Anyone".';
+          return;
+        }
 
         try {
-          // Menukarkan respons teks secara manual kepada JSON
           const res: AuthResponse = JSON.parse(responseText);
+          console.log('Hasil JSON parse:', res);
 
-          // Menyemak status jawapan dari Google Apps Script
-          if (res && (res.status === 'authenticated' || res.status === 'success')) {
+          // 2. Evaluasi berbagai format status berhasil dari Google Apps Script
+          const isSuccess = 
+            res.status === 'authenticated' || 
+            res.status === 'success' || 
+            res.result === 'success' || 
+            res.success === true;
+
+          if (isSuccess) {
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('username', this.credentials.username);
             
-            this.router.navigate(['/quizgenerator']);
+            console.log('Login berhasil! Mengalihkan ke /quizgenerator...');
+            
+            // Pengalihan halaman ke route /quizgenerator
+            this.router.navigate(['/quizgenerator']).then(navigated => {
+              if (!navigated) {
+                console.warn('Pengalihan halaman gagal. Memperbarui lokasi secara manual...');
+                window.location.href = '/quizgenerator';
+              }
+            });
           } else {
-            this.errorMessage = res.message || 'Log masuk gagal: Pengguna atau kata laluan tidak sah.';
+            this.errorMessage = res.message || 'Log masuk gagal: Pengguna atau kata sandi tidak sah.';
           }
         } catch (e) {
           console.error('Ralat Parsing JSON:', e, responseText);
-          this.errorMessage = 'Format maklum balas dari pelayan tidak sah.';
+          this.errorMessage = 'Format respons dari server tidak sah atau tidak dapat diproses.';
         }
       },
       error: (err) => {
         this.isLoading = false;
+        console.error('HTTP Error:', err);
         this.errorMessage = 'Ralat rangkaian atau masalah akses Google Script. Sila cuba lagi.';
-        console.error('Login Error:', err);
       }
     });
   }

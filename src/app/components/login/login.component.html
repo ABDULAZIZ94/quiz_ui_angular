@@ -14,7 +14,7 @@
         </div>
 
         <!-- Form -->
-        <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="login-form">
+        <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" class="login-form">
 
             <!-- Username -->
             <div class="form-group">
