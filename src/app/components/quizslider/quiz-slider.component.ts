@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface SlideItem {
+  sid: string;          // ID / Kumpulan slaid
   name: string;
   topic: string;
   pageType: string;
@@ -12,6 +13,11 @@ export interface SlideItem {
   content: SafeHtml;
   bulletPoints?: SafeHtml[];
   isNumbered?: boolean;
+}
+
+export interface GroupedSlide {
+  sid: string;
+  slides: SlideItem[];
 }
 
 @Component({
@@ -27,9 +33,11 @@ export class QuizSliderComponent implements OnInit {
   csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=1845049912&single=true&output=csv';
 
   allSlides: SlideItem[] = [];
+  groupedSlides: GroupedSlide[] = [];
   filteredSlides: SlideItem[] = [];
-  slideNames: string[] = [];
-  selectedName = 'ALL';
+  
+  slideSids: string[] = [];
+  selectedSid = 'ALL';
 
   currentIndex = 0;
   loading = true;
@@ -72,18 +80,13 @@ export class QuizSliderComponent implements OnInit {
     });
   }
 
-  // Fungsi khas untuk membersihkan string \n literal, koma ekstra, dan menukarnya kepada HTML
   cleanAndFormatHtml(text: string): string {
     if (!text) return '';
-
     return text
-      // 1. Buang koma berlebihan di hujung/tengah teks (cth: ',,' atau ', ,')
       .replace(/,(\s*,)+/g, ',')
       .replace(/,\s*$/g, '')
-      // 2. Tukar string literal '\n' atau '\\n' daripada CSV kepada tag <br>
       .replace(/\\n/g, '<br>')
       .replace(/\r\n|\r|\n/g, '<br>')
-      // 3. Bersihkan pemisah <br> yang berulang secara berlebihan (lebih 2 berturut-turut)
       .replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>')
       .trim();
   }
@@ -97,8 +100,9 @@ export class QuizSliderComponent implements OnInit {
 
     const headers = this.parseCsvRow(lines[0]).map(h => h.trim().toLowerCase());
     const parsedSlides: SlideItem[] = [];
-    const nameSet = new Set<string>();
+    const sidSet = new Set<string>();
 
+    const sidIdx = headers.findIndex(h => h === 'sid' || h === 'id' || h.includes('sid'));
     const nameIdx = headers.findIndex(h => h === 'name' || h.includes('nama'));
     const topicIdx = headers.findIndex(h => h.includes('topic') || h.includes('topik'));
     const pageTypeIdx = headers.findIndex(h => h.includes('pagetype') || h.includes('type'));
@@ -108,38 +112,31 @@ export class QuizSliderComponent implements OnInit {
       const values = this.parseCsvRow(lines[i]);
       if (values.length === 0) continue;
 
-      const rawName = (nameIdx !== -1 ? values[nameIdx] : values[0]) || `Slaid ${i}`;
-      const rawTopic = (topicIdx !== -1 ? values[topicIdx] : values[1]) || 'Umum';
-      const pageType = (pageTypeIdx !== -1 ? values[pageTypeIdx] : values[2]) || 'normal';
-      const rawData1 = (data1Idx !== -1 ? values[data1Idx] : values[3]) || '';
+      const rawSid = (sidIdx !== -1 ? values[sidIdx] : values[0]) || `SID-${i}`;
+      const rawName = (nameIdx !== -1 ? values[nameIdx] : values[1]) || `Slaid ${i}`;
+      const rawTopic = (topicIdx !== -1 ? values[topicIdx] : values[2]) || 'Umum';
+      const pageType = (pageTypeIdx !== -1 ? values[pageTypeIdx] : values[3]) || 'normal';
+      const rawData1 = (data1Idx !== -1 ? values[data1Idx] : values[4]) || '';
 
+      const cleanSid = rawSid.replace(/^["'\s]+|["'\s]+$/g, '').trim();
       const cleanName = rawName.replace(/^["'\s]+|["'\s]+$/g, '').trim();
       const cleanTopic = rawTopic.replace(/^["'\s]+|["'\s]+$/g, '').trim();
 
-      if (cleanName) nameSet.add(cleanName);
+      if (cleanSid) sidSet.add(cleanSid);
 
-      // Bersihkan dan formatkan kandungan utama
       const formattedData1 = this.cleanAndFormatHtml(rawData1);
-
       let titleText = cleanName || cleanTopic;
       let contentText = formattedData1;
       let bulletPoints: SafeHtml[] | undefined;
       let isNumbered = false;
 
-      // Jika kandungan mengandungi poin bernombor (seperti 1., 2., 3.)
       if (pageType.toLowerCase().includes('list') || /\d+\.\s/.test(contentText)) {
         isNumbered = pageType.toLowerCase().includes('sorted') || /\d+\.\s/.test(contentText);
-        
-        // Asingkan perenggan berdasarkan tag <br>
-        const parts = contentText
-          .split(/<br\s*\/?>/)
-          .map(p => p.trim())
-          .filter(p => p.length > 0);
+        const parts = contentText.split(/<br\s*\/?>/).map(p => p.trim()).filter(p => p.length > 0);
 
         if (parts.length > 1) {
-          contentText = parts[0]; // Baris tajuk/penerangan
+          contentText = parts[0];
           bulletPoints = parts.slice(1).map(p => {
-            // Buang nombor awalan seperti '1. ', '2. ' jika menggunakan senarai <ol>/<ul>
             const cleanPoint = p.replace(/^\d+\.\s*/, '');
             return this.sanitizer.bypassSecurityTrustHtml(cleanPoint);
           });
@@ -147,6 +144,7 @@ export class QuizSliderComponent implements OnInit {
       }
 
       parsedSlides.push({
+        sid: cleanSid,
         name: cleanName,
         topic: cleanTopic,
         pageType: pageType,
@@ -161,7 +159,7 @@ export class QuizSliderComponent implements OnInit {
       this.errorMessage = 'Tiada data slaid berjaya diproses daripada format CSV.';
     } else {
       this.allSlides = parsedSlides;
-      this.slideNames = Array.from(nameSet);
+      this.slideSids = Array.from(sidSet);
       this.filterSlides();
     }
   }
@@ -177,20 +175,14 @@ export class QuizSliderComponent implements OnInit {
         inQuotes = !inQuotes;
         currentLine += char;
       } else if ((char === '\n' || char === '\r') && !inQuotes) {
-        if (char === '\r' && text[i + 1] === '\n') {
-          i++;
-        }
-        if (currentLine.trim()) {
-          lines.push(currentLine);
-        }
+        if (char === '\r' && text[i + 1] === '\n') { i++; }
+        if (currentLine.trim()) { lines.push(currentLine); }
         currentLine = '';
       } else {
         currentLine += char;
       }
     }
-    if (currentLine.trim()) {
-      lines.push(currentLine);
-    }
+    if (currentLine.trim()) { lines.push(currentLine); }
     return lines;
   }
 
@@ -214,15 +206,15 @@ export class QuizSliderComponent implements OnInit {
     return result;
   }
 
-  onNameChange(): void {
+  onSidChange(): void {
     this.filterSlides();
   }
 
   filterSlides(): void {
-    if (this.selectedName === 'ALL') {
+    if (this.selectedSid === 'ALL') {
       this.filteredSlides = [...this.allSlides];
     } else {
-      this.filteredSlides = this.allSlides.filter(s => s.name === this.selectedName);
+      this.filteredSlides = this.allSlides.filter(s => s.sid === this.selectedSid);
     }
     this.currentIndex = 0;
   }
@@ -239,6 +231,13 @@ export class QuizSliderComponent implements OnInit {
     }
   }
 
+  // Fungsi Lompat Slaid (Jump to 10, 20, 30, dsb.)
+  jumpToSlide(index: number): void {
+    if (index >= 0 && index < this.filteredSlides.length) {
+      this.currentIndex = index;
+    }
+  }
+
   toggleFullscreen(): void {
     const elem = this.sliderContainer.nativeElement;
     if (!document.fullscreenElement) {
@@ -248,17 +247,27 @@ export class QuizSliderComponent implements OnInit {
     }
   }
 
+  // Cetak mengikut apa yang dipaparkan (displayed) pada slaid semasa / senarai tertapis
+  // Cetak PDF: Memuatkan 2 slaid bagi setiap muka surat A4
   printToPdf(): void {
     const printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) return;
 
     let slidesHtml = '';
     this.filteredSlides.forEach((slide, idx) => {
+      let pointsHtml = '';
+      if (slide.bulletPoints && slide.bulletPoints.length > 0) {
+        const tag = slide.isNumbered ? 'ol' : 'ul';
+        const items = slide.bulletPoints.map(p => `<li>${(p as any).changingThisBreaksApplicationSecurity || p}</li>`).join('');
+        pointsHtml = `<${tag}>${items}</${tag}>`;
+      }
+
       slidesHtml += `
         <div class="pdf-slide">
-          <div class="top-tag">${slide.name} - ${slide.topic} (Slaid ${idx + 1})</div>
-          <h2>${slide.title}</h2>
-          <div class="content">${slide.content}</div>
+          <div class="top-tag">SID: ${slide.sid} | ${slide.name} - ${slide.topic} (Slaid ${idx + 1})</div>
+          <h2>${(slide.title as any).changingThisBreaksApplicationSecurity || slide.title}</h2>
+          <div class="content">${(slide.content as any).changingThisBreaksApplicationSecurity || slide.content}</div>
+          ${pointsHtml}
         </div>
       `;
     });
@@ -266,17 +275,74 @@ export class QuizSliderComponent implements OnInit {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Eksport Slaid PDF</title>
+          <title>Cetak Slaid Pembentangan</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .pdf-slide { page-break-after: always; border: 1px solid #ccc; padding: 24px; border-radius: 8px; margin-bottom: 20px; }
-            .top-tag { color: #2563eb; font-weight: bold; font-size: 12px; text-transform: uppercase; }
-            h2 { color: #0f172a; margin-top: 5px; }
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              margin: 0;
+              padding: 0;
+              background: #fff;
+              color: #333;
+            }
+            .pdf-slide {
+              height: 46vh; /* Memastikan setiap slaid mengambil separuh halaman A4 */
+              box-sizing: border-box;
+              border: 1px solid #cbd5e1;
+              padding: 16px 20px;
+              border-radius: 8px;
+              margin-bottom: 12px;
+              page-break-inside: avoid; /* Elakkan slaid terpotong di tengah */
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-start;
+              overflow: hidden;
+            }
+            /* Setiap 2 slaid akan memaksa pertukaran halaman (page break) baru */
+            .pdf-slide:nth-child(2n) {
+              page-break-after: always;
+              margin-bottom: 0;
+            }
+            .top-tag {
+              color: #2563eb;
+              font-weight: bold;
+              font-size: 11px;
+              text-transform: uppercase;
+              margin-bottom: 4px;
+            }
+            h2 {
+              color: #0f172a;
+              margin-top: 0;
+              margin-bottom: 8px;
+              font-size: 18px;
+            }
+            .content {
+              font-size: 14px;
+              line-height: 1.4;
+              margin-bottom: 8px;
+            }
+            ul, ol {
+              margin: 0;
+              padding-left: 18px;
+              font-size: 13px;
+              line-height: 1.3;
+            }
+            li {
+              margin-bottom: 3px;
+            }
           </style>
         </head>
         <body>
           ${slidesHtml}
-          <script>window.onload = function() { window.print(); window.close(); };</script>
+          <script>
+            window.onload = function() {
+              window.print();
+              window.close();
+            };
+          </script>
         </body>
       </html>
     `);

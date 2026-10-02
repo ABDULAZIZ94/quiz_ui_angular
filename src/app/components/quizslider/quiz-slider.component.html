@@ -1,11 +1,12 @@
 <div #sliderContainer class="presentation-container">
+    <!-- Toolbar Utama -->
     <div class="toolbar">
-        <div class="topic-selector" *ngIf="slideNames.length > 0">
-            <label for="nameSelect"><strong>Pilih Nama Slaid:</strong></label>
-            <select id="nameSelect" [(ngModel)]="selectedName" (change)="onNameChange()">
-                <option value="ALL">Semua Nama ({{ allSlides.length }} slaid)</option>
-                <option *ngFor="let name of slideNames" [value]="name">
-                    {{ name }}
+        <div class="topic-selector" *ngIf="slideSids.length > 0">
+            <label for="sidSelect"><strong>Pilih Kumpulan (SID):</strong></label>
+            <select id="sidSelect" [(ngModel)]="selectedSid" (change)="onSidChange()" class="form-select">
+                <option value="ALL">Semua SID (Jumlah: {{ allSlides.length }} Slaid)</option>
+                <option *ngFor="let sid of slideSids" [value]="sid">
+                    SID: {{ sid }}
                 </option>
             </select>
         </div>
@@ -13,19 +14,37 @@
         <div class="toolbar-actions">
             <button (click)="toggleFullscreen()" class="btn btn-secondary">🖥 Skrin Penuh</button>
             <button (click)="printToPdf()" [disabled]="loading || filteredSlides.length === 0" class="btn btn-primary">
-                📄 Cetak PDF
+                📄 Cetak PDF (Dipaparkan)
             </button>
         </div>
     </div>
 
+    <!-- Butang Lompatan Pantas (Jump to 10, 20, 30, dsb.) -->
+    <div class="jump-toolbar" *ngIf="filteredSlides.length > 10">
+        <span class="jump-label">Lompat ke Slaid:</span>
+        <div class="jump-buttons">
+            <ng-container *ngFor="let slide of filteredSlides; let i = index">
+                <button *ngIf="(i + 1) % 10 === 0 || i === 0" (click)="jumpToSlide(i)"
+                    [class.active]="currentIndex === i" class="btn-jump">
+                    {{ i + 1 }}
+                </button>
+            </ng-container>
+        </div>
+    </div>
+
+    <!-- Status Memuat Turun / Ralat -->
     <div *ngIf="loading" class="status-card">
         <p>Memuat turun data pembentangan...</p>
     </div>
     <div *ngIf="errorMessage" class="status-card error">{{ errorMessage }}</div>
 
+    <!-- Paparan Slaid Semasa (Slider View) -->
     <div *ngIf="!loading && filteredSlides.length > 0" class="slide-card">
         <div class="slide-header">
             <div class="header-badges">
+                <span class="sid-badge" *ngIf="filteredSlides[currentIndex].sid">
+                    SID: {{ filteredSlides[currentIndex].sid }}
+                </span>
                 <span class="name-badge" *ngIf="filteredSlides[currentIndex].name">
                     {{ filteredSlides[currentIndex].name }}
                 </span>
@@ -39,10 +58,10 @@
         </div>
 
         <div class="slide-body">
-            <!-- Tajuk Slaid (Menyokong Format SafeHtml) -->
+            <!-- Tajuk Slaid -->
             <h2 class="slide-title" [innerHTML]="filteredSlides[currentIndex].title"></h2>
 
-            <!-- Kandungan Utama (Menyokong <h1>, <br>, <b> dll.) -->
+            <!-- Kandungan Utama -->
             <div class="slide-content" *ngIf="filteredSlides[currentIndex].content"
                 [innerHTML]="filteredSlides[currentIndex].content"></div>
 
@@ -57,9 +76,10 @@
             </div>
         </div>
 
+        <!-- Navigasi Bawah (Sebelum & Seterusnya) -->
         <div class="slide-footer">
             <button (click)="prevSlide()" [disabled]="currentIndex === 0" class="btn-nav">
-                &laquo; Sebelum
+                &laquo; Sebelumnya
             </button>
 
             <div class="progress-bar-container">
