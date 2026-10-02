@@ -25,8 +25,8 @@ export class LoginComponent {
   private apiUrl = 'https://script.google.com/macros/s/AKfycbxtY2Zm9EhX3GiHRzQMTL00wnqT2jjAz59JxPvz6VvG7nnJKYmU26BWiXygoUp0IT97rA/exec';
 
   credentials: LoginPayload = {
-    username: 'aziz',
-    password: 'aziz1234'
+    username: '',
+    password: ''
   };
 
   isLoading = false;

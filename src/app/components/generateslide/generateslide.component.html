@@ -1,0 +1,19 @@
+<div class="generate-slide-container">
+    <h2>Penjana Slaid</h2>
+
+    <div class="payload-preview">
+        <h3>Data yang akan dihantar:</h3>
+        <p><strong>Topik:</strong> {{ payload.topic }}</p>
+        <p><strong>Penerangan:</strong> {{ payload.description }}</p>
+        <p><strong>Jumlah Slaid:</strong> {{ payload.total_slides }}</p>
+    </div>
+
+    <button class="btn-submit" (click)="sendPostRequest()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Hantar Permintaan</span>
+        <span *ngIf="isLoading">Sedang Dihantar...</span>
+    </button>
+
+    <div *ngIf="responseMessage" [ngClass]="{'success-msg': isSuccess, 'error-msg': !isSuccess}" class="status-message">
+        {{ responseMessage }}
+    </div>
+</div>

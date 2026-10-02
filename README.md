@@ -71,3 +71,4 @@ docker push zizi94/angular-app:latest
 ng build
 firebase init hosting
 firebase deploy --only hosting
+

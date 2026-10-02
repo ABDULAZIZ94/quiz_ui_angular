@@ -28,7 +28,7 @@ export class Flashcard2Component implements OnInit {
 
   @ViewChild('flashcardContainer') flashcardContainer!: ElementRef;
 
-  private csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=1845049912&single=true&output=csv';
+  private csvUrl = 'https://quizapi.ezcigu.online/quizcsv';
   private STORAGE_KEY = 'flashcard2_data';
   private ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 

@@ -11,6 +11,7 @@ import { authGuard } from './auth.guard';
 import { LoginComponent } from './components/login/login.component';
 import { QuizSliderComponent } from './components/quizslider/quiz-slider.component';
 import { Flashcard2Component } from './components/flashcard2/flashcardcomponent';
+import { GenerateSlideComponent } from './components/generateslide/generateslide.component';
 
 export const routes: Routes = [
   {
@@ -45,10 +46,16 @@ export const routes: Routes = [
   {
     path: 'quizgenerator',
     component: QuizGeneratorComponent,
+    canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'quizslider',
     component: QuizSliderComponent,
+  },
+  {
+    path: 'generateslide',
+    component: GenerateSlideComponent,
+    canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'flashcard2',
