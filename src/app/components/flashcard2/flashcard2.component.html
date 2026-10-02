@@ -1,0 +1,147 @@
+<div class="flashcard-container" #flashcardContainer>
+
+    <!-- Header & Toolbar -->
+    <div class="card-toolbar">
+        <div class="header-title">
+            <h2>🗂️ Kad Kilat 5 Bahasa (Flashcard2)</h2>
+            <span class="card-count" *ngIf="flashcards.length > 0">
+                Kad {{ currentIndex + 1 }} / {{ flashcards.length }}
+            </span>
+        </div>
+        <div class="toolbar-actions">
+            <!-- Butang Skrin Penuh -->
+            <button class="btn-action btn-refresh" (click)="toggleFullscreen()" title="Tukar Mod Skrin Penuh">
+                📺 {{ isFullscreen ? 'Keluar Skrin Penuh' : 'Skrin Penuh' }}
+            </button>
+            <!-- Butang Refresh -->
+            <button class="btn-action btn-refresh" (click)="refreshData()" title="Kemaskini Data dari Server">
+                🔄 Muat Semula Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Memuat Turun / Status Ralat -->
+    <div *ngIf="loading" class="status-card">
+        <p>⌛ Memuat turun kad kilat...</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="status-card error">
+        <p>❌ {{ errorMessage }}</p>
+    </div>
+
+    <!-- Kad Kilat Utama -->
+    <div *ngIf="!loading && currentCard" class="card-wrapper">
+        <div class="languages-grid">
+
+            <!-- 1. Bahasa Arab -->
+            <div class="lang-box arabic-box">
+                <div class="lang-header">
+                    <span class="lang-flag">🇸🇦</span>
+                    <span class="lang-title">العربية (Arab)</span>
+                    <button class="btn-speak" [class.speaking]="currentlySpeaking === 'arabic'"
+                        (click)="speak(currentCard.arabic, 'ar', 'arabic')">
+                        👨‍💼 Sebut (Lelaki)
+                    </button>
+                </div>
+                <div class="lang-text rtl">{{ currentCard.arabic || '-' }}</div>
+            </div>
+
+            <!-- 2. Bahasa Urdu -->
+            <div class="lang-box urdu-box">
+                <div class="lang-header">
+                    <span class="lang-flag">🇵🇰</span>
+                    <span class="lang-title">اردو (Urdu)</span>
+                    <button class="btn-speak" [class.speaking]="currentlySpeaking === 'urdu'"
+                        (click)="speak(currentCard.urdu, 'ur', 'urdu')">
+                        👨‍💼 Sebut (Lelaki)
+                    </button>
+                </div>
+                <div class="lang-text rtl">{{ currentCard.urdu || '-' }}</div>
+            </div>
+
+            <!-- 3. Bahasa Inggeris -->
+            <div class="lang-box english-box">
+                <div class="lang-header">
+                    <span class="lang-flag">🇬🇧</span>
+                    <span class="lang-title">English</span>
+                    <button class="btn-speak" [class.speaking]="currentlySpeaking === 'english'"
+                        (click)="speak(currentCard.english, 'en', 'english')">
+                        👨‍💼 Sebut (Lelaki)
+                    </button>
+                </div>
+                <div class="lang-text">{{ currentCard.english || '-' }}</div>
+            </div>
+
+            <!-- 4. Bahasa Melayu -->
+            <div class="lang-box malay-box">
+                <div class="lang-header">
+                    <span class="lang-flag">🇲🇾</span>
+                    <span class="lang-title">Bahasa Melayu</span>
+                    <button class="btn-speak" [class.speaking]="currentlySpeaking === 'malay'"
+                        (click)="speak(currentCard.malay, 'ms', 'malay')">
+                        👨‍💼 Sebut (Lelaki)
+                    </button>
+                </div>
+                <div class="lang-text">{{ currentCard.malay || '-' }}</div>
+            </div>
+
+            <!-- 5. Bahasa Rohingya -->
+            <div class="lang-box rohingya-box">
+                <div class="lang-header">
+                    <span class="lang-flag">🌐</span>
+                    <span class="lang-title">Ruáingga (Rohingya)</span>
+                    <button class="btn-speak" [class.speaking]="currentlySpeaking === 'rohingya'"
+                        (click)="speak(currentCard.rohingya, 'en', 'rohingya')">
+                        👨‍💼 Sebut (Lelaki)
+                    </button>
+                </div>
+                <div class="lang-text">{{ currentCard.rohingya || '-' }}</div>
+            </div>
+
+        </div>
+
+        <!-- Navigasi Utama Bawah -->
+        <div class="navigation-bar">
+            <!-- Ke Nombor 1 -->
+            <button (click)="goToFirstCard()" [disabled]="currentIndex === 0" class="nav-btn nav-btn-secondary"
+                title="Pergi ke Kad Pertama">
+                ⏮️ Ke Nombor 1
+            </button>
+
+            <!-- Sebelum -->
+            <button (click)="prevCard()" [disabled]="currentIndex === 0" class="nav-btn">
+                &laquo; Sebelum
+            </button>
+
+            <!-- Bar Kemajuan -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="((currentIndex + 1) / flashcards.length) * 100">
+                </div>
+            </div>
+
+            <!-- Seterusnya -->
+            <button (click)="nextCard()" [disabled]="currentIndex === flashcards.length - 1" class="nav-btn">
+                Seterusnya &raquo;
+            </button>
+
+            <!-- Ke Akhir -->
+            <button (click)="goToLastCard()" [disabled]="currentIndex === flashcards.length - 1"
+                class="nav-btn nav-btn-secondary" title="Pergi ke Kad Terakhir">
+                Ke Akhir ⏭
+            </button>
+        </div>
+
+        <!-- Pintasan Nombor (10, 20, 30...) -->
+        <div class="shortcut-container" *ngIf="getShortcutNumbers().length > 0">
+            <span class="shortcut-label">Pintasan Kad:</span>
+            <div class="shortcut-buttons">
+                <button *ngFor="let num of getShortcutNumbers()" (click)="goToCardNumber(num)" class="shortcut-btn"
+                    [class.active]="currentIndex === num - 1">
+                    {{ num }}
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,243 @@
+.flashcard-container {
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.header-title h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.4rem;
+}
+
+.card-count {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.btn-refresh {
+  background: #e2e8f0;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+  background: #cbd5e1;
+}
+
+.status-card {
+  text-align: center;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  color: #475569;
+}
+
+.status-card.error {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+/* Grid Bahasa */
+.languages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.lang-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  transition: transform 0.2s;
+}
+
+.lang-box:hover {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+}
+
+.lang-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #f1f5f9;
+}
+
+.lang-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #334155;
+  margin-left: 8px;
+  flex-grow: 1;
+}
+
+.lang-text {
+  font-size: 1.2rem;
+  color: #0f172a;
+  line-height: 1.5;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* Tulisan Kanan ke Kiri (RTL) untuk Arab & Urdu */
+.lang-text.rtl {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Amiri', 'Traditional Arabic', 'Naskh', serif;
+  font-size: 1.4rem;
+}
+
+.btn-speak {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-speak:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-speak.speaking {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Navigasi */
+.navigation-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.nav-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.nav-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.3s ease;
+}
+
+/* Container Pintasan Nombor */
+.shortcut-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #cbd5e1;
+  flex-wrap: wrap;
+}
+
+.shortcut-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.shortcut-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shortcut-btn {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shortcut-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.shortcut-btn.active {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.nav-btn-secondary {
+  background: #64748b !important;
+}
+
+.nav-btn-secondary:hover:not(:disabled) {
+  background: #475569 !important;
+}

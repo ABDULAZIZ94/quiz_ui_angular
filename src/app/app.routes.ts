@@ -10,6 +10,7 @@ import { QuizGeneratorComponent } from './components/quizgenerator/quizgenerator
 import { authGuard } from './auth.guard';
 import { LoginComponent } from './components/login/login.component';
 import { QuizSliderComponent } from './components/quizslider/quiz-slider.component';
+import { Flashcard2Component } from './components/flashcard2/flashcardcomponent';
 
 export const routes: Routes = [
   {
@@ -48,6 +49,10 @@ export const routes: Routes = [
   {
     path: 'quizslider',
     component: QuizSliderComponent,
+  },
+  {
+    path: 'flashcard2',
+    component: Flashcard2Component,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
