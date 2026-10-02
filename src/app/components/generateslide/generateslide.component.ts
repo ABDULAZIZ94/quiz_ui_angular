@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-generateslide',
   templateUrl: './generateslide.component.html',
+  standalone: true, // Jika komponen anda adalah standalone
+  imports: [CommonModule], // 2. Tambah CommonModule di sini
   styleUrls: ['./generateslide.component.css']
 })
 export class GenerateSlideComponent {
