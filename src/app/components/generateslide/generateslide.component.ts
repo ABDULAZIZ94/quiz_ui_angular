@@ -15,8 +15,7 @@ import { FormsModule } from '@angular/forms'; // 1. Import FormsModule di sini
 })
 export class GenerateSlideComponent {
   private apiUrl = 
-  // 'https://script.google.com/macros/s/AKfycbwnxDxxiRk9_lvHIUQIwZYVcoMJDTqxmzna1Hj9VwcGQ_I7V0bvLpJK3ybRNH-ImL2Z4Q/exec';
-'https://script.google.com/macros/s/AKfycbwnxDxxiRk9_lvHIUQIwZYVcoMJDTqxmzna1Hj9VwcGQ_I7V0bvLpJK3ybRNH-ImL2Z4Q/exec';
+  'https://script.google.com/macros/s/AKfycbxcq4nfllrYcYMAwTJVMniCx79WiwlxreErZRvNHGtGwUF6tq72slqTyycDNdwcccFhww/exec';
   isLoading: boolean = false;
   responseMessage: string = '';
   isSuccess: boolean = false;

@@ -2,11 +2,12 @@
     <!-- Toolbar Utama -->
     <div class="toolbar">
         <div class="topic-selector" *ngIf="slideSids.length > 0">
-            <label for="sidSelect"><strong>Pilih Kumpulan (SID):</strong></label>
+            <label for="sidSelect"><strong>Pilih Slaid:</strong></label>
             <select id="sidSelect" [(ngModel)]="selectedSid" (change)="onSidChange()" class="form-select">
-                <option value="ALL">Semua SID (Jumlah: {{ allSlides.length }} Slaid)</option>
+                <option value="ALL">Semua Slaid (Jumlah: {{ allSlides.length }} Slaid)</option>
+                <!-- Menilai pilihan mengikut SID, tetapi memaparkan nama slaid (name) -->
                 <option *ngFor="let sid of slideSids" [value]="sid">
-                    SID: {{ sid }}
+                    {{ getSlideNameBySid(sid) }}
                 </option>
             </select>
         </div>

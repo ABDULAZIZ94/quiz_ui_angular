@@ -348,4 +348,10 @@ export class QuizSliderComponent implements OnInit {
     `);
     printWindow.document.close();
   }
+
+  // Mendapatkan nama slaid yang sepadan dengan SID untuk dipaparkan pada dropdown
+  getSlideNameBySid(sid: string): string {
+    const found = this.allSlides.find(s => s.sid === sid);
+    return found ? `${found.name} (SID: ${sid})` : `SID: ${sid}`;
+  }
 }
