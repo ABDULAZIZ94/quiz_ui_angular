@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { saveAs } from 'file-saver';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http'; // 1. Import HttpClient
 
 interface Subjek {
   nama_subjek: string;
@@ -30,6 +31,11 @@ interface RphData {
 
 @Component({
   selector: 'app-rph',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   templateUrl: './rph.component.html',
   styleUrls: ['./rph.component.css']
 })
@@ -40,6 +46,9 @@ export class RphComponent implements OnInit {
   
   // URL CSV Jadual Sekolah
   private csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=2064660124&single=true&output=csv';
+
+  // 2. Gunakan inject(HttpClient) bagi Angular moden
+  private http = inject(HttpClient);
 
   rph: RphData = {
     user_id: 101,
@@ -69,8 +78,6 @@ export class RphComponent implements OnInit {
   isSubmitting = false;
   responseResult: any = null;
   errorMessage = '';
-
-  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.muatNaikJadualCSV();
@@ -166,7 +173,7 @@ export class RphComponent implements OnInit {
     window.print();
   }
 
-  // Eksport ke Microsoft Word
+  // Eksport ke Microsoft Word (Kaedah Native Blob tanpa memerlukan library file-saver)
   eksportKeWord(): void {
     const printElement = document.getElementById('rph-jawi-print-area');
     if (!printElement) return;
@@ -196,6 +203,10 @@ export class RphComponent implements OnInit {
       type: 'application/msword'
     });
 
-    saveAs(blob, `RPH_Jawi_${this.rph.tarikh}_User${this.rph.user_id}.doc`);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `RPH_Jawi_${this.rph.tarikh}_User${this.rph.user_id}.doc`;
+    link.click();
+    URL.revokeObjectURL(link.href);
   }
 }
