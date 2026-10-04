@@ -1,0 +1,71 @@
+<div class="schedule-container">
+    <h2>Pengurusan Jadual Sebulan (RPH Schedule)</h2>
+
+    <!-- Tetapan Utama -->
+    <div class="form-group-row">
+        <div class="field">
+            <label>User ID:</label>
+            <input type="number" [(ngModel)]="user_id" />
+        </div>
+        <div class="field">
+            <label>Nama Jadual:</label>
+            <input type="text" [(ngModel)]="nama_jadual" placeholder="Cth: Jadual Bulan Oktober" />
+        </div>
+        <div class="field">
+            <label>Tarikh Mula:</label>
+            <input type="date" [(ngModel)]="start_date" />
+        </div>
+        <div class="field">
+            <label>Tarikh Tamat:</label>
+            <input type="date" [(ngModel)]="end_date" />
+        </div>
+    </div>
+
+    <!-- Bar Tindakan -->
+    <div class="action-bar">
+        <button type="button" class="btn-copy" (click)="salinJadualMingguan()">
+            📋 Salin Jadual Minggu Ini Untuk Sebulan
+        </button>
+        <button type="button" class="btn-add" (click)="tambahSlot()">
+            ➕ Tambah Slot
+        </button>
+    </div>
+
+    <!-- Senarai Slot Jadual -->
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tarikh</th>
+                    <th>Kelas</th>
+                    <th>Subjek</th>
+                    <th>Masa Mula</th>
+                    <th>Masa Tamat</th>
+                    <th>Tindakan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of jadualList; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td><input type="date" [(ngModel)]="item.tarikh" /></td>
+                    <td><input type="text" [(ngModel)]="item.kelas" placeholder="Cth: 4 Mawar" /></td>
+                    <td><input type="text" [(ngModel)]="item.subject" placeholder="Cth: Matematik" /></td>
+                    <td><input type="time" [(ngModel)]="item.masa_mula" /></td>
+                    <td><input type="time" [(ngModel)]="item.masa_tamat" /></td>
+                    <td>
+                        <button class="btn-delete" (click)="padamSlot(i)">🗑️</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Simpan -->
+    <div class="submit-section">
+        <button class="btn-save" [disabled]="isSubmitting" (click)="simpanJadual()">
+            {{ isSubmitting ? 'Menyimpan...' : '💾 Simpan Jadual Sebulan' }}
+        </button>
+        <p class="status-msg" *ngIf="message">{{ message }}</p>
+    </div>
+</div>
