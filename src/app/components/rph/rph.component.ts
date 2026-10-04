@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http'; // 1. Import HttpClient
+import { HttpClient } from '@angular/common/http';
 
 interface Subjek {
   nama_subjek: string;
@@ -47,7 +47,7 @@ export class RphComponent implements OnInit {
   // URL CSV Jadual Sekolah
   private csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=2064660124&single=true&output=csv';
 
-  // 2. Gunakan inject(HttpClient) bagi Angular moden
+  // Inject HttpClient
   private http = inject(HttpClient);
 
   rph: RphData = {
@@ -173,7 +173,7 @@ export class RphComponent implements OnInit {
     window.print();
   }
 
-  // Eksport ke Microsoft Word (Kaedah Native Blob tanpa memerlukan library file-saver)
+  // Eksport ke Microsoft Word
   eksportKeWord(): void {
     const printElement = document.getElementById('rph-jawi-print-area');
     if (!printElement) return;
