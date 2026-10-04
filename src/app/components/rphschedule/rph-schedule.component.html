@@ -1,6 +1,36 @@
 <div class="schedule-container">
     <h2>Pengurusan Jadual Sebulan (RPH Schedule)</h2>
 
+    <!-- Bahagian Carian & Pilih Jadual dari Google Sheet (CSV) -->
+    <div class="published-section">
+        <div class="section-header">
+            <h3>📂 Pilih Jadual dari Sheet</h3>
+            <button type="button" class="btn-refresh" (click)="loadCsvData()" [disabled]="isLoadingCsv">
+                {{ isLoadingCsv ? '🔄 Memuatkan...' : '🔄 Muat Semula Data' }}
+            </button>
+        </div>
+
+        <div class="form-group-row">
+            <div class="field search-field">
+                <label>Cari Jadual / User / ID:</label>
+                <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+                    placeholder="Cari mengikut user_id, id, atau nama jadual..." />
+            </div>
+            <div class="field dropdown-field">
+                <label>Pilih Rekod Jadual:</label>
+                <select [(ngModel)]="selectedScheduleId" (change)="onSelectSchedule()">
+                    <option value="">-- Pilih Rekod Jadual --</option>
+                    <option *ngFor="let option of filteredPublishedSchedules" [value]="option.id">
+                        [{{ option.id }}] User: {{ option.user_id }} - {{ option.nama_jadual }} ({{ option.start_date }}
+                        hingga {{ option.end_date }})
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider" />
+
     <!-- Tetapan Utama -->
     <div class="form-group-row">
         <div class="field">
