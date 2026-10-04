@@ -4,27 +4,46 @@
     <!-- Bahagian Carian & Pilih Jadual dari Google Sheet (CSV) -->
     <div class="published-section">
         <div class="section-header">
-            <h3>📂 Pilih Jadual dari Sheet</h3>
+            <h3>📂 Pilih / Cari Jadual dari Sheet</h3>
             <button type="button" class="btn-refresh" (click)="loadCsvData()" [disabled]="isLoadingCsv">
                 {{ isLoadingCsv ? '🔄 Memuatkan...' : '🔄 Muat Semula Data' }}
             </button>
         </div>
 
-        <div class="form-group-row">
-            <div class="field search-field">
-                <label>Cari Jadual / User / ID:</label>
-                <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
-                    placeholder="Cari mengikut user_id, id, atau nama jadual..." />
-            </div>
-            <div class="field dropdown-field">
-                <label>Pilih Rekod Jadual:</label>
-                <select [(ngModel)]="selectedScheduleId" (change)="onSelectSchedule()">
-                    <option value="">-- Pilih Rekod Jadual --</option>
-                    <option *ngFor="let option of filteredPublishedSchedules" [value]="option.id">
-                        [{{ option.id }}] User: {{ option.user_id }} - {{ option.nama_jadual }} ({{ option.start_date }}
-                        hingga {{ option.end_date }})
-                    </option>
-                </select>
+        <!-- Combobox / Dropdown dengan Carian -->
+        <div class="combobox-container">
+            <label>Cari & Pilih Rekod Jadual:</label>
+            <div class="combobox-wrapper">
+                <input 
+                    type="text" 
+                    class="combobox-input"
+                    [(ngModel)]="searchQuery" 
+                    (focus)="isDropdownOpen = true"
+                    (input)="onSearchChange(); isDropdownOpen = true"
+                    placeholder="Taip untuk cari (User ID, Nama, Subjek, atau ID)..." 
+                />
+                
+                <button type="button" class="combobox-toggle" (click)="toggleDropdown()">
+                    {{ isDropdownOpen ? '▲' : '▼' }}
+                </button>
+
+                <!-- Senarai Dropdown Hasil Carian -->
+                <ul class="combobox-dropdown" *ngIf="isDropdownOpen">
+                    <li *ngIf="filteredPublishedSchedules.length === 0" class="no-result">
+                        Tiada rekod dijumpai
+                    </li>
+                    <li 
+                        *ngFor="let option of filteredPublishedSchedules" 
+                        (click)="pilihRekodJadual(option)"
+                        [class.selected]="option.id === selectedScheduleId">
+                        <div class="option-title">
+                            <strong>[{{ option.id }}]</strong> {{ option.nama_jadual }}
+                        </div>
+                        <div class="option-sub">
+                            User ID: {{ option.user_id }} | Tarikh: {{ option.start_date }} hingga {{ option.end_date }}
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
