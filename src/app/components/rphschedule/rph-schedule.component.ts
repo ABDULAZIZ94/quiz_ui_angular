@@ -51,6 +51,7 @@ export class RphScheduleComponent implements OnInit {
     this.isLoadingCsv = true;
     this.rphService.getPublishedCsvData().subscribe({
       next: (csvRows: any[]) => {
+        console.log('Data CSV diterima:', csvRows);
         this.isLoadingCsv = false;
         this.processPublishedCsv(csvRows);
       },
@@ -79,7 +80,7 @@ export class RphScheduleComponent implements OnInit {
 
       const id = row.id || `REC_${index + 1}`;
       const userId = row.user_id || '';
-      const namaJadual = parsedSchedule.nama_jadual || row.nama_jadual || `Jadual ${id}`;
+      const namaJadual = row.nama_jadual ;
       const startDate = row.start_date || '';
       const endDate = row.end_date || '';
 

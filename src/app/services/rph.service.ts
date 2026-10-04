@@ -54,35 +54,80 @@ export class RphService {
   /**
    * Helper function untuk memproses/parse baris CSV kepada Objek JSON
    */
+/**
+   * Helper function untuk memproses/parse baris CSV kepada Objek JSON
+   * Boleh mengendalikan JSON Array/Object yang kompleks & multiline di dalam lajur CSV
+   */
   private parseCsvToObjects(csvText: string): any[] {
     if (!csvText) return [];
 
-    const lines = csvText.split(/\r\n|\n/);
-    if (lines.length < 2) return [];
+    const rows = this.parseCsvRows(csvText);
+    if (rows.length < 2) return [];
 
-    // Mengambil baris pertama sebagai nama tajuk/lajur (headers)
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
-
+    // Baris pertama ialah headers (lajur)
+    const headers = rows[0].map(h => h.trim());
     const result: any[] = [];
 
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      // Regex untuk mengendalikan nilai koma di dalam tanda petik
-      const values = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || line.split(',');
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      // Abaikan baris kosong
+      if (row.length === 0 || (row.length === 1 && !row[0].trim())) continue;
 
       const rowObject: any = {};
       headers.forEach((header, index) => {
-        let val = values[index] ? values[index].trim() : '';
-        // Buang tanda petik berganda jika ada
-        val = val.replace(/^"(.*)"$/, '$1');
-        rowObject[header] = val;
+        rowObject[header] = row[index] !== undefined ? row[index] : '';
       });
 
       result.push(rowObject);
     }
 
     return result;
+  }
+
+  /**
+   * CSV Parser State Machine:
+   * Memecahkan CSV mengikut lajur & baris dengan betul walaupun ada koma atau newlines dalam JSON
+   */
+  private parseCsvRows(text: string): string[][] {
+    const p: string[][] = [[]];
+    let curCell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      const nextC = text[i + 1];
+
+      if (c === '"') {
+        if (inQuotes && nextC === '"') {
+          // Escaped quote ("" -> ")
+          curCell += '"';
+          i++; // langkau quote seterusnya
+        } else {
+          // Buka atau tutup petik
+          inQuotes = !inQuotes;
+        }
+      } else if (c === ',' && !inQuotes) {
+        // Tamat lajur/cell
+        p[p.length - 1].push(curCell);
+        curCell = '';
+      } else if ((c === '\r' || c === '\n') && !inQuotes) {
+        // Tamat baris CSV
+        if (c === '\r' && nextC === '\n') {
+          i++; // langkau \n jika \r\n
+        }
+        p[p.length - 1].push(curCell);
+        curCell = '';
+        p.push([]);
+      } else {
+        curCell += c;
+      }
+    }
+
+    // Masukkan sel terakhir
+    if (curCell !== '' || p[p.length - 1].length > 0) {
+      p[p.length - 1].push(curCell);
+    }
+
+    return p;
   }
 }
