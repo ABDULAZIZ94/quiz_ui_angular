@@ -98,18 +98,29 @@ export class RphScheduleComponent implements OnInit {
     this.onSearchChange();
   }
 
-  // Menapis senarai pilihan berdasarkan kata kunci carian
+// Menapis senarai pilihan berdasarkan kata kunci carian
   onSearchChange(): void {
     const q = this.searchQuery.trim().toLowerCase();
+    
     if (!q) {
       this.filteredPublishedSchedules = [...this.publishedSchedules];
       return;
     }
 
     this.filteredPublishedSchedules = this.publishedSchedules.filter(item => {
-      return item.id.toLowerCase().includes(q) ||
-             item.user_id.toString().toLowerCase().includes(q) ||
-             item.nama_jadual.toLowerCase().includes(q);
+      // 1. Semakan selamat bagi medan utama (elak ralat null/undefined)
+      const matchesId = item.id ? item.id.toString().toLowerCase().includes(q) : false;
+      const matchesUserId = item.user_id ? item.user_id.toString().toLowerCase().includes(q) : false;
+      const matchesNamaJadual = item.nama_jadual ? item.nama_jadual.toLowerCase().includes(q) : false;
+
+      // 2. Semakan di dalam senarai slot jadual (pilihan: cari subjek/kelas/tarikh)
+      const matchesJadualSlots = item.scheduleRaw?.jadual?.some(slot => 
+        (slot.subject && slot.subject.toLowerCase().includes(q)) ||
+        (slot.kelas && slot.kelas.toLowerCase().includes(q)) ||
+        (slot.tarikh && slot.tarikh.toLowerCase().includes(q))
+      ) ?? false;
+
+      return matchesId || matchesUserId || matchesNamaJadual || matchesJadualSlots;
     });
   }
 
