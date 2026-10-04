@@ -12,6 +12,7 @@ import { LoginComponent } from './components/login/login.component';
 import { QuizSliderComponent } from './components/quizslider/quiz-slider.component';
 import { Flashcard2Component } from './components/flashcard2/flashcardcomponent';
 import { GenerateSlideComponent } from './components/generateslide/generateslide.component';
+import { RphComponent } from './components/rph/rph.component';
 
 export const routes: Routes = [
   {
@@ -60,6 +61,10 @@ export const routes: Routes = [
   {
     path: 'flashcard2',
     component: Flashcard2Component,
+  },
+  {
+    path: 'rph',
+    component: RphComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 

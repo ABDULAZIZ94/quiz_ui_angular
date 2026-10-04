@@ -1,0 +1,130 @@
+.container {
+  max-width: 950px;
+  margin: 20px auto;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-grid label, .form-grid-full label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.form-grid input, .form-grid-full input, .form-grid-full textarea {
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-grid-full {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subject-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.badge {
+  background-color: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.input-subject { width: 30%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.input-topic { width: 50%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.char-count { font-size: 12px; color: #666; width: 60px; }
+
+.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+.btn-primary { background-color: #28a745; color: white; }
+.btn-large { padding: 12px 24px; font-size: 16px; width: 100%; }
+.btn-secondary { background-color: #007bff; color: white; }
+.btn-danger { background-color: #dc3545; color: white; }
+.btn-success { background-color: #17a2b8; color: white; }
+.btn-info { background-color: #6c757d; color: white; }
+
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.alert { padding: 12px; border-radius: 4px; margin-bottom: 15px; }
+.alert-danger { background-color: #f8d7da; color: #721c24; }
+.alert-success { background-color: #d4edda; color: #155724; }
+
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th, .data-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+
+/* Gaya Dokumen Jawi RPH */
+.rph-jawi-document {
+  background: #fff;
+  padding: 25px;
+  border: 1px solid #ccc;
+  direction: rtl;
+  text-align: right;
+  font-family: 'Amiri', 'Traditional Arabic', Arial, sans-serif;
+  font-size: 16px;
+}
+
+.title-jawi {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.jawi-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.jawi-table th, .jawi-table td {
+  border: 1px solid #000;
+  padding: 8px 12px;
+  text-align: right;
+}
+
+.jawi-table th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+.signature-table td {
+  border: 1px solid #000;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .print-section { margin: 0; padding: 0; }
+  .rph-jawi-document { border: none; padding: 0; }
+}
