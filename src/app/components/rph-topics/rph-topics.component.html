@@ -89,16 +89,6 @@
         <p>⚠️ Tiada slot jadual dimuatkan. Sila pilih jadual di atas atau lengkapkan Langkah 1 terlebih dahulu.</p>
     </div>
 
-    <!-- Mesej & Butang Simpan -->
-    <div class="action-footer" *ngIf="slotsWithTopics.length > 0">
-        <div *ngIf="message" class="alert-message">{{ message }}</div>
-
-        <button type="button" class="btn-save" (click)="simpanSemuaTopic()" [disabled]="isSubmitting">
-            <span *ngIf="!isSubmitting">💾 Simpan Tetapan Topik</span>
-            <span *ngIf="isSubmitting">Sedang Menyimpan...</span>
-        </button>
-    </div>
-
     <!-- Modal Pukal (Bulk Apply Modal) -->
     <div class="modal-overlay" *ngIf="isBulkModalOpen">
         <div class="modal-card">
