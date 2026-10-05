@@ -43,13 +43,57 @@ export class RphGenerateComponent implements OnInit {
   rphList: RphGeneratedItem[] = [];
 
   ngOnInit(): void {
-    const activeData = this.topicData || this.rphService.getTopicData();
+    // 1. Semak data dari @Input() atau memory RphService
+    let activeData = this.topicData || this.rphService.getTopicData();
 
     if (activeData && activeData.items && activeData.items.length > 0) {
       this.janaRph(activeData);
     } else {
-      this.errorMessage = 'Tiada data topik dijumpai. Sila pastikan anda telah menyimpan topik di Langkah 2.';
+      // 2. Jika tiada dalam memori, cuba tarik terus dari sumber CSV/Google Sheets melalui RphService
+      this.muatDataDariService();
     }
+  }
+
+  /**
+   * Menarik data CSV/Sheets terus daripada RphService jika tiada dalam memori
+   */
+  muatDataDariService(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.rphService.getPublishedCsvData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (csvItems: any[]) => {
+          this.isLoading = false;
+          if (csvItems && csvItems.length > 0) {
+            // Memetakan data CSV kepada struktur RphGeneratedItem
+            this.rphList = csvItems.map(item => ({
+              hari: item.hari || item.Hari || '',
+              tarikh: item.tarikh || item.Tarikh || '',
+              minggu: item.minggu || item.Minggu || '',
+              tajuk: item.tajuk || item.Tajuk || '',
+              pelajaran_bidang: item.pelajaran_bidang || item['Pelajaran/Bidang'] || '',
+              isi: item.isi || item.Isi || '',
+              objektif: item.objektif || item.Objektif || '',
+              kelas_tahun: item.kelas_tahun || item['Kelas/Tahun'] || '',
+              aktiviti: item.aktiviti || item.Aktiviti || '',
+              masa: item.masa || item.Masa || '',
+              abm: item.abm || item.ABM || '',
+              nilai_murni: item.nilai_murni || item['Nilai Murni'] || '',
+              refleksi: item.refleksi || item.Refleksi || '',
+              catatan: item.catatan || item.Catatan || ''
+            }));
+          } else {
+            this.errorMessage = 'Tiada data dijumpai daripada RphService. Sila simpan topik di Langkah 2 dahulu.';
+          }
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          console.error('Ralat menarik data dari RphService:', err);
+          this.errorMessage = 'Gagal menarik data daripada RphService.';
+        }
+      });
   }
 
   janaRph(customData?: ScheduleTopicMapping): void {

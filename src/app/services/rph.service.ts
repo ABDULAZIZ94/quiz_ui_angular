@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 
 export interface ScheduleItem {
   tarikh: string;
@@ -80,18 +80,18 @@ export class RphService {
     });
   }
 
-  /**
-   * Menyimpan tetapan topik jadual RPH ke Google Apps Script & Memori
+/**
+   * Menyimpan tetapan topik jadual RPH HANYA ke memori lokal & log ke console
    */
   simpanTopics(data: ScheduleTopicMapping): Observable<any> {
-    this.setTopicData(data); // Simpan terus ke memori lokal
-    const payload = {
-      action: 'save_topics',
-      ...data
-    };
-    return this.http.post(this.webAppUrl, JSON.stringify(payload), {
-      headers: { 'Content-Type': 'text/plain' }
-    });
+    // 1. Simpan data terus ke memori lokal
+    this.setTopicData(data);
+
+    // 2. Cetak log ke console
+    console.log('Saved Topic (Memori Lokal):', data);
+
+    // 3. Kembalikan Observable berjaya
+    return of({ success: true, message: 'Topik berjaya disimpan ke memori lokal.' });
   }
 
   /**
