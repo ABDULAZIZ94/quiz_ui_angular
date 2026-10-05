@@ -98,79 +98,118 @@ export class RphGenerateComponent implements OnInit {
       });
   }
 
-  janaRph(customData?: ScheduleTopicMapping): void {
-    const payloadData = customData || this.topicData || this.rphService.getTopicData();
+janaRph(customData?: ScheduleTopicMapping): void {
+  const payloadData = customData || this.topicData || this.rphService.getTopicData();
 
-    if (!payloadData || !payloadData.items || payloadData.items.length === 0) {
-      this.errorMessage = 'Tiada data topik disediakan untuk menjana RPH.';
-      return;
-    }
+  if (!payloadData || !payloadData.items || payloadData.items.length === 0) {
+    this.errorMessage = 'Tiada data topik disediakan untuk menjana RPH.';
+    return;
+  }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+  this.isLoading = true;
+  this.errorMessage = '';
 
-    const payload = {
-      ...payloadData,
-      language: this.selectedLanguage
-    };
+  const payload = {
+    ...payloadData,
+    language: this.selectedLanguage
+  };
 
-    console.log('🚀 Menghantar Payload ke Gemini AI:', payload);
+  console.log('🚀 Menghantar Payload ke Gemini AI:', payload);
 
-    this.rphService.generateRphFromGemini(payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res: any) => {
-          this.isLoading = false;
-          
-          // === LOG CONSOLE UNTUK SEMAK RESPON GEMINI ===
-          console.log('🤖 [GEMINI RAW RESPONSE]:', res);
+  this.rphService.generateRphFromGemini(payload)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        console.log('🤖 [GEMINI RAW RESPONSE]:', res);
 
-          let rawData = res?.data || res?.rph || res?.result || res;
+        // 1. Semak ralat dari API
+        if (res && res.status === 'error') {
+          console.error('❌ Ralat dari API Gemini:', res.message);
+          this.errorMessage = res.message || 'Gagal menerima maklum balas dari Gemini.';
+          this.rphList = [];
+          return;
+        }
 
-          // Jika Gemini mengembalikan JSON dalam bentuk teks string
-          if (typeof rawData === 'string') {
-            try {
-              rawData = JSON.parse(rawData);
-            } catch (e) {
-              console.warn('⚠️ Gagal parse JSON string dari Gemini, menggunakan teks mentah:', e);
-            }
+        // 2. Ambil tatasusunan data daripada res.data
+        let rawItems = res?.data || res?.rph || res;
+
+        // Jika data dalam bentuk JSON string
+        if (typeof rawItems === 'string') {
+          try {
+            const cleanedText = rawItems.replace(/```json/gi, '').replace(/```/g, '').trim();
+            const parsed = JSON.parse(cleanedText);
+            rawItems = parsed.data || parsed;
+          } catch (e) {
+            console.warn('⚠️ Gagal parse JSON string:', e);
           }
+        }
 
-          if (rawData) {
-            const items = Array.isArray(rawData) ? rawData : [rawData];
-            
-            // Pemetaan data supaya dipadankan terus ke rphPrintArea
-            this.rphList = items.map((item: any) => ({
-              hari: item.hari || item.Hari || '',
-              tarikh: item.tarikh || item.Tarikh || '',
-              minggu: item.minggu || item.Minggu || '',
-              tajuk: item.tajuk || item.Tajuk || '',
-              pelajaran_bidang: item.pelajaran_bidang || item.pelajaran || item['Pelajaran/Bidang'] || '',
-              isi: item.isi || item.Isi || '',
-              objektif: item.objektif || item.Objektif || '',
-              kelas_tahun: item.kelas_tahun || item.kelas || item['Kelas/Tahun'] || '',
-              aktiviti: item.aktiviti || item.Aktiviti || '',
-              masa: item.masa || item.Masa || '',
-              abm: item.abm || item.ABM || '',
-              nilai_murni: item.nilai_murni || item['Nilai Murni'] || '',
-              refleksi: item.refleksi || item.Refleksi || '',
-              catatan: item.catatan || item.Catatan || '',
+        if (Array.isArray(rawItems) && rawItems.length > 0) {
+          // 3. Pemetaan mengikut kunci sebenar daripada API Gemini
+          this.rphList = rawItems.map((item: any) => {
+            // Gabungkan aktiviti array menjadi string jika aktiviti_pdpc berbentuk array
+            let aktivitiText = '';
+            if (Array.isArray(item.aktiviti_pdpc)) {
+              aktivitiText = item.aktiviti_pdpc.join('\n');
+            } else if (Array.isArray(item.aktiviti)) {
+              aktivitiText = item.aktiviti.join('\n');
+            } else {
+              aktivitiText = item.aktiviti_pdpc || item.aktiviti || '';
+            }
+
+            // Gabungkan Masa Mula & Masa Tamat
+            let masaText = item.masa || '';
+            if (item.masa_mula && item.masa_tamat) {
+              masaText = `${item.masa_mula} - ${item.masa_tamat}`;
+            }
+
+            // Dapatkan Hari daripada Tarikh secara automatik (jika tiada medan hari)
+            let hariText = item.hari || item.Hari || '';
+            if (!hariText && item.tarikh) {
+              const dateObj = new Date(item.tarikh);
+              const daysInMs = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+              hariText = daysInMs[dateObj.getDay()] || '';
+            }
+
+            // Gabungkan Pelajaran / Bidang / Subject / Subtopic
+            const pelajaranBidangText = item.pelajaran_bidang || 
+              (item.subject && item.subtopic ? `${item.subject} (${item.subtopic})` : item.subject || item.subtopic || '');
+
+            return {
+              hari: hariText,
+              tarikh: item.tarikh || '',
+              minggu: item.minggu || '',
+              tajuk: item.topic || item.tajuk || '',
+              pelajaran_bidang: pelajaranBidangText,
+              isi: item.standard_pembelajaran || item.isi || item.kriteria_kejayaan || '',
+              objektif: item.objektif_pembelajaran || item.objektif || '',
+              kelas_tahun: item.kelas || item.kelas_tahun || '',
+              aktiviti: aktivitiText,
+              masa: masaText,
+              abm: item.bbm || item.abm || '',
+              nilai_murni: item.nilai_murni || '',
+              refleksi: item.refleksi || '',
+              catatan: item.catatan || '',
               tanda_tangan_guru: item.tanda_tangan_guru || '',
               ulasan_penyelia: item.ulasan_penyelia || ''
-            }));
+            };
+          });
 
-            console.log('✅ [DATA RPH DIPETA KAN KE PRINT AREA]:', this.rphList);
-          } else {
-            this.errorMessage = 'Gagal memproses jawapan daripada pelayan AI.';
-          }
-        },
-        error: (err: any) => {
-          this.isLoading = false;
-          console.error('❌ Ralat semasa memanggil Gemini AI:', err);
-          this.errorMessage = 'Berlaku ralat semasa menghubungi perkhidmatan Gemini.';
+          console.log('✅ [DATA RPH DIPETAKAN KE PRINT AREA]:', this.rphList);
+        } else {
+          this.errorMessage = 'Data RPH yang diterima tidak mengandungi senarai item yang sah.';
+          this.rphList = [];
         }
-      });
-  }
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        console.error('❌ Ralat HTTP semasa memanggil Gemini AI:', err);
+        this.errorMessage = 'Berlaku ralat rangkaian semasa menghubungi perkhidmatan Gemini.';
+        this.rphList = [];
+      }
+    });
+}
 
   tukarBahasa(lang: 'ms' | 'en' | 'ar' | 'jawi'): void {
     this.selectedLanguage = lang;

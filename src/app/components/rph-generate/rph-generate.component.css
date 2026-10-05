@@ -108,3 +108,34 @@
     border: 1px solid #000000 !important;
   }
 }
+/* Styling untuk Two-Way Binding Inputs */
+.editable-input, .editable-textarea {
+  width: 100%;
+  border: 1px dashed #cbd5e1;
+  background-color: transparent;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+.editable-input:focus, .editable-textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: #f8fafc;
+}
+
+.editable-textarea {
+  resize: vertical;
+}
+
+/* Sembunyikan garisan border input semasa cetakan PDF/Window Print */
+@media print {
+  .editable-input, .editable-textarea {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+}
