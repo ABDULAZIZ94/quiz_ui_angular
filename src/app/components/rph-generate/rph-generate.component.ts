@@ -44,7 +44,7 @@ export class RphGenerateComponent implements OnInit {
 
   ngOnInit(): void {
     // 1. Semak data dari @Input() atau memory RphService
-    let activeData = this.topicData || this.rphService.getTopicData();
+    const activeData = this.topicData || this.rphService.getTopicData();
 
     if (activeData && activeData.items && activeData.items.length > 0) {
       this.janaRph(activeData);
@@ -66,6 +66,8 @@ export class RphGenerateComponent implements OnInit {
       .subscribe({
         next: (csvItems: any[]) => {
           this.isLoading = false;
+          console.log('📄 Data CSV Diterima dari RphService:', csvItems);
+
           if (csvItems && csvItems.length > 0) {
             // Memetakan data CSV kepada struktur RphGeneratedItem
             this.rphList = csvItems.map(item => ({
@@ -90,7 +92,7 @@ export class RphGenerateComponent implements OnInit {
         },
         error: (err: any) => {
           this.isLoading = false;
-          console.error('Ralat menarik data dari RphService:', err);
+          console.error('❌ Ralat menarik data dari RphService:', err);
           this.errorMessage = 'Gagal menarik data daripada RphService.';
         }
       });
@@ -112,20 +114,59 @@ export class RphGenerateComponent implements OnInit {
       language: this.selectedLanguage
     };
 
+    console.log('🚀 Menghantar Payload ke Gemini AI:', payload);
+
     this.rphService.generateRphFromGemini(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: any) => {
           this.isLoading = false;
-          if (res && res.data) {
-            this.rphList = Array.isArray(res.data) ? res.data : [res.data];
+          
+          // === LOG CONSOLE UNTUK SEMAK RESPON GEMINI ===
+          console.log('🤖 [GEMINI RAW RESPONSE]:', res);
+
+          let rawData = res?.data || res?.rph || res?.result || res;
+
+          // Jika Gemini mengembalikan JSON dalam bentuk teks string
+          if (typeof rawData === 'string') {
+            try {
+              rawData = JSON.parse(rawData);
+            } catch (e) {
+              console.warn('⚠️ Gagal parse JSON string dari Gemini, menggunakan teks mentah:', e);
+            }
+          }
+
+          if (rawData) {
+            const items = Array.isArray(rawData) ? rawData : [rawData];
+            
+            // Pemetaan data supaya dipadankan terus ke rphPrintArea
+            this.rphList = items.map((item: any) => ({
+              hari: item.hari || item.Hari || '',
+              tarikh: item.tarikh || item.Tarikh || '',
+              minggu: item.minggu || item.Minggu || '',
+              tajuk: item.tajuk || item.Tajuk || '',
+              pelajaran_bidang: item.pelajaran_bidang || item.pelajaran || item['Pelajaran/Bidang'] || '',
+              isi: item.isi || item.Isi || '',
+              objektif: item.objektif || item.Objektif || '',
+              kelas_tahun: item.kelas_tahun || item.kelas || item['Kelas/Tahun'] || '',
+              aktiviti: item.aktiviti || item.Aktiviti || '',
+              masa: item.masa || item.Masa || '',
+              abm: item.abm || item.ABM || '',
+              nilai_murni: item.nilai_murni || item['Nilai Murni'] || '',
+              refleksi: item.refleksi || item.Refleksi || '',
+              catatan: item.catatan || item.Catatan || '',
+              tanda_tangan_guru: item.tanda_tangan_guru || '',
+              ulasan_penyelia: item.ulasan_penyelia || ''
+            }));
+
+            console.log('✅ [DATA RPH DIPETA KAN KE PRINT AREA]:', this.rphList);
           } else {
-            this.errorMessage = 'Gagal memproses jawapan dari pelayan AI.';
+            this.errorMessage = 'Gagal memproses jawapan daripada pelayan AI.';
           }
         },
         error: (err: any) => {
           this.isLoading = false;
-          console.error('Ralat Jana RPH:', err);
+          console.error('❌ Ralat semasa memanggil Gemini AI:', err);
           this.errorMessage = 'Berlaku ralat semasa menghubungi perkhidmatan Gemini.';
         }
       });

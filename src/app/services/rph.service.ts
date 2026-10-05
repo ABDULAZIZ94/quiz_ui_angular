@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, of } from 'rxjs';
+import { Observable, map, of, tap } from 'rxjs';
 
 export interface ScheduleItem {
   tarikh: string;
@@ -94,7 +94,7 @@ export class RphService {
     return of({ success: true, message: 'Topik berjaya disimpan ke memori lokal.' });
   }
 
-  /**
+/**
    * Menghantar ScheduleTopicMapping ke Apps Script untuk dijana oleh Gemini AI
    */
   generateRphFromGemini(data: ScheduleTopicMapping): Observable<any> {
@@ -105,7 +105,12 @@ export class RphService {
 
     return this.http.post(this.geminiApiUrl, JSON.stringify(payload), {
       headers: { 'Content-Type': 'text/plain' }
-    });
+    }).pipe(
+      tap((response: any) => {
+        // Log jawapan penuh daripada Gemini AI ke console
+        console.log('🤖 [Gemini AI Reply]:', response);
+      })
+    );
   }
 
   /**
