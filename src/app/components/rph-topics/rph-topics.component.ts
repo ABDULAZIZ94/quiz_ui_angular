@@ -208,4 +208,48 @@ export class RphTopicComponent implements OnInit {
     alert(`Topik berjaya diterapkan untuk semua slot ${this.bulkSubject}!`);
   }
 
+  // Dalam rph-topics.component.ts
+
+simpanSemuaTopic(): void {
+  // 1. Semak jika ada slot
+  if (!this.slotsWithTopics || this.slotsWithTopics.length === 0) {
+    alert('Tiada slot jadual untuk diteruskan.');
+    return;
+  }
+
+  // 2. Semak jika ada slot belum diisi topik (pilihan peringatan)
+  const unassignedCount = this.slotsWithTopics.filter(s => !s.topic || !s.topic.trim()).length;
+  if (unassignedCount > 0) {
+    const confirmProceed = confirm(`Terdapat ${unassignedCount} slot yang belum mempunyai topik. Adakah anda ingin teruskan?`);
+    if (!confirmProceed) return;
+  }
+
+  this.isSubmitting = true;
+  this.message = 'Memproses topik...';
+
+  // Formatkan payload khas mengikut perkhidmatan
+  const payload: ScheduleTopicMapping = {
+    schedule_id: this.selectedScheduleId || undefined,
+    user_id: this.userId,
+    nama_jadual: this.namaJadual || 'Jadual RPH',
+    items: this.slotsWithTopics.map(s => ({
+      slot_index: s.slot_index,
+      tarikh: s.tarikh,
+      kelas: s.kelas,
+      subject: s.subject,
+      masa_mula: s.masa_mula,
+      masa_tamat: s.masa_tamat,
+      topic: s.topic || '',
+      subtopic: s.subtopic || '',
+      standard_pembelajaran: s.standard_pembelajaran || ''
+    }))
+  };
+
+  // Reset flag submitting & panggil EventEmitter untuk ke Step 3
+  this.isSubmitting = false;
+  this.message = 'Topik berjaya diproses!';
+  
+  // Hantar payload penuh ke parent (rph-flow)
+  this.topicsSaved.emit(payload as any);
+}
 }

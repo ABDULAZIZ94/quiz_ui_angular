@@ -38,4 +38,6 @@ export class RphFlowComponent {
   setStep(step: number): void {
     this.currentStep = step;
   }
+
+  
 }

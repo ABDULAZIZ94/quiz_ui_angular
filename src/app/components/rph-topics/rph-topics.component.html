@@ -117,4 +117,13 @@
             </div>
         </div>
     </div>
+    <!-- Bahagian Action Footer di rph-topics.component.html -->
+    <div class="action-footer" *ngIf="slotsWithTopics && slotsWithTopics.length > 0">
+        <div *ngIf="message" class="alert-message">{{ message }}</div>
+    
+        <button type="button" class="btn-save" [disabled]="isSubmitting" (click)="simpanSemuaTopic()">
+            <span *ngIf="!isSubmitting">➡️ Selesai & Teruskan ke Jana RPH</span>
+            <span *ngIf="isSubmitting">⏳ Sedang Memproses...</span>
+        </button>
+    </div>
 </div>

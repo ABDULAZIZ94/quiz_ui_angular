@@ -49,6 +49,8 @@ export class RphGenerateComponent implements OnInit {
     }
   }
 
+  // Dalam rph-generate.component.ts
+
   janaRph(): void {
     if (!this.topicData || !this.topicData.items || this.topicData.items.length === 0) {
       this.errorMessage = 'Tiada data topik disediakan untuk menjana RPH.';
@@ -58,7 +60,6 @@ export class RphGenerateComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Tambah maklumat bahasa ke dalam payload
     const payload = {
       ...this.topicData,
       language: this.selectedLanguage
@@ -70,7 +71,6 @@ export class RphGenerateComponent implements OnInit {
         next: (res: any) => {
           this.isLoading = false;
           if (res && res.data) {
-            // Menerima senarai RPH hasil jana Gemini
             this.rphList = Array.isArray(res.data) ? res.data : [res.data];
           } else {
             this.errorMessage = 'Gagal memproses jawapan dari pelayan AI.';
