@@ -8,8 +8,8 @@ export interface ScheduleItem {
   subject: string;
   masa_mula: string;
   masa_tamat: string;
-  topic?: string;           // Ditambah untuk menyokong topik
-  subtopic?: string;        // Ditambah untuk menyokong subtopik/objektif
+  topic?: string;
+  subtopic?: string;
   standard_pembelajaran?: string;
 }
 
@@ -50,8 +50,26 @@ export interface ScheduleTopicMapping {
 export class RphService {
   private webAppUrl = 'https://script.google.com/macros/s/AKfycbyxmInszG_6orlVTsNUF4hOI2e7vgwy_D-HGq6pDKx6MQOso5U14BV9mHcjf5FatQktkg/exec';
   private csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=920483592&single=true&output=csv';
-
+  private geminiApiUrl = 'https://script.google.com/macros/s/AKfycbxu6jeqmwRyG3RCST1X8O-_kxAwB3Zh30xW0NYzwjLvMctg5qcY4MB-MDLatgzUmM7rKw/exec';
+  
   private http = inject(HttpClient);
+
+  // === PEMBOLEHUBAH SIMPANAN TEMPATAN (IN-MEMORY STATE) ===
+  private activeTopicData: ScheduleTopicMapping | null = null;
+
+  /**
+   * Menyimpan data topik terkini ke dalam memori Service
+   */
+  setTopicData(data: ScheduleTopicMapping): void {
+    this.activeTopicData = data;
+  }
+
+  /**
+   * Mengambil data topik yang tersimpan dari memori Service
+   */
+  getTopicData(): ScheduleTopicMapping | null {
+    return this.activeTopicData;
+  }
 
   /**
    * Menyimpan jadual ke Google Apps Script
@@ -63,9 +81,10 @@ export class RphService {
   }
 
   /**
-   * Menyimpan tetapan topik jadual RPH ke Google Apps Script
+   * Menyimpan tetapan topik jadual RPH ke Google Apps Script & Memori
    */
   simpanTopics(data: ScheduleTopicMapping): Observable<any> {
+    this.setTopicData(data); // Simpan terus ke memori lokal
     const payload = {
       action: 'save_topics',
       ...data
@@ -77,7 +96,6 @@ export class RphService {
 
   /**
    * Menghantar ScheduleTopicMapping ke Apps Script untuk dijana oleh Gemini AI
-   * Mengatasi isu CORS dengan menggunakan 'Content-Type': 'text/plain'
    */
   generateRphFromGemini(data: ScheduleTopicMapping): Observable<any> {
     const payload = {
@@ -85,14 +103,13 @@ export class RphService {
       ...data
     };
 
-    return this.http.post(this.webAppUrl, JSON.stringify(payload), {
+    return this.http.post(this.geminiApiUrl, JSON.stringify(payload), {
       headers: { 'Content-Type': 'text/plain' }
     });
   }
 
   /**
    * Mengambil data CSV daripada pautan terbitan Google Sheets
-   * dan menukarkannya kepada Array of Objects
    */
   getPublishedCsvData(): Observable<any[]> {
     return this.http.get(this.csvUrl, { responseType: 'text' }).pipe(

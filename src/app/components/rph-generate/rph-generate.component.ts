@@ -39,20 +39,26 @@ export class RphGenerateComponent implements OnInit {
   selectedLanguage: 'ms' | 'en' | 'ar' | 'jawi' = 'jawi';
   isLoading: boolean = false;
   errorMessage: string = '';
-  
+
   // Senarai RPH yang dijana dari Gemini
   rphList: RphGeneratedItem[] = [];
 
   ngOnInit(): void {
-    if (this.topicData) {
-      this.janaRph();
+    // Ambil data dari @Input() atau dapatkan dari RphService
+    const activeData = this.topicData || this.rphService.getTopicData();
+
+    if (activeData && activeData.items && activeData.items.length > 0) {
+      this.janaRph(activeData);
+    } else {
+      this.errorMessage = 'Tiada data topik dijumpai. Sila pastikan anda telah menyimpan topik di Langkah 2.';
     }
   }
 
-  // Dalam rph-generate.component.ts
+  janaRph(customData?: ScheduleTopicMapping): void {
+    // Gunakan parameter, atau property topicData, atau ambil terus dari Service
+    const payloadData = customData || this.topicData || this.rphService.getTopicData();
 
-  janaRph(): void {
-    if (!this.topicData || !this.topicData.items || this.topicData.items.length === 0) {
+    if (!payloadData || !payloadData.items || payloadData.items.length === 0) {
       this.errorMessage = 'Tiada data topik disediakan untuk menjana RPH.';
       return;
     }
@@ -61,7 +67,7 @@ export class RphGenerateComponent implements OnInit {
     this.errorMessage = '';
 
     const payload = {
-      ...this.topicData,
+      ...payloadData,
       language: this.selectedLanguage
     };
 
@@ -86,8 +92,9 @@ export class RphGenerateComponent implements OnInit {
 
   tukarBahasa(lang: 'ms' | 'en' | 'ar' | 'jawi'): void {
     this.selectedLanguage = lang;
-    if (this.topicData) {
-      this.janaRph();
+    const activeData = this.topicData || this.rphService.getTopicData();
+    if (activeData) {
+      this.janaRph(activeData);
     }
   }
 
