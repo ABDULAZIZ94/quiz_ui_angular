@@ -1,5 +1,5 @@
 <div class="rph-container">
-    <!-- Panel Kawalan & Navigasi -->
+    <!-- Panel Kawalan Navigasi & Butang Eksport -->
     <div class="control-panel no-print">
         <div class="lang-selector">
             <label><strong>Pilih Bahasa / اختر اللغة:</strong></label>
@@ -14,16 +14,14 @@
         </div>
 
         <div class="action-buttons">
-            <!-- BUTANG SELESAI & JANA -->
             <button type="button" class="btn-nav btn-finish" (click)="janaRph()" [disabled]="isLoading">
                 <span *ngIf="!isLoading">🚀 Selesai & Jana</span>
                 <span *ngIf="isLoading">⏳ Sedang Menjana...</span>
             </button>
 
-            <!-- BUTANG EXPORT -->
             <button type="button" class="btn-export btn-pdf" (click)="exportToPdf()"
                 [disabled]="isLoading || rphList.length === 0">
-                📄 Simpan PDF
+                📄 Simpan PDF / Cetak
             </button>
             <button type="button" class="btn-export btn-word" (click)="exportToWord()"
                 [disabled]="isLoading || rphList.length === 0">
@@ -43,6 +41,108 @@
         {{ errorMessage }}
     </div>
 
-    <!-- Paparan RPH -->
-    <!-- ... (Kekalkan templat jadual RPH seperti sebelumnya) ... -->
+    <!-- KAWASAN CETAKAN & PAPARAN TEMPLAT RPH JAWI -->
+    <div id="rph-print-area" *ngIf="!isLoading && rphList.length > 0"
+        [dir]="(selectedLanguage === 'jawi' || selectedLanguage === 'ar') ? 'rtl' : 'ltr'">
+
+        <div *ngFor="let rph of rphList" class="rph-paper-page">
+            <h2 class="header-title">رنچڠن فڠجرن هارين</h2>
+
+            <table class="rph-template-table">
+                <!-- Baris 1: Hari, Tarikh, Minggu -->
+                <tr>
+                    <td width="33%"><strong>هاري :</strong> {{ rph.hari }}</td>
+                    <td width="33%"><strong>تاريخ :</strong> {{ rph.tarikh }}</td>
+                    <td width="34%"><strong>ميڠݢو :</strong> {{ rph.minggu }}</td>
+                </tr>
+
+                <!-- Baris 2: Tajuk -->
+                <tr>
+                    <td colspan="3"><strong>تاجوق :</strong> {{ rph.tajuk }}</td>
+                </tr>
+
+                <!-- Baris 3: Pelajaran / Bidang -->
+                <tr>
+                    <td colspan="3"><strong>فلاجرن / بيدڠ :</strong> {{ rph.pelajaran_bidang }}</td>
+                </tr>
+
+                <!-- Baris 4: Isi -->
+                <tr>
+                    <td colspan="3" class="multiline-cell">
+                        <strong>ايسي :</strong>
+                        <p>{{ rph.isi }}</p>
+                    </td>
+                </tr>
+
+                <!-- Baris 5: Objektif -->
+                <tr>
+                    <td colspan="3" class="multiline-cell">
+                        <strong>اوبجيقتيف :</strong>
+                        <p>{{ rph.objektif }}</p>
+                    </td>
+                </tr>
+
+                <!-- Baris 6: Kelas / Tahun -->
+                <tr>
+                    <td colspan="3"><strong>كلس / تاهون :</strong> {{ rph.kelas_tahun }}</td>
+                </tr>
+
+                <!-- Baris 7: Aktiviti -->
+                <tr>
+                    <td colspan="3" class="multiline-cell">
+                        <strong>اكتيفيتي :</strong>
+                        <p>{{ rph.aktiviti }}</p>
+                    </td>
+                </tr>
+
+                <!-- Baris 8: Masa & ABM -->
+                <tr>
+                    <td width="40%"><strong>ماس :</strong> {{ rph.masa }}</td>
+                    <td colspan="2" width="60%"><strong>اءى بي عيم :</strong> {{ rph.abm }}</td>
+                </tr>
+
+                <!-- Baris 9: Nilai Murni -->
+                <tr>
+                    <td colspan="3"><strong>نيلاي مورني :</strong> {{ rph.nilai_murni }}</td>
+                </tr>
+
+                <!-- Baris 10: Refleksi -->
+                <tr>
+                    <td colspan="3" class="multiline-cell">
+                        <strong>ريفليقسي :</strong>
+                        <p>{{ rph.refleksi }}</p>
+                    </td>
+                </tr>
+
+                <!-- Baris 11: Catatan -->
+                <tr>
+                    <td colspan="3" class="multiline-cell">
+                        <strong>چاتتن :</strong>
+                        <p>{{ rph.catatan }}</p>
+                    </td>
+                </tr>
+
+                <!-- Baris 12: Tanda Tangan Guru -->
+                <tr>
+                    <td colspan="3" class="signature-cell">
+                        <strong>تندا تاڠن ݢور :</strong>
+                        <div class="signature-space">
+                            {{ rph.tanda_tangan_guru || '' }}
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Baris 13: Ulasan & Tanda Tangan Penyelia -->
+                <tr>
+                    <td colspan="3" class="supervisor-cell">
+                        <strong>اولسن دان تندا تاڠن فڽليا دان چوڤ :</strong>
+                        <div class="supervisor-space">
+                            <p>{{ rph.ulasan_penyelia || '' }}</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
 </div>
