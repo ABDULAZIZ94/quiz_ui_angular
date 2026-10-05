@@ -41,26 +41,26 @@
         {{ errorMessage }}
     </div>
 
-    <!-- KAWASAN CETAKAN & PAPARAN TEMPLAT RPH JAWI -->
+    <!-- KAWASAN CETAKAN & PAPARAN TEMPLAT RPH DYNAMIC -->
     <div id="rph-print-area" *ngIf="!isLoading && rphList.length > 0"
         [dir]="(selectedLanguage === 'jawi' || selectedLanguage === 'ar') ? 'rtl' : 'ltr'">
 
         <div *ngFor="let rph of rphList" class="rph-paper-page">
-            <h2 class="header-title">رنچڠن فڠجرن هارين</h2>
+            <h2 class="header-title">{{ lbl.headerTitle }}</h2>
 
             <table class="rph-template-table">
                 <!-- Baris 1: Hari, Tarikh, Minggu -->
                 <tr>
                     <td width="33%">
-                        <strong>هاري :</strong>
+                        <strong>{{ lbl.hari }}</strong>
                         <input type="text" [(ngModel)]="rph.hari" class="editable-input" />
                     </td>
                     <td width="33%">
-                        <strong>تاريخ :</strong>
+                        <strong>{{ lbl.tarikh }}</strong>
                         <input type="text" [(ngModel)]="rph.tarikh" class="editable-input" />
                     </td>
                     <td width="34%">
-                        <strong>ميڠݢو :</strong>
+                        <strong>{{ lbl.minggu }}</strong>
                         <input type="text" [(ngModel)]="rph.minggu" class="editable-input" />
                     </td>
                 </tr>
@@ -68,7 +68,7 @@
                 <!-- Baris 2: Tajuk -->
                 <tr>
                     <td colspan="3">
-                        <strong>تاجوق :</strong>
+                        <strong>{{ lbl.tajuk }}</strong>
                         <input type="text" [(ngModel)]="rph.tajuk" class="editable-input" />
                     </td>
                 </tr>
@@ -76,7 +76,7 @@
                 <!-- Baris 3: Pelajaran / Bidang -->
                 <tr>
                     <td colspan="3">
-                        <strong>فلاجرن / بيدڠ :</strong>
+                        <strong>{{ lbl.pelajaranBidang }}</strong>
                         <input type="text" [(ngModel)]="rph.pelajaran_bidang" class="editable-input" />
                     </td>
                 </tr>
@@ -84,7 +84,7 @@
                 <!-- Baris 4: Isi -->
                 <tr>
                     <td colspan="3" class="multiline-cell">
-                        <strong>ايسي :</strong>
+                        <strong>{{ lbl.isi }}</strong>
                         <textarea [(ngModel)]="rph.isi" class="editable-textarea" rows="3"></textarea>
                     </td>
                 </tr>
@@ -92,7 +92,7 @@
                 <!-- Baris 5: Objektif -->
                 <tr>
                     <td colspan="3" class="multiline-cell">
-                        <strong>اوبجيقتيف :</strong>
+                        <strong>{{ lbl.objektif }}</strong>
                         <textarea [(ngModel)]="rph.objektif" class="editable-textarea" rows="3"></textarea>
                     </td>
                 </tr>
@@ -100,7 +100,7 @@
                 <!-- Baris 6: Kelas / Tahun -->
                 <tr>
                     <td colspan="3">
-                        <strong>كلس / تاهون :</strong>
+                        <strong>{{ lbl.kelasTahun }}</strong>
                         <input type="text" [(ngModel)]="rph.kelas_tahun" class="editable-input" />
                     </td>
                 </tr>
@@ -108,7 +108,7 @@
                 <!-- Baris 7: Aktiviti -->
                 <tr>
                     <td colspan="3" class="multiline-cell">
-                        <strong>اكتيفيتي :</strong>
+                        <strong>{{ lbl.aktiviti }}</strong>
                         <textarea [(ngModel)]="rph.aktiviti" class="editable-textarea" rows="6"></textarea>
                     </td>
                 </tr>
@@ -116,11 +116,11 @@
                 <!-- Baris 8: Masa & ABM -->
                 <tr>
                     <td width="40%">
-                        <strong>ماس :</strong>
+                        <strong>{{ lbl.masa }}</strong>
                         <input type="text" [(ngModel)]="rph.masa" class="editable-input" />
                     </td>
                     <td colspan="2" width="60%">
-                        <strong>اءى بي عيم :</strong>
+                        <strong>{{ lbl.abm }}</strong>
                         <input type="text" [(ngModel)]="rph.abm" class="editable-input" />
                     </td>
                 </tr>
@@ -128,7 +128,7 @@
                 <!-- Baris 9: Nilai Murni -->
                 <tr>
                     <td colspan="3">
-                        <strong>نيلاي مورني :</strong>
+                        <strong>{{ lbl.nilaiMurni }}</strong>
                         <input type="text" [(ngModel)]="rph.nilai_murni" class="editable-input" />
                     </td>
                 </tr>
@@ -136,7 +136,7 @@
                 <!-- Baris 10: Refleksi -->
                 <tr>
                     <td colspan="3" class="multiline-cell">
-                        <strong>ريفليقسي :</strong>
+                        <strong>{{ lbl.refleksi }}</strong>
                         <textarea [(ngModel)]="rph.refleksi" class="editable-textarea" rows="3"></textarea>
                     </td>
                 </tr>
@@ -144,7 +144,7 @@
                 <!-- Baris 11: Catatan -->
                 <tr>
                     <td colspan="3" class="multiline-cell">
-                        <strong>چاتتن :</strong>
+                        <strong>{{ lbl.catatan }}</strong>
                         <textarea [(ngModel)]="rph.catatan" class="editable-textarea" rows="2"></textarea>
                     </td>
                 </tr>
@@ -152,10 +152,10 @@
                 <!-- Baris 12: Tanda Tangan Guru -->
                 <tr>
                     <td colspan="3" class="signature-cell">
-                        <strong>تندا تاڠن ݢور :</strong>
+                        <strong>{{ lbl.tandaTanganGuru }}</strong>
                         <div class="signature-space">
                             <input type="text" [(ngModel)]="rph.tanda_tangan_guru" class="editable-input"
-                                placeholder="Nama / Tanda Tangan" />
+                                [placeholder]="lbl.placeholderTtGuru" />
                         </div>
                     </td>
                 </tr>
@@ -163,10 +163,10 @@
                 <!-- Baris 13: Ulasan & Tanda Tangan Penyelia -->
                 <tr>
                     <td colspan="3" class="supervisor-cell">
-                        <strong>اولسن دان تندا تاڠن فڽليا دان چوڤ :</strong>
+                        <strong>{{ lbl.ulasanPenyelia }}</strong>
                         <div class="supervisor-space">
                             <textarea [(ngModel)]="rph.ulasan_penyelia" class="editable-textarea" rows="2"
-                                placeholder="Ulasan Penyelia"></textarea>
+                                [placeholder]="lbl.placeholderUlasan"></textarea>
                         </div>
                     </td>
                 </tr>
