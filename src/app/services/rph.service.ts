@@ -26,7 +26,7 @@ export interface RphScheduleData {
   end_date: string;
 }
 
-// Interface baharu khas untuk penetapan topik
+// Interface khas untuk penetapan topik
 export interface ScheduleTopicMapping {
   schedule_id?: string;
   user_id: number;
@@ -70,6 +70,21 @@ export class RphService {
       action: 'save_topics',
       ...data
     };
+    return this.http.post(this.webAppUrl, JSON.stringify(payload), {
+      headers: { 'Content-Type': 'text/plain' }
+    });
+  }
+
+  /**
+   * Menghantar ScheduleTopicMapping ke Apps Script untuk dijana oleh Gemini AI
+   * Mengatasi isu CORS dengan menggunakan 'Content-Type': 'text/plain'
+   */
+  generateRphFromGemini(data: ScheduleTopicMapping): Observable<any> {
+    const payload = {
+      action: 'generate_rph',
+      ...data
+    };
+
     return this.http.post(this.webAppUrl, JSON.stringify(payload), {
       headers: { 'Content-Type': 'text/plain' }
     });

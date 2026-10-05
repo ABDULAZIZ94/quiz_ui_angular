@@ -1,0 +1,131 @@
+<div class="rph-container">
+    <!-- Kawalan Atas (Aksesibiliti & Pilihan) -->
+    <div class="control-panel no-print">
+        <div class="lang-selector">
+            <label><strong>Pilih Bahasa / اختر اللغة:</strong></label>
+            <button type="button" [class.active]="selectedLanguage === 'jawi'" (click)="tukarBahasa('jawi')">جاوي
+                (Jawi)</button>
+            <button type="button" [class.active]="selectedLanguage === 'ar'" (click)="tukarBahasa('ar')">العربية
+                (Arab)</button>
+            <button type="button" [class.active]="selectedLanguage === 'ms'" (click)="tukarBahasa('ms')">Bahasa
+                Melayu</button>
+            <button type="button" [class.active]="selectedLanguage === 'en'"
+                (click)="tukarBahasa('en')">English</button>
+        </div>
+
+        <div class="action-buttons">
+            <button type="button" class="btn-export btn-pdf" (click)="exportToPdf()"
+                [disabled]="isLoading || rphList.length === 0">
+                📄 Simpan PDF
+            </button>
+            <button type="button" class="btn-export btn-word" (click)="exportToWord()"
+                [disabled]="isLoading || rphList.length === 0">
+                📝 Simpan Word (.doc)
+            </button>
+        </div>
+    </div>
+
+    <!-- Indikator Loading -->
+    <div *ngIf="isLoading" class="loading-state no-print">
+        <div class="spinner"></div>
+        <p>Sedang menjana RPH dengan Gemini AI...</p>
+    </div>
+
+    <!-- Mesej Ralat -->
+    <div *ngIf="errorMessage" class="error-alert no-print">
+        {{ errorMessage }}
+    </div>
+
+    <!-- Kawasan Paparan Templat RPH -->
+    <div id="rph-print-area" *ngIf="!isLoading && rphList.length > 0"
+        [attr.dir]="(selectedLanguage === 'ar' || selectedLanguage === 'jawi') ? 'rtl' : 'ltr'">
+
+        <div *ngFor="let item of rphList; let i = index" class="rph-page-sheet">
+
+            <!-- Tajuk Utam Templat -->
+            <h2 class="rph-header-title">
+                <ng-container [ngSwitch]="selectedLanguage">
+                    <span *ngSwitchCase="'jawi'">رنچڠن فڠجرن هارين</span>
+                    <span *ngSwitchCase="'ar'">خطة التدريس اليومية</span>
+                    <span *ngSwitchCase="'en'">DAILY LESSON PLAN</span>
+                    <span *ngSwitchDefault>RANCANGAN PENGAJARAN HARIAN</span>
+                </ng-container>
+            </h2>
+
+            <!-- Jadual Utama Templat RPH -->
+            <table class="rph-table">
+                <tbody>
+                    <tr>
+                        <td width="33%"><strong>هاري / Hari:</strong> {{ item.hari }}</td>
+                        <td width="33%"><strong>تاريخ / Tarikh:</strong> {{ item.tarikh }}</td>
+                        <td width="34%"><strong>ميڠݢو / Minggu:</strong> {{ item.minggu }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>تاجوق / Tajuk:</strong> {{ item.tajuk }}</td>
+                        <td><strong>كلس / تاهون / Kelas:</strong> {{ item.kelas_tahun }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>فلاجرن / بيدڠ / Bidang:</strong> {{ item.pelajaran_bidang }}</td>
+                        <td><strong>ماس / Masa:</strong> {{ item.masa }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>ايسي / Isi Kandungan:</strong>
+                            <p>{{ item.isi }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>اوبجيقتيف / Objektif:</strong>
+                            <p>{{ item.objektif }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>اكتيفيتي / Aktiviti:</strong>
+                            <p style="white-space: pre-line;">{{ item.aktiviti }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>اءى بي عيم / ABM / BBM:</strong> {{ item.abm }}</td>
+                        <td><strong>نيلاي مورني / Nilai Murni:</strong> {{ item.nilai_murni }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>ريفليقسي / Refleksi:</strong>
+                            <p>{{ item.refleksi }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>چاتتن / Catatan:</strong>
+                            <p>{{ item.catatan }}</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Bahagian Tanda Tangan & Ulasan -->
+            <table class="rph-table signature-table">
+                <tbody>
+                    <tr>
+                        <td width="50%" class="signature-box">
+                            <p><strong>تندا تاڠن ݢورو / Tanda Tangan Guru:</strong></p>
+                            <div class="sig-space"></div>
+                            <p>{{ item.tanda_tangan_guru || '..............................................' }}</p>
+                        </td>
+                        <td width="50%" class="signature-box">
+                            <p><strong>اولسن، تندا تاڠن فڽليا دان چوڤ / Ulasan & Cop Penyelia:</strong></p>
+                            <p class="ulasan-text">{{ item.ulasan_penyelia || '' }}</p>
+                            <div class="sig-space"></div>
+                            <p>..............................................</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="page-break" *ngIf="i < rphList.length - 1"></div>
+        </div>
+
+    </div>
+</div>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RphScheduleComponent } from '../rphschedule/rph-schedule.component';
 import { RphTopicComponent } from '../rph-topics/rph-topics.component';
+import { RphGenerateComponent } from '../rph-generate/rph-generate.component';
 
 @Component({
   selector: 'app-rph-flow',
@@ -10,6 +11,7 @@ import { RphTopicComponent } from '../rph-topics/rph-topics.component';
     CommonModule,
     RphScheduleComponent, // Mengimport komponen Jadual (Flow 1)
     RphTopicComponent,    // Mengimport komponen Topik (Flow 2)
+    RphGenerateComponent,  // Mengimport komponen Jana RPH (Flow 3)
   ],
   templateUrl: './rph-flow.component.html',
   styleUrls: ['./rph-flow.component.css']
