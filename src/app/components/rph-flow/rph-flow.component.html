@@ -1,0 +1,70 @@
+<div class="flow-container">
+    <h2>Aliran Pengurusan RPH (RPH Flow)</h2>
+
+    <!-- Indikator Langkah (Stepper Header) -->
+    <div class="stepper-header">
+        <div class="step-item" [class.active]="currentStep === 1" [class.completed]="currentStep > 1"
+            (click)="setStep(1)">
+            <div class="step-number">1</div>
+            <div class="step-label">Jadual (Schedule)</div>
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step-item" [class.active]="currentStep === 2" [class.completed]="currentStep > 2"
+            (click)="setStep(2)">
+            <div class="step-number">2</div>
+            <div class="step-label">Topik (Topic)</div>
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step-item" [class.active]="currentStep === 3" (click)="setStep(3)">
+            <div class="step-number">3</div>
+            <div class="step-label">Jana RPH (Generate RPH)</div>
+        </div>
+    </div>
+
+    <!-- Kandungan Langkah -->
+    <div class="flow-content">
+
+        <!-- FLOW 1: SCHEDULE -->
+        <div *ngIf="currentStep === 1" class="step-pane">
+            <app-rph-schedule></app-rph-schedule>
+        </div>
+
+        <!-- FLOW 2: TOPIC -->
+        <div *ngIf="currentStep === 2" class="step-pane">
+            <h3>Langkah 2: Tetapan Topik RPH</h3>
+            <p>Pilih atau urus topik untuk setiap slot jadual yang telah ditetapkan.</p>
+            <!-- Masukkan komponen atau form topik di sini -->
+            <app-rph-topics></app-rph-topics>
+        </div>
+
+        <!-- FLOW 3: GENERATE RPH -->
+        <div *ngIf="currentStep === 3" class="step-pane">
+            <h3>Langkah 3: Jana RPH Lengkap</h3>
+            <p>Semak maklumat dan jana Rancangan Pengajaran Harian (RPH).</p>
+            <!-- Masukkan komponen atau fungsi Jana RPH di sini -->
+            <div class="placeholder-card">
+                <p>⚡ <em>Fungsi Jana RPH akan dipaparkan di sini.</em></p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bawah: Kawalan Navigasi -->
+    <div class="flow-footer">
+        <button type="button" class="btn-nav btn-prev" (click)="prevStep()" [disabled]="currentStep === 1">
+            ⬅️ Kembali
+        </button>
+
+        <button type="button" class="btn-nav btn-next" (click)="nextStep()" *ngIf="currentStep < 3">
+            Seterusnya ➡️
+        </button>
+
+        <button type="button" class="btn-nav btn-finish" *ngIf="currentStep === 3">
+            🚀 Selesai & Jana
+        </button>
+    </div>
+</div>

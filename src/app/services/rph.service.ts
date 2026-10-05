@@ -8,6 +8,9 @@ export interface ScheduleItem {
   subject: string;
   masa_mula: string;
   masa_tamat: string;
+  topic?: string;           // Ditambah untuk menyokong topik
+  subtopic?: string;        // Ditambah untuk menyokong subtopik/objektif
+  standard_pembelajaran?: string;
 }
 
 export interface ScheduleJson {
@@ -21,6 +24,24 @@ export interface RphScheduleData {
   schedule: ScheduleJson;
   start_date: string;
   end_date: string;
+}
+
+// Interface baharu khas untuk penetapan topik
+export interface ScheduleTopicMapping {
+  schedule_id?: string;
+  user_id: number;
+  nama_jadual: string;
+  items: {
+    slot_index: number;
+    tarikh: string;
+    kelas: string;
+    subject: string;
+    masa_mula: string;
+    masa_tamat: string;
+    topic: string;
+    subtopic: string;
+    standard_pembelajaran: string;
+  }[];
 }
 
 @Injectable({
@@ -42,6 +63,19 @@ export class RphService {
   }
 
   /**
+   * Menyimpan tetapan topik jadual RPH ke Google Apps Script
+   */
+  simpanTopics(data: ScheduleTopicMapping): Observable<any> {
+    const payload = {
+      action: 'save_topics',
+      ...data
+    };
+    return this.http.post(this.webAppUrl, JSON.stringify(payload), {
+      headers: { 'Content-Type': 'text/plain' }
+    });
+  }
+
+  /**
    * Mengambil data CSV daripada pautan terbitan Google Sheets
    * dan menukarkannya kepada Array of Objects
    */
@@ -54,23 +88,17 @@ export class RphService {
   /**
    * Helper function untuk memproses/parse baris CSV kepada Objek JSON
    */
-/**
-   * Helper function untuk memproses/parse baris CSV kepada Objek JSON
-   * Boleh mengendalikan JSON Array/Object yang kompleks & multiline di dalam lajur CSV
-   */
   private parseCsvToObjects(csvText: string): any[] {
     if (!csvText) return [];
 
     const rows = this.parseCsvRows(csvText);
     if (rows.length < 2) return [];
 
-    // Baris pertama ialah headers (lajur)
     const headers = rows[0].map(h => h.trim());
     const result: any[] = [];
 
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      // Abaikan baris kosong
       if (row.length === 0 || (row.length === 1 && !row[0].trim())) continue;
 
       const rowObject: any = {};
@@ -85,8 +113,7 @@ export class RphService {
   }
 
   /**
-   * CSV Parser State Machine:
-   * Memecahkan CSV mengikut lajur & baris dengan betul walaupun ada koma atau newlines dalam JSON
+   * CSV Parser State Machine
    */
   private parseCsvRows(text: string): string[][] {
     const p: string[][] = [[]];
@@ -99,21 +126,17 @@ export class RphService {
 
       if (c === '"') {
         if (inQuotes && nextC === '"') {
-          // Escaped quote ("" -> ")
           curCell += '"';
-          i++; // langkau quote seterusnya
+          i++;
         } else {
-          // Buka atau tutup petik
           inQuotes = !inQuotes;
         }
       } else if (c === ',' && !inQuotes) {
-        // Tamat lajur/cell
         p[p.length - 1].push(curCell);
         curCell = '';
       } else if ((c === '\r' || c === '\n') && !inQuotes) {
-        // Tamat baris CSV
         if (c === '\r' && nextC === '\n') {
-          i++; // langkau \n jika \r\n
+          i++;
         }
         p[p.length - 1].push(curCell);
         curCell = '';
@@ -123,7 +146,6 @@ export class RphService {
       }
     }
 
-    // Masukkan sel terakhir
     if (curCell !== '' || p[p.length - 1].length > 0) {
       p[p.length - 1].push(curCell);
     }

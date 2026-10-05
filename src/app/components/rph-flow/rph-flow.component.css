@@ -1,0 +1,118 @@
+.flow-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: Arial, sans-serif;
+}
+
+/* Stepper Navigation */
+.stepper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding: 0 10px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.step-item.active {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.step-item.completed .step-number {
+  background-color: #2e7d32;
+  color: #fff;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.step-item.active .step-number {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.step-label {
+  font-size: 15px;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin: 0 16px;
+}
+
+/* Content Area */
+.flow-content {
+  min-height: 300px;
+  padding: 16px 0;
+}
+
+.placeholder-card {
+  padding: 40px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  text-align: center;
+  color: #666;
+  background-color: #fafafa;
+}
+
+/* Footer Navigation Buttons */
+.flow-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.btn-nav {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-prev {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-next {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.btn-finish {
+  background-color: #2e7d32;
+  color: #fff;
+}

@@ -1,0 +1,130 @@
+<div class="topic-container">
+    <div class="header-section">
+        <h2>2. Tetapan Topik Bagi Setiap Subjek</h2>
+        <p class="subtitle">Tetapkan topik, subtopik, dan standard pembelajaran bagi setiap slot mengajar dalam jadual.
+        </p>
+    </div>
+
+    <!-- Pilihan Jadual jika tiada input automatik -->
+    <div class="card selector-card" *ngIf="!selectedSchedule">
+        <label class="form-label">Pilih Jadual RPH yang Diterbitkan:</label>
+        <div class="dropdown-wrapper">
+            <input type="text" class="form-input" placeholder="Cari mengikut nama jadual, ID atau subjek..."
+                [(ngModel)]="searchQuery" (input)="onSearchChange()" (focus)="isDropdownOpen = true" />
+            <button type="button" class="btn-dropdown-toggle" (click)="toggleDropdown()">▼</button>
+
+            <div class="dropdown-menu" *ngIf="isDropdownOpen">
+                <div *ngIf="isLoadingCsv" class="dropdown-loading">Membaca data jadual...</div>
+                <div *ngIf="!isLoadingCsv && filteredPublishedSchedules.length === 0" class="dropdown-empty">Tiada rekod
+                    ditemui</div>
+
+                <div *ngFor="let opt of filteredPublishedSchedules" class="dropdown-item"
+                    (click)="pilihRekodJadual(opt)">
+                    <strong>{{ opt.nama_jadual }}</strong>
+                    <span class="badge-id">ID: {{ opt.id }}</span>
+                    <small *ngIf="opt.start_date"> ({{ opt.start_date }} - {{ opt.end_date }})</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bar Kawalan Penapis Subjek & Aksi Pukal -->
+    <div class="control-bar card" *ngIf="slotsWithTopics.length > 0">
+        <div class="filter-group">
+            <label>Tapis Subjek:</label>
+            <select [(ngModel)]="selectedSubjectFilter" class="form-select">
+                <option value="ALL">-- Semua Subjek ({{ slotsWithTopics.length }} slot) --</option>
+                <option *ngFor="let subj of availableSubjects" [value]="subj">{{ subj }}</option>
+            </select>
+        </div>
+
+        <div class="bulk-actions" *ngIf="selectedSubjectFilter !== 'ALL'">
+            <button type="button" class="btn-bulk" (click)="openBulkApply(selectedSubjectFilter)">
+                ⚡ Isi Topik Pukal untuk "{{ selectedSubjectFilter }}"
+            </button>
+        </div>
+    </div>
+
+    <!-- Senarai Slot Mengajar & Isian Topik -->
+    <div class="slots-list" *ngIf="slotsWithTopics.length > 0">
+        <div *ngFor="let slot of filteredSlots; let i = index" class="slot-card card"
+            [class.has-topic]="slot.topic.trim().length > 0">
+
+            <div class="slot-header">
+                <div class="slot-meta">
+                    <span class="slot-badge">Slot #{{ slot.slot_index }}</span>
+                    <span class="slot-subject">{{ slot.subject }}</span>
+                    <span class="slot-class">Kelas: {{ slot.kelas }}</span>
+                </div>
+                <div class="slot-time">
+                    📅 {{ slot.tarikh || 'Tiada Tarikh' }} | ⏰ {{ slot.masa_mula }} - {{ slot.masa_tamat }}
+                </div>
+            </div>
+
+            <div class="slot-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="required-label">Tajuk / Topik Utama:</label>
+                        <input type="text" class="form-input" placeholder="Contoh: Bab 1 - Nombor Bulat dan Operasi"
+                            [(ngModel)]="slot.topic" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subtopik / Tajuk Kecil:</label>
+                        <input type="text" class="form-input" placeholder="Contoh: 1.1 Penambahan hingga 100,000"
+                            [(ngModel)]="slot.subtopic" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Standard Pembelajaran / SK/SP:</label>
+                        <input type="text" class="form-input" placeholder="Contoh: 1.1.1 Membilang dan menulis nombor"
+                            [(ngModel)]="slot.standard_pembelajaran" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="slotsWithTopics.length === 0" class="empty-state card">
+        <p>⚠️ Tiada slot jadual dimuatkan. Sila pilih jadual di atas atau lengkapkan Langkah 1 terlebih dahulu.</p>
+    </div>
+
+    <!-- Mesej & Butang Simpan -->
+    <div class="action-footer" *ngIf="slotsWithTopics.length > 0">
+        <div *ngIf="message" class="alert-message">{{ message }}</div>
+
+        <button type="button" class="btn-save" (click)="simpanSemuaTopic()" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">💾 Simpan Tetapan Topik</span>
+            <span *ngIf="isSubmitting">Sedang Menyimpan...</span>
+        </button>
+    </div>
+
+    <!-- Modal Pukal (Bulk Apply Modal) -->
+    <div class="modal-overlay" *ngIf="isBulkModalOpen">
+        <div class="modal-card">
+            <h3>Guna Topik Pukal untuk {{ bulkSubject }}</h3>
+            <p class="modal-subtitle">Topik ini akan diterapkan kepada semua slot bagi subjek ini.</p>
+
+            <div class="form-group">
+                <label>Topik Utama:</label>
+                <input type="text" class="form-input" [(ngModel)]="bulkTopic"
+                    placeholder="Isi topik untuk semua slot..." />
+            </div>
+
+            <div class="form-group">
+                <label>Subtopik (Opsional):</label>
+                <input type="text" class="form-input" [(ngModel)]="bulkSubtopic" placeholder="Isi subtopik..." />
+            </div>
+
+            <div class="form-group">
+                <label>Standard Pembelajaran (Opsional):</label>
+                <input type="text" class="form-input" [(ngModel)]="bulkSKSP" placeholder="Isi SK/SP..." />
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" (click)="closeBulkModal()">Batal</button>
+                <button type="button" class="btn-apply" (click)="applyBulkTopic()">Terapkan Ke Semua Slot</button>
+            </div>
+        </div>
+    </div>
+</div>
