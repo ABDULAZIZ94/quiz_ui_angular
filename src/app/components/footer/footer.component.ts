@@ -21,7 +21,7 @@ export class FooterComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadFooterScripts();
+    // this.loadFooterScripts();
   }
 
   private loadFooterScripts(): void {
