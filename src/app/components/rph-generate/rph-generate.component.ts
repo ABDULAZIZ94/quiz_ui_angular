@@ -349,41 +349,106 @@ export class RphGenerateComponent implements OnInit {
   }
 
   exportToWord(): void {
-    const element = document.getElementById('rph-print-area');
-    if (!element) return;
-
-    const isRtl = this.selectedLanguage === 'ar' || this.selectedLanguage === 'jawi';
-    const htmlHeader = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-            xmlns:w='urn:schemas-microsoft-com:office:word' 
-            xmlns='http://www.w3.org/TR/REC-html40'>
-      <head>
-        <meta charset='utf-8'>
-        <title>Rancangan Pengajaran Harian</title>
-        <style>
-          body { font-family: 'Traditional Arabic', 'Amiri', 'Calibri', sans-serif; direction: ${isRtl ? 'rtl' : 'ltr'}; }
-          .header-title { font-size: 20pt; font-weight: bold; text-align: center; margin-bottom: 20px; }
-          table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-          td, th { border: 1px solid #000000; padding: 8px 12px; vertical-align: top; font-size: 12pt; }
-          .rph-paper-page { page-break-after: always; }
-        </style>
-      </head>
-      <body>
-    `;
-    const htmlFooter = '</body></html>';
-    const sourceHTML = htmlHeader + element.innerHTML + htmlFooter;
-
-    const blob = new Blob(['\ufeff' + sourceHTML], {
-      type: 'application/msword'
-    });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `RPH_${this.selectedLanguage.toUpperCase()}_${new Date().toISOString().slice(0, 10)}.doc`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const element = document.getElementById('rph-print-area');
+  if (!element) {
+    console.error('Elemen rph-print-area tidak dijumpai.');
+    return;
   }
+
+  // 1. Buat salinan (clone) DOM supaya tidak mengganggu paparan asal di skrin
+  const clone = element.cloneNode(true) as HTMLElement;
+
+  // 2. Gantikan elemen <input> dengan nilai teks (value) semasa
+  const inputs = clone.querySelectorAll('input');
+  inputs.forEach((input: HTMLInputElement) => {
+    const span = document.createElement('span');
+    span.textContent = input.value || '';
+    input.parentNode?.replaceChild(span, input);
+  });
+
+  // 3. Gantikan elemen <textarea> dengan nilai teks semasa (kekalkan baris baharu)
+  const textareas = clone.querySelectorAll('textarea');
+  textareas.forEach((textarea: HTMLTextAreaElement) => {
+    const div = document.createElement('div');
+    div.style.whiteSpace = 'pre-wrap'; // Kekalkan format enter/new line
+    div.textContent = textarea.value || '';
+    textarea.parentNode?.replaceChild(div, textarea);
+  });
+
+  // 4. Buang elemen yang mempunyai kelas khusus untuk cetakan/butang sahaja (jika ada)
+  const hiddenElements = clone.querySelectorAll('.no-print, .btn, button');
+  hiddenElements.forEach(el => el.remove());
+
+  const isRtl = this.selectedLanguage === 'ar' || this.selectedLanguage === 'jawi';
+
+  // 5. Bina templat HTML khas untuk MS Word dengan MSO Schema
+  const htmlHeader = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+          xmlns:w='urn:schemas-microsoft-com:office:word' 
+          xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>Rancangan Pengajaran Harian</title>
+      <!--[if gte mso 9]>
+      <xml>
+        <w:WordDocument>
+          <w:View>Print</w:View>
+          <w:Zoom>100</w:Zoom>
+          <w:DoNotOptimizeForCustomXSL/>
+        </w:WordDocument>
+      </xml>
+      <![endif]-->
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 1in;
+        }
+        body { 
+          font-family: 'Traditional Arabic', 'Amiri', 'Calibri', 'Arial', sans-serif; 
+          direction: ${isRtl ? 'rtl' : 'ltr'};
+          text-align: ${isRtl ? 'right' : 'left'};
+        }
+        .header-title { 
+          font-size: 18pt; 
+          font-weight: bold; 
+          text-align: center; 
+          margin-bottom: 20px; 
+        }
+        table { 
+          border-collapse: collapse; 
+          width: 100%; 
+          margin-bottom: 20px; 
+        }
+        td, th { 
+          border: 1px solid #000000; 
+          padding: 8px 10px; 
+          vertical-align: top; 
+          font-size: 11pt; 
+        }
+        .rph-paper-page { 
+          page-break-after: always; 
+          margin-bottom: 30px;
+        }
+      </style>
+    </head>
+    <body>
+  `;
+
+  const htmlFooter = '</body></html>';
+  const sourceHTML = htmlHeader + clone.innerHTML + htmlFooter;
+
+  // 6. Cipta Blob dan muat turun fail .doc
+  const blob = new Blob(['\ufeff' + sourceHTML], {
+    type: 'application/msword;charset=utf-8'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `RPH_${this.selectedLanguage.toUpperCase()}_${new Date().toISOString().slice(0, 10)}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 }
