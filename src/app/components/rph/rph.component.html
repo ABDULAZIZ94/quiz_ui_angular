@@ -1,187 +1,185 @@
 <div class="container no-print">
-    <h2>Sistem Pengurusan RPH & Jadual Sekolah</h2>
+  <h2>Sistem Pengurusan RPH & Jadual Sekolah</h2>
 
-    <!-- Mesej Ralat -->
-    <div *ngIf="errorMessage" class="alert alert-danger">
-        {{ errorMessage }}
+  <!-- Mesej Ralat -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Borang Pengisian RPH -->
+  <div class="card">
+    <h3>Pengisian Data RPH (Jawi & Asas)</h3>
+    <div class="form-grid">
+      <label>User ID: <input type="number" [(ngModel)]="rph.user_id" /></label>
+      <label>Tarikh: <input type="date" [(ngModel)]="rph.tarikh" /></label>
+      <label>Masa Mula: <input type="time" [(ngModel)]="rph.masa_mula" /></label>
+      <label>Masa Tamat: <input type="time" [(ngModel)]="rph.masa_tamat" /></label>
+      <label>هاري (Hari): <input type="text" [(ngModel)]="rph.hari" /></label>
+      <label>ميڠݢو (Minggu): <input type="text" [(ngModel)]="rph.minggu" /></label>
+      <label>تاجوق (Tajuk): <input type="text" [(ngModel)]="rph.tajuk" /></label>
+      <label>فلاجرن / بيدڠ: <input type="text" [(ngModel)]="rph.pelajaran" /></label>
+      <label>كلس / تاهون: <input type="text" [(ngModel)]="rph.kelas" /></label>
+      <label>اءى بي عيم (ABM): <input type="text" [(ngModel)]="rph.abm" /></label>
     </div>
 
-    <!-- Borang Pengisian RPH -->
-    <div class="card">
-        <h3>Pengisian Data RPH (Jawi & Asas)</h3>
-        <div class="form-grid">
-            <label>User ID: <input type="number" [(ngModel)]="rph.user_id" /></label>
-            <label>Tarikh: <input type="date" [(ngModel)]="rph.tarikh" /></label>
-            <label>Masa Mula: <input type="time" [(ngModel)]="rph.masa_mula" /></label>
-            <label>Masa Tamat: <input type="time" [(ngModel)]="rph.masa_tamat" /></label>
-            <label>هاري (Hari): <input type="text" [(ngModel)]="rph.hari" /></label>
-            <label>ميڠݢو (Minggu): <input type="text" [(ngModel)]="rph.minggu" /></label>
-            <label>تاجوق (Tajuk): <input type="text" [(ngModel)]="rph.tajuk" /></label>
-            <label>فلاجرن / بيدڠ: <input type="text" [(ngModel)]="rph.pelajaran" /></label>
-            <label>كلس / تاهون: <input type="text" [(ngModel)]="rph.kelas" /></label>
-            <label>اءى بي عيم (ABM): <input type="text" [(ngModel)]="rph.abm" /></label>
-        </div>
+    <div class="form-grid-full">
+      <label>ايسي (Isi): <textarea [(ngModel)]="rph.isi" rows="2"></textarea></label>
+      <label>اوبجيقتيف (Objektif): <textarea [(ngModel)]="rph.objektif" rows="2"></textarea></label>
+      <label>اكتيفيتي (Aktiviti): <textarea [(ngModel)]="rph.aktiviti" rows="2"></textarea></label>
+      <label>نيلاي مورني: <input type="text" [(ngModel)]="rph.nilai_murni" /></label>
+      <label>ريفليقسي (Refleksi): <textarea [(ngModel)]="rph.refleksi" rows="2"></textarea></label>
+      <label>چاتتن: <input type="text" [(ngModel)]="rph.catatan" /></label>
+      <label>اولسن: <input type="text" [(ngModel)]="rph.ulasan" /></label>
+    </div>
+  </div>
 
-        <div class="form-grid-full">
-            <label>ايسي (Isi): <textarea [(ngModel)]="rph.isi" rows="2"></textarea></label>
-            <label>اوبجيقتيف (Objektif): <textarea [(ngModel)]="rph.objektif" rows="2"></textarea></label>
-            <label>اكتيفيتي (Aktiviti): <textarea [(ngModel)]="rph.aktiviti" rows="2"></textarea></label>
-            <label>نيلاي مورني: <input type="text" [(ngModel)]="rph.nilai_murni" /></label>
-            <label>ريفليقسي (Refleksi): <textarea [(ngModel)]="rph.refleksi" rows="2"></textarea></label>
-            <label>چاتتن: <input type="text" [(ngModel)]="rph.catatan" /></label>
-            <label>اولسن: <input type="text" [(ngModel)]="rph.ulasan" /></label>
-        </div>
+  <!-- Senarai Subjek & Topik -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Senarai Subjek & Topik (Min: 1, Maks: 15)</h3>
+      <button type="button" class="btn btn-secondary" (click)="tambahSubjek()" [disabled]="rph.senarai_subjek.length >= 15">
+        + Tambah Subjek
+      </button>
     </div>
 
-    <!-- Senarai Subjek & Topik -->
-    <div class="card">
-        <div class="card-header">
-            <h3>Senarai Subjek & Topik (Min: 1, Maks: 15)</h3>
-            <button type="button" class="btn btn-secondary" (click)="tambahSubjek()"
-                [disabled]="rph.senarai_subjek.length >= 15">
-                + Tambah Subjek
-            </button>
-        </div>
-
-        <div *ngFor="let subjek of rph.senarai_subjek; let i = index" class="subject-row">
-            <span class="badge">{{ i + 1 }}</span>
-            <input type="text" [(ngModel)]="subjek.nama_subjek" placeholder="Nama Subjek" class="input-subject" />
-            <input type="text" [(ngModel)]="subjek.topik" maxlength="200" placeholder="Topik (Maksimum 200 aksara)"
-                class="input-topic" />
-            <span class="char-count">{{ subjek.topik.length }}/200</span>
-            <button type="button" class="btn btn-danger" (click)="padamSubjek(i)">Padam</button>
-        </div>
+    <div *ngFor="let subjek of rph.senarai_subjek; let i = index" class="subject-row">
+      <span class="badge">{{ i + 1 }}</span>
+      <input type="text" [(ngModel)]="subjek.nama_subjek" placeholder="Nama Subjek" class="input-subject" />
+      <input type="text" [(ngModel)]="subjek.topik" maxlength="200" placeholder="Topik (Maksimum 200 aksara)" class="input-topic" />
+      <span class="char-count">{{ subjek.topik.length }}/200</span>
+      <button type="button" class="btn btn-danger" (click)="padamSubjek(i)">Padam</button>
     </div>
+  </div>
 
-    <!-- Butang Save Data POST -->
-    <div class="actions">
-        <button type="button" class="btn btn-primary btn-large" (click)="simpanData()" [disabled]="isSubmitting">
-            {{ isSubmitting ? 'Menyimpan...' : 'Save Data (POST ke Apps Script)' }}
-        </button>
-    </div>
+  <!-- Butang Save Data POST -->
+  <div class="actions">
+    <button type="button" class="btn btn-primary btn-large" (click)="simpanData()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Menyimpan...' : 'Save Data (POST ke Apps Script)' }}
+    </button>
+  </div>
 
-    <!-- Keputusan Respons -->
-    <div *ngIf="responseResult" class="alert alert-success">
-        <strong>Status:</strong> {{ responseResult.status }} <br>
-        <strong>Mesej:</strong> {{ responseResult.message }} <br>
-        <span *ngIf="responseResult.data?.rph_id"><strong>ID RPH:</strong> {{ responseResult.data.rph_id }}</span>
-    </div>
+  <!-- Keputusan Respons -->
+  <div *ngIf="responseResult" class="alert alert-success">
+    <strong>Status:</strong> {{ responseResult.status }} <br>
+    <strong>Mesej:</strong> {{ responseResult.message }} <br>
+    <span *ngIf="responseResult.data?.rph_id"><strong>ID RPH:</strong> {{ responseResult.data.rph_id }}</span>
+  </div>
 
-    <!-- Jadual Sekolah Bulanan dari CSV -->
-    <div class="card" *ngIf="jadualSekolah.length > 0">
-        <h3>Jadual Sekolah Sebulan (Data CSV Live)</h3>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr *ngIf="jadualSekolah[0]">
-                        <th *ngFor="let col of jadualSekolah[0]">{{ col }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let row of jadualSekolah.slice(1)">
-                        <td *ngFor="let cell of row">{{ cell }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <!-- Jadual Sekolah Bulanan dari CSV -->
+  <div class="card" *ngIf="jadualSekolah.length > 0">
+    <h3>Jadual Sekolah Sebulan (Data CSV Live)</h3>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr *ngIf="jadualSekolah[0]">
+            <th *ngFor="let col of jadualSekolah[0]">{{ col }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of jadualSekolah.slice(1)">
+            <td *ngFor="let cell of row">{{ cell }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
 <!-- =================================================== -->
 <!-- KAWASAN PAPARAN DOKUMEN RPH JAWI (PRINT / WORD) -->
 <!-- =================================================== -->
 <div class="container print-section">
-    <div class="action-buttons no-print">
-        <button class="btn btn-success" (click)="cetakPDF()">Cetak / Simpan PDF</button>
-        <button class="btn btn-info" (click)="eksportKeWord()">Eksport ke Word (.docx)</button>
-    </div>
+  <div class="action-buttons no-print">
+    <button class="btn btn-success" (click)="cetakPDF()">Cetak / Simpan PDF</button>
+    <button class="btn btn-info" (click)="eksportKeWord()">Eksport ke Word (.docx)</button>
+  </div>
 
-    <div id="rph-jawi-print-area" class="rph-jawi-document" dir="rtl">
-        <h2 class="title-jawi">رنچڠن فڠجرن هارين</h2>
+  <div id="rph-jawi-print-area" class="rph-jawi-document" dir="rtl">
+    <h2 class="title-jawi">رنچڠن فڠجرن هارين</h2>
 
-        <table class="jawi-table">
-            <tr>
-                <th style="width: 15%;">هاري :</th>
-                <td style="width: 18%;">{{ rph.hari }}</td>
-                <th style="width: 15%;">تاريخ :</th>
-                <td style="width: 18%;">{{ rph.tarikh }}</td>
-                <th style="width: 15%;">ميڠݢو:</th>
-                <td style="width: 19%;">{{ rph.minggu }}</td>
-            </tr>
-            <tr>
-                <th>تاجوق :</th>
-                <td colspan="5">{{ rph.tajuk }}</td>
-            </tr>
-            <tr>
-                <th>فلاجرن / بيدڠ :</th>
-                <td colspan="2">{{ rph.pelajaran }}</td>
-                <th>كلس / تاهون :</th>
-                <td colspan="2">{{ rph.kelas }}</td>
-            </tr>
-            <tr>
-                <th>ايسي :</th>
-                <td colspan="5">{{ rph.isi }}</td>
-            </tr>
-            <tr>
-                <th>اوبجيقتيف :</th>
-                <td colspan="5">{{ rph.objektif }}</td>
-            </tr>
-            <tr>
-                <th>اكتيفيتي :</th>
-                <td colspan="5">{{ rph.aktiviti }}</td>
-            </tr>
-            <tr>
-                <th>ماس :</th>
-                <td colspan="2">{{ rph.masa_mula }} - {{ rph.masa_tamat }}</td>
-                <th>اءى بي عيم :</th>
-                <td colspan="2">{{ rph.abm }}</td>
-            </tr>
-            <tr>
-                <th>نيلاي مورني:</th>
-                <td colspan="5">{{ rph.nilai_murni }}</td>
-            </tr>
-            <tr>
-                <th>ريفليقسي :</th>
-                <td colspan="5">{{ rph.refleksi }}</td>
-            </tr>
-            <tr>
-                <th>چاتتن :</th>
-                <td colspan="5">{{ rph.catatan }}</td>
-            </tr>
-        </table>
+    <table class="jawi-table">
+      <tr>
+        <th style="width: 15%;">هاري :</th>
+        <td style="width: 18%;">{{ rph.hari }}</td>
+        <th style="width: 15%;">تاريخ :</th>
+        <td style="width: 18%;">{{ rph.tarikh }}</td>
+        <th style="width: 15%;">ميڠݢو:</th>
+        <td style="width: 19%;">{{ rph.minggu }}</td>
+      </tr>
+      <tr>
+        <th>تاجوق :</th>
+        <td colspan="5">{{ rph.tajuk }}</td>
+      </tr>
+      <tr>
+        <th>فلاجرن / بيدڠ :</th>
+        <td colspan="2">{{ rph.pelajaran }}</td>
+        <th>كلس / تاهون :</th>
+        <td colspan="2">{{ rph.kelas }}</td>
+      </tr>
+      <tr>
+        <th>ايسي :</th>
+        <td colspan="5">{{ rph.isi }}</td>
+      </tr>
+      <tr>
+        <th>اوبجيقتيف :</th>
+        <td colspan="5">{{ rph.objektif }}</td>
+      </tr>
+      <tr>
+        <th>اكتيفيتي :</th>
+        <td colspan="5">{{ rph.aktiviti }}</td>
+      </tr>
+      <tr>
+        <th>ماس :</th>
+        <td colspan="2">{{ rph.masa_mula }} - {{ rph.masa_tamat }}</td>
+        <th>اءى بي عيم :</th>
+        <td colspan="2">{{ rph.abm }}</td>
+      </tr>
+      <tr>
+        <th>نيلاي مورني:</th>
+        <td colspan="5">{{ rph.nilai_murni }}</td>
+      </tr>
+      <tr>
+        <th>ريفليقسي :</th>
+        <td colspan="5">{{ rph.refleksi }}</td>
+      </tr>
+      <tr>
+        <th>چاتتن :</th>
+        <td colspan="5">{{ rph.catatan }}</td>
+      </tr>
+    </table>
 
-        <br>
-        <h3>سناراي سوبجيق دان توفيق</h3>
-        <table class="jawi-table">
-            <thead>
-                <tr>
-                    <th style="width: 10%; text-align: center;">بييلڠن</th>
-                    <th style="width: 40%;">سوبجيق</th>
-                    <th style="width: 50%;">توفيق</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let s of rph.senarai_subjek; let idx = index">
-                    <td style="text-align: center;">{{ idx + 1 }}</td>
-                    <td>{{ s.nama_subjek }}</td>
-                    <td>{{ s.topik }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <br>
+    <h3>سناراي سوبجيق دان توفيق</h3>
+    <table class="jawi-table">
+      <thead>
+        <tr>
+          <th style="width: 10%; text-align: center;">بييلڠن</th>
+          <th style="width: 40%;">سوبجيق</th>
+          <th style="width: 50%;">توفيق</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of rph.senarai_subjek; let idx = index">
+          <td style="text-align: center;">{{ idx + 1 }}</td>
+          <td>{{ s.nama_subjek }}</td>
+          <td>{{ s.topik }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-        <br>
-        <table class="jawi-table signature-table">
-            <tr>
-                <td style="width: 50%; vertical-align: bottom; height: 90px;">
-                    <strong>تندا تاڠن ݢورو :</strong> <br><br>
-                    ...................................................
-                </td>
-                <td style="width: 50%; vertical-align: bottom; height: 90px;">
-                    <strong>اولسن:</strong> {{ rph.ulasan }} <br><br>
-                    <strong>و تادا تاڠن فڽليا دان چوڤ :</strong> <br><br>
-                    ...................................................
-                </td>
-            </tr>
-        </table>
-    </div>
+    <br>
+    <table class="jawi-table signature-table">
+      <tr>
+        <td style="width: 50%; vertical-align: bottom; height: 90px;">
+          <strong>تندا تاڠن ݢورو :</strong> <br><br>
+          ...................................................
+        </td>
+        <td style="width: 50%; vertical-align: bottom; height: 90px;">
+          <strong>اولسن:</strong> {{ rph.ulasan }} <br><br>
+          <strong>و تادا تاڠن فڽليا دان چوڤ :</strong> <br><br>
+          ...................................................
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
