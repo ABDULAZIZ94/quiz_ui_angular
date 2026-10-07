@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ms" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rancangan Pengajaran Harian (A4)</title>
+    <!-- Bootstrap 5 CSS (RTL) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+
+    <style>
+        /* Tetapan Asas & Halaman A4 */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Traditional Arabic', 'Amiri', 'Sakkal Majalla', Tahoma, sans-serif;
+            background-color: #dbe5f1;
+            margin: 0;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Halaman A4 Presisi */
+        .page-a4 {
+            width: 210mm;
+            height: 297mm;
+            background-color: #e8f1f5;
+            padding: 10mm;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            direction: rtl;
+        }
+
+        /* Kelas Garisan / Sempadan */
+        .b-all {
+            border: 1.5px solid #000 !important;
+        }
+
+        .b-top {
+            border-top: 1.5px solid #000 !important;
+        }
+
+        .b-bottom {
+            border-bottom: 1.5px solid #000 !important;
+        }
+
+        .b-left {
+            border-left: 1.5px solid #000 !important;
+        }
+
+        .b-right {
+            border-right: 1.5px solid #000 !important;
+        }
+
+        /* Skim Warna */
+        .bg-blue-header {
+            background-color: #3b71ca !important;
+            color: #ffffff;
+        }
+
+        .bg-yellow-kat {
+            background-color: #e3d297 !important;
+        }
+
+        .bg-green-kat {
+            background-color: #9fccaa !important;
+        }
+
+        .bg-blue-kat {
+            background-color: #a4c2f4 !important;
+        }
+
+        /* Font & Teks Jawi */
+        .text-jawi {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Tetapan Cetakan (Print) */
+        @media print {
+            body {
+                background-color: transparent !important;
+                padding: 0 !important;
+            }
+
+            .page-a4 {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                page-break-after: always;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Lembaran A4 Utama -->
+    <div class="page-a4 text-jawi">
+
+        <!-- Kotak Luar Utama -->
+        <div class="w-100 h-100 b-all d-flex flex-column">
+
+            <!-- Header Tajuk Utama -->
+            <div class="bg-blue-header text-center fs-2 py-2 b-bottom">
+                رنچڠن ڤڠجرن هارين
+            </div>
+
+            <!-- Baris 1: Minggu, Tarikh, Hari -->
+            <div class="d-flex text-center b-bottom" style="height: 48px;">
+                <div class="d-flex align-items-center justify-content-end pe-3 b-left" style="width: 35%;">
+                    ميڠݢو : {{minggu}}
+                </div>
+                <div class="d-flex align-items-center justify-content-end pe-3 b-left" style="width: 35%;">
+                    تاريخ : {{tarikh}}
+                </div>
+                <div class="d-flex align-items-center justify-content-end pe-3" style="width: 30%;">
+                    هاري : {{hari}}
+                </div>
+            </div>
+
+            <!-- Divider Melintang Tanpa Border -->
+            <div class="b-bottom" style="height: 5px; background-color: #ffffff;"></div>
+
+            <!-- Bahagian Tengah (Kandungan Kiri & Kategori Kanan) -->
+            <div class="d-flex flex-grow-1 b-bottom">
+
+
+
+                <!-- Bahagian Kanan: Pelajaran, Kelas, Masa, Nilai Murni -->
+                <div class="d-flex flex-column flex-grow-1">
+                
+                    <!-- Pelajaran / Bidang -->
+                    <div class="p-2 text-start b-bottom" style="height: 40px; background-color: #e7e4cf;">
+                        ڤلاجرن / بيدڠ :
+                    </div>
+                    <div class="p-2 b-bottom" style="height: 120px;">
+                        {{pelajaran}}
+                    </div>
+                
+                    <!-- Kelas / Tahun (Kuning) -->
+                    <div class="p-2 text-start bg-yellow-kat b-bottom" style="height: 40px;">
+                        كلاس / تاهون :
+                    </div>
+                    <div class="p-2 b-bottom" style="height: 160px;">
+                        {{kelas}}
+                    </div>
+                
+                    <!-- Masa (Hijau) -->
+                    <div class="p-2 text-start bg-green-kat b-bottom" style="height: 40px;">
+                        ماس :
+                    </div>
+                    <div class="p-2 b-bottom" style="height: 50px;">
+                        {{masa}}
+                    </div>
+                
+                    <!-- Nilai Murni (Biru Muda) -->
+                    <div class="p-2 text-start bg-blue-kat b-bottom" style="height: 40px;">
+                        نيلاي مورني :
+                    </div>
+                    <div class="p-2 flex-grow-1">
+                        {{nilai_murni}}
+                    </div>
+                
+                </div>
+
+                <!-- Divider Menegak Tanpa Border -->
+                <div class="b-left" style="width: 5px; background-color: #ffffff;"></div>
+
+                <!-- Bahagian Kiri (Utama): Tajuk, Isi, Objektif, Aktiviti, BBM, Refleksi -->
+                <div class="d-flex flex-column b-left" style="width: 70%;">
+                
+                    <!-- Tajuk -->
+                    <div class="p-2 text-start b-bottom" style="height: 45px;">
+                        تاجوق : {{tajuk}}
+                    </div>
+                
+                    <!-- Isi -->
+                    <div class="p-2 text-start b-bottom" style="height: 45px;">
+                        ايسي : {{isi}}
+                    </div>
+                
+                    <!-- Objektif -->
+                    <div class="p-2 text-start b-bottom" style="height: 170px;">
+                        اوئبجيقتيف : {{objektif}}
+                    </div>
+                
+                    <!-- Aktiviti -->
+                    <div class="p-2 text-start b-bottom" style="height: 180px;">
+                        اكتاويتي : {{aktiviti}}
+                    </div>
+                
+                    <!-- BBM -->
+                    <div class="p-2 text-start b-bottom" style="height: 55px;">
+                        اي بي ايم : {{abm}}
+                    </div>
+                
+                    <!-- Refleksi -->
+                    <div class="p-2 text-start flex-grow-1">
+                        ريفليكسي : {{refleksi}}
+                    </div>
+                
+                </div>
+
+            </div>
+
+            <!-- Bahagian Bawah: Catatan & Tanda Tangan -->
+            <div class="d-flex flex-column" style="height: 240px;">
+
+                <!-- Catatan -->
+                <div class="p-2 text-start d-flex flex-column justify-content-between b-bottom" style="height: 90px;">
+                    <div>چاتتن : {{catatan}}</div>
+                    <div>:</div>
+                </div>
+
+                <!-- Tanda Tangan Guru -->
+                <div class="d-flex justify-content-center align-items-center py-2 b-bottom" style="height: 65px;">
+                    <div class="b-all p-2 text-start d-flex align-items-center" style="width: 65%; height: 45px;">
+                        تندا تاڠن ݢورو :
+                    </div>
+                </div>
+
+                <!-- Ulasan & Tanda Tangan Pengetua/Guru Besar -->
+                <div class="d-flex flex-grow-1">
+                    <div class="p-2 text-start b-left d-flex align-items-end" style="width: 35%;">
+                        اولسن : {{ulasan}}
+                    </div>
+                    <div class="p-2 text-start flex-grow-1 d-flex align-items-end justify-content-end">
+                        تندا تاڠن ڤڠتوا دان چوڤ :
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

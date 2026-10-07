@@ -15,6 +15,7 @@ import { GenerateSlideComponent } from './components/generateslide/generateslide
 import { RphComponent } from './components/rph/rph.component';
 import { RphScheduleComponent } from './components/rphschedule/rph-schedule.component';
 import { RphFlowComponent } from './components/rph-flow/rph-flow.component';
+import { RphFormComponent } from './components/rph2/rph-form.component';
 
 export const routes: Routes = [
   {
@@ -75,6 +76,10 @@ export const routes: Routes = [
   {
     path: 'rph-flow',
     component: RphFlowComponent,
+  },
+  {
+    path: 'rph-form',
+    component: RphFormComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
