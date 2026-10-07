@@ -22,7 +22,7 @@ export interface RphRequestData {
   styleUrls: ['./rph-form.component.css']
 })
 export class RphFormComponent implements OnInit {
-  private scriptUrl = 'https://script.google.com/macros/s/AKfycbwpGApeIt2UnetuiLOawmlzUb-85xMmOMER8bKdthKwr2eDBVUDoHdFgPchJvY0FTPzHQ/exec';
+  private scriptUrl = 'https://script.google.com/macros/s/AKfycbzjLq8T1jJjKjWDe_KVwIqAPaxeR04k1c2fCBwzYKDwjN0uMzrCbzfgG2IEdrJeXHk-mA/exec';
 
   isLoading = false;
   responseMessage = '';
@@ -127,25 +127,85 @@ export class RphFormComponent implements OnInit {
   }
 
   exportWord(): void {
-    const printElement = document.getElementById('rendered-rph-container');
-    if (!printElement) return;
-
-    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
-      "xmlns:w='urn:schemas-microsoft-com:office:word' " +
-      "xmlns='http://www.w3.org/TR/REC-html40'>" +
-      "<head><meta charset='utf-8'><title>RPH Document</title></head><body>";
-    
-    const htmlContent = printElement.innerHTML;
-    const footer = "</body></html>";
-    const sourceHTML = header + htmlContent + footer;
-
-    const blob = new Blob(['\ufeff' + sourceHTML], { type: 'application/msword' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `RPH_Gemini_${new Date().toISOString().slice(0, 10)}.doc`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const printElement = document.getElementById('rendered-rph-container');
+  if (!printElement || !printElement.innerHTML.trim()) {
+    console.error('Kandungan RPH tidak dijumpai untuk dieksport.');
+    return;
   }
+
+  // 1. Gaya CSS lengkap daripada rph-template.html & Bootstrap RTL
+  const templateStyles = `
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <style>
+      @page WordSection1 {
+        size: 210mm 297mm;
+        margin: 10mm;
+      }
+      div.WordSection1 {
+        page: WordSection1;
+      }
+      body {
+        font-family: 'Traditional Arabic', 'Amiri', 'Sakkal Majalla', Tahoma, sans-serif;
+        direction: rtl;
+        text-align: right;
+        background-color: #ffffff;
+      }
+      .page-a4 {
+        width: 210mm;
+        min-height: 297mm;
+        background-color: #e8f1f5;
+        padding: 10mm;
+        box-shadow: none !important;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        direction: rtl;
+      }
+      .b-all { border: 1.5px solid #000000 !important; }
+      .b-top { border-top: 1.5px solid #000000 !important; }
+      .b-bottom { border-bottom: 1.5px solid #000000 !important; }
+      .b-left { border-left: 1.5px solid #000000 !important; }
+      .b-right { border-right: 1.5px solid #000000 !important; }
+      .bg-blue-header { background-color: #3b71ca !important; color: #ffffff; }
+      .bg-yellow-kat { background-color: #e3d297 !important; }
+      .bg-green-kat { background-color: #9fccaa !important; }
+      .bg-blue-kat { background-color: #a4c2f4 !important; }
+      .text-jawi { font-size: 1.2rem; font-weight: bold; }
+    </style>
+  `;
+
+  // 2. Pembinaan dokumen HTML penuh dengan meta XML MS Word
+  const header = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+          xmlns:w='urn:schemas-microsoft-com:office:word' 
+          xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>RPH Document</title>
+      ${templateStyles}
+    </head>
+    <body>
+      <div class="WordSection1">
+  `;
+
+  const htmlContent = printElement.innerHTML;
+  const footer = `
+      </div>
+    </body>
+    </html>
+  `;
+
+  const sourceHTML = header + htmlContent + footer;
+
+  // 3. Menjana fail Blob Word (.doc) dengan sokongan UTF-8 (BOM \ufeff)
+  const blob = new Blob(['\ufeff' + sourceHTML], { type: 'application/msword;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `RPH_Gemini_${new Date().toISOString().slice(0, 10)}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 }
