@@ -16,6 +16,7 @@ import { RphComponent } from './components/rph/rph.component';
 import { RphScheduleComponent } from './components/rphschedule/rph-schedule.component';
 import { RphFlowComponent } from './components/rph-flow/rph-flow.component';
 import { RphFormComponent } from './components/rph2/rph-form.component';
+import { RphBulkComponent } from './components/rph2bulk/rph-bulk.component';
 
 export const routes: Routes = [
   {
@@ -80,6 +81,10 @@ export const routes: Routes = [
   {
     path: 'rph-form',
     component: RphFormComponent,
+  },
+  {
+    path: 'rph-bulk',
+    component: RphBulkComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 

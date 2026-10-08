@@ -12,19 +12,19 @@ export interface RphRequestData {
 }
 
 @Component({
-  selector: 'app-rph-form',
+  selector: 'app-rph-bulk',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     HttpClientModule
   ],
-  templateUrl: './rph-form.component.html',
-  styleUrls: ['./rph-form.component.css']
+  templateUrl: './rph-bulk.component.html',
+  styleUrls: ['./rph-bulk.component.css']
 })
-export class RphFormComponent implements OnInit {
-  private defaultScriptUrl = 'https://script.google.com/macros/s/AKfycbzjLq8T1jJjKjWDe_KVwIqAPaxeR04k1c2fCBwzYKDwjN0uMzrCbzfgG2IEdrJeXHk-mA/exec';
-  private liteScriptUrl = 'https://script.google.com/macros/s/AKfycbyHtTe6ds_D1ZPVU3vBuECoRM8vE8ywWkxGFkGkge0ooUHIJhsQbvCpvfpdNt77d2I3dQ/exec';
+export class RphBulkComponent implements OnInit {
+  private defaultScriptUrl = 'https://script.google.com/macros/s/AKfycbzJlP_fwJE8qjPAl4Spqk0FMapAFLdr6tdK20e65Zt-fKUOIhG5PX_x5aoMfSn0opI2hA/exec';
+  private liteScriptUrl = 'https://script.google.com/macros/s/AKfycbyKzfU6IJtnaWqKKPkrlqp55YFIpXG8PJJ0CllraZFjCI3thWCeg6QZ2crt5o_WSEPe7g/exec';
 
   isLoading = false;
   responseMessage = '';
@@ -34,14 +34,14 @@ export class RphFormComponent implements OnInit {
   rawHtmlTemplate = '';
   renderedTemplate: SafeHtml = '';
   
-  // Simpan data array asal RPH untuk kegunaan eksport Word
+  // Simpan data array asal RPH untuk kegunaan eksport Word & PDF
   rphDataList: any[] = [];
 
   selectedModel: 'standard' | 'lite' = 'lite';
 
   formData: RphRequestData = {
     action: 'generate_rph',
-    prompt: 'Tulis Jawi. Jana RPH untuk subjek Bahasa Arab Tahun 4 untuk minggu ke-15 Hari Rabu Jam 8:00-9:00.',
+    prompt: 'Tulis Jawi. Jana 10 RPH secara pukal untuk subjek Bahasa Arab Tahun 4 dari Unit 1 hingga Unit 10.',
     arahan_tambahan: 'Pilih mana-mana topik yang sesuai mengikut DSKP Tahun 4 dan pastikan elemen nilai murni diberi penekanan.'
   };
 
@@ -78,8 +78,13 @@ export class RphFormComponent implements OnInit {
       next: (res: any) => {
         this.isLoading = false;
         if (res.status === 'success') {
-          const rphList = Array.isArray(res.data) ? res.data : [res.data];
-          this.rphDataList = rphList; // Simpan rphDataList untuk Word
+          let rawData = res.data;
+          if (rawData && rawData.rph_list && Array.isArray(rawData.rph_list)) {
+            rawData = rawData.rph_list;
+          }
+
+          const rphList = Array.isArray(rawData) ? rawData : (rawData ? [rawData] : []);
+          this.rphDataList = rphList; // Simpan rphDataList untuk Word & PDF
           this.responseMessage = `Berjaya menjana ${rphList.length} RPH menggunakan Gemini (${this.selectedModel === 'lite' ? 'Lite' : 'Standard'})!`;
           this.isError = false;
           this.renderHtml(rphList);
@@ -100,9 +105,14 @@ export class RphFormComponent implements OnInit {
   renderHtml(dataInput: any): void {
     if (!this.rawHtmlTemplate) return;
 
-    const rphList: any[] = Array.isArray(dataInput)
-      ? dataInput
-      : (dataInput && Object.keys(dataInput).length > 0 ? [dataInput] : []);
+    let rphList: any[] = [];
+    if (Array.isArray(dataInput)) {
+      rphList = dataInput;
+    } else if (dataInput && dataInput.rph_list && Array.isArray(dataInput.rph_list)) {
+      rphList = dataInput.rph_list;
+    } else if (dataInput && Object.keys(dataInput).length > 0) {
+      rphList = [dataInput];
+    }
 
     this.rphDataList = rphList;
 
@@ -138,14 +148,14 @@ export class RphFormComponent implements OnInit {
         html = html.replace(new RegExp(key, 'g'), replaceMap[key]);
       });
 
-      return html;
+      return `<div class="page-a4">${html}</div>`;
     });
 
     const combinedHtml = htmlOutputs.join('\n');
     this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(combinedHtml);
   }
 
-  // Cetak ke PDF melalui Browser
+  // Cetak KESEMUA 10 Halaman PDF dengan rapat ke atas
   exportPdf(): void {
     const printStyle = document.createElement('style');
     printStyle.id = 'dynamic-print-style';
@@ -153,32 +163,46 @@ export class RphFormComponent implements OnInit {
       @media print {
         @page {
           size: A4 portrait;
-          margin: 0mm;
+          margin: 0 !important; /* Buang margin cetak pelayar */
         }
+
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background-color: #ffffff !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
         body * {
           visibility: hidden !important;
         }
+
+        /* Tampilkan bekas paparan RPH sahaja */
         .page-a4, .page-a4 * {
           visibility: visible !important;
         }
+
+        /* Guanakan relative supaya semua RPH dapat disusun mengikut urutan berasingan */
         .page-a4 {
-          position: absolute !important;
-          left: 0 !important;
-          top: 0 !important;
+          position: relative !important;
+          display: block !important;
           width: 210mm !important;
-          height: 297mm !important;
+          min-height: 297mm !important;
           margin: 0 auto !important;
-          padding: 8mm !important;
+          padding: 5mm 8mm 5mm 8mm !important; /* Jarak atas 5mm sahaja */
+          box-sizing: border-box !important;
           background-color: #ffffff !important;
           box-shadow: none !important;
-          page-break-after: always !important;
+          page-break-after: always !important; /* Pemisah helaian PDF */
           break-after: page !important;
         }
-        body {
-          background-color: #ffffff !important;
-          background: #ffffff !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
+
+        /* Hilangkan margin atas pada jadual RPH pertama dalam setiap halaman */
+        .page-a4 > *:first-child,
+        .page-a4 table:first-child {
+          margin-top: 0 !important;
+          padding-top: 0 !important;
         }
       }
     `;
@@ -193,7 +217,6 @@ export class RphFormComponent implements OnInit {
     }, 1000);
   }
 
-  // Eksport ke Microsoft Word (.doc) yang 100% mengikut Format Templat A4
   exportWord(): void {
     if (!this.rphDataList || this.rphDataList.length === 0) {
       console.error('Kandungan RPH tidak dijumpai untuk dieksport.');
@@ -207,7 +230,8 @@ export class RphFormComponent implements OnInit {
     const wordDocumentContent = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' 
             xmlns:w='urn:schemas-microsoft-com:office:word' 
-            xmlns='http://www.w3.org/TR/REC-html40'>
+            xmlns='http://www.w3.org/TR/REC-html40'
+            lang='ms-Arab' dir='rtl'>
       <head>
         <meta charset='utf-8'>
         <title>Rancangan Pengajaran Harian (A4)</title>
@@ -233,9 +257,13 @@ export class RphFormComponent implements OnInit {
           div.WordSection1 {
             page: WordSection1;
           }
-          body {
+          body, table, td, span, p {
             font-family: 'Traditional Arabic', 'Amiri', 'Sakkal Majalla', 'Arial', sans-serif !important;
-            direction: rtl;
+            direction: rtl !important;
+            unicode-bidi: embed !important;
+            font-feature-settings: "liga" 1, "calt" 1;
+          }
+          body {
             background-color: #ffffff;
             margin: 0;
             padding: 0;
@@ -255,16 +283,9 @@ export class RphFormComponent implements OnInit {
             font-weight: bold;
             text-align: center;
           }
-          .bg-yellow-kat { background-color: #e3d297 !important; }
-          .bg-green-kat { background-color: #9fccaa !important; }
-          .bg-blue-kat { background-color: #a4c2f4 !important; }
-          .text-jawi {
-            font-size: 11pt;
-            font-weight: bold;
-          }
         </style>
       </head>
-      <body>
+      <body dir='rtl' lang='ms-Arab'>
         <div class="WordSection1">
           ${wordHtmlPages}
         </div>
@@ -283,15 +304,14 @@ export class RphFormComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  // Bina HTML Table Khas MS Word (Menterjemahkan Flexbox -> HTML Table berukuran persis A4)
-  // Bina HTML Table Khas MS Word (Lajur Kanan & Kiri Telah Ditukar Kedudukan)
+  // Bina HTML Table Khas MS Word
   private generateWordTableHtml(data: any): string {
     const aktivitiText = Array.isArray(data.aktiviti || data.aktiviti_p_dan_p)
       ? (data.aktiviti || data.aktiviti_p_dan_p).join('<br>')
       : (data.aktiviti || data.aktiviti_p_dan_p || '');
 
     return `
-      <table border="1" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1.5pt solid #000000; font-family: 'Traditional Arabic', 'Amiri', sans-serif; direction: rtl; margin-bottom: 20px;">
+      <table border="1" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1.5pt solid #000000; font-family: 'Traditional Arabic', 'Amiri', sans-serif; direction: rtl; margin-bottom: 0px;">
         <!-- Header Tajuk Utama -->
         <tr>
           <td colspan="3" class="bg-blue-header" style="background-color: #3b71ca; color: #ffffff; text-align: center; font-size: 18pt; font-weight: bold; padding: 8pt; border-bottom: 1.5pt solid #000000;">
@@ -317,9 +337,9 @@ export class RphFormComponent implements OnInit {
           <td colspan="3" style="height: 4pt; background-color: #ffffff; border-bottom: 1.5pt solid #000000;"></td>
         </tr>
 
-        <!-- Bahagian Tengah (Jadual Dua Lajur: Kanan Dahulu, Kemudian Kiri) -->
+        <!-- Bahagian Tengah -->
         <tr>
-          <!-- Lajur Kanan: Pelajaran, Kelas, Masa, Nilai Murni (30% Lebar) -->
+          <!-- Lajur Kanan -->
           <td style="width: 30%; border-left: 1.5pt solid #000000; border-bottom: 1.5pt solid #000000; vertical-align: top; padding: 0;">
             <table border="0" cellspacing="0" cellpadding="6" style="width: 100%; border-collapse: collapse;">
               <tr>
@@ -365,7 +385,7 @@ export class RphFormComponent implements OnInit {
             </table>
           </td>
 
-          <!-- Lajur Kiri: Tajuk, Isi, Objektif, Aktiviti, BBM, Refleksi (70% Lebar) -->
+          <!-- Lajur Kiri -->
           <td colspan="2" style="width: 70%; border-bottom: 1.5pt solid #000000; vertical-align: top; padding: 0;">
             <table border="0" cellspacing="0" cellpadding="6" style="width: 100%; border-collapse: collapse;">
               <tr>
@@ -380,12 +400,12 @@ export class RphFormComponent implements OnInit {
               </tr>
               <tr>
                 <td style="border-bottom: 1.5pt solid #000000; height: 110pt;">
-                  <b>اوئبجيقتيف :</b> ${data.objektif || data.objektif_pembelajaran || ''}
+                  <b>اوبجيكتيف :</b> ${data.objektif || data.objektif_pembelajaran || ''}
                 </td>
               </tr>
               <tr>
                 <td style="border-bottom: 1.5pt solid #000000; height: 120pt;">
-                  <b>اكتاويتي :</b><br>${aktivitiText}
+                  <b>اكتيويتي :</b><br>${aktivitiText}
                 </td>
               </tr>
               <tr>
@@ -402,7 +422,7 @@ export class RphFormComponent implements OnInit {
           </td>
         </tr>
 
-        <!-- Bahagian Bawah: Catatan, Tanda Tangan & Ulasan -->
+        <!-- Bahagian Bawah -->
         <tr>
           <td colspan="3" style="padding: 0;">
             <table border="0" cellspacing="0" cellpadding="6" style="width: 100%; border-collapse: collapse;">
