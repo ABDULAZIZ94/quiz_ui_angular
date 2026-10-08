@@ -122,9 +122,49 @@ export class RphFormComponent implements OnInit {
     this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
+  // exportPdf(): void {
+  //   window.print();
+  // }
+
   exportPdf(): void {
-    window.print();
-  }
+  // Tambah gaya CSS sementara khusus untuk cetakan bersih tanpa header/footer
+  const printStyle = document.createElement('style');
+  printStyle.id = 'dynamic-print-style';
+  printStyle.innerHTML = `
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0mm; /* Membuang header/footer sistem penyemak imbas */
+      }
+      body {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-a4 {
+        background-color: #ffffff !important;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+      }
+    }
+  `;
+  document.head.appendChild(printStyle);
+
+  // Panggil dialog cetakan browser
+  window.print();
+
+  // Buang gaya CSS sementara selepas dialog cetakan ditutup
+  setTimeout(() => {
+    const injectedStyle = document.getElementById('dynamic-print-style');
+    if (injectedStyle) {
+      injectedStyle.remove();
+    }
+  }, 1000);
+}
 
   exportWord(): void {
     const printElement = document.getElementById('rendered-rph-container');
