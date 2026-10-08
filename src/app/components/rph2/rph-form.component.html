@@ -20,10 +20,18 @@
         <!-- BORANG INPUT 3 MEDAN -->
         <form (ngSubmit)="hantarData()" *ngIf="viewMode === 'web'">
 
-            <div class="mb-3">
+            <div class="mb-3" hidden>
                 <label class="form-label fw-bold">Action</label>
                 <input type="text" class="form-control bg-light" [(ngModel)]="formData.action" name="action" readonly
                     required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Pilihan Model Gemini AI</label>
+                <select class="form-select" [(ngModel)]="selectedModel" name="selectedModel">
+                    <option value="lite">Gemini Lite (Pantas / URL Baharu)</option>
+                    <option value="standard">Gemini Standard (URL Asal)</option>
+                </select>
             </div>
 
             <div class="mb-3">

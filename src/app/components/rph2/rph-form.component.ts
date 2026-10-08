@@ -8,6 +8,7 @@ export interface RphRequestData {
   action: string;
   prompt: string;
   arahan_tambahan: string;
+  endpoint_url?: string; // Menambah pilihan URL endpoint
 }
 
 @Component({
@@ -22,7 +23,9 @@ export interface RphRequestData {
   styleUrls: ['./rph-form.component.css']
 })
 export class RphFormComponent implements OnInit {
-  private scriptUrl = 'https://script.google.com/macros/s/AKfycbzjLq8T1jJjKjWDe_KVwIqAPaxeR04k1c2fCBwzYKDwjN0uMzrCbzfgG2IEdrJeXHk-mA/exec';
+  // Senarai URL pilihan Gemini API
+  private defaultScriptUrl = 'https://script.google.com/macros/s/AKfycbzjLq8T1jJjKjWDe_KVwIqAPaxeR04k1c2fCBwzYKDwjN0uMzrCbzfgG2IEdrJeXHk-mA/exec';
+  private liteScriptUrl = 'https://script.google.com/macros/s/AKfycbyHtTe6ds_D1ZPVU3vBuECoRM8vE8ywWkxGFkGkge0ooUHIJhsQbvCpvfpdNt77d2I3dQ/exec';
 
   isLoading = false;
   responseMessage = '';
@@ -34,6 +37,9 @@ export class RphFormComponent implements OnInit {
   
   // Safe HTML untuk paparan Angular innerHTML
   renderedTemplate: SafeHtml = '';
+
+  // Model terpilih (Pilihan lalai: 'lite')
+  selectedModel: 'standard' | 'lite' = 'lite';
 
   formData: RphRequestData = {
     action: 'generate_rph',
@@ -51,7 +57,7 @@ export class RphFormComponent implements OnInit {
     this.http.get('assets/rph-template.html', { responseType: 'text' }).subscribe({
       next: (html) => {
         this.rawHtmlTemplate = html;
-        this.renderHtml({}); // Render awal kosong
+        this.renderHtml([]); // Render awal kosong
       },
       error: (err) => {
         console.error('Gagal memuat turun assets/rph-template.html', err);
@@ -64,18 +70,28 @@ export class RphFormComponent implements OnInit {
     this.responseMessage = '';
     this.isError = false;
 
+    // Tentukan URL sasaran berdasarkan pilihan pengguna (Standard vs Gemini Lite)
+    const targetUrl = this.selectedModel === 'lite' ? this.liteScriptUrl : this.defaultScriptUrl;
+
+    // Masukkan info model URL ke dalam payload jika perlu
+    this.formData.endpoint_url = targetUrl;
+
     const headers = new HttpHeaders({
       'Content-Type': 'text/plain;charset=utf-8'
     });
 
-    this.http.post(this.scriptUrl, JSON.stringify(this.formData), { headers }).subscribe({
+    this.http.post(targetUrl, JSON.stringify(this.formData), { headers }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         if (res.status === 'success') {
-          this.responseMessage = 'RPH berjaya dijana oleh Gemini AI!';
+          // Terima res.data sebagai array (menyokong sehingga 30 RPH)
+          const rphList = Array.isArray(res.data) ? res.data : [res.data];
+          
+          this.responseMessage = `Berjaya menjana ${rphList.length} RPH menggunakan Gemini (${this.selectedModel === 'lite' ? 'Lite' : 'Standard'})!`;
           this.isError = false;
-          // Render HTML templat menggunakan data yang diterima
-          this.renderHtml(res.data);
+
+          // Hantar senarai array RPH ke renderHtml
+          this.renderHtml(rphList);
         } else {
           this.responseMessage = 'Ralat: ' + (res.message || 'Gagal menjana RPH.');
           this.isError = true;
@@ -89,82 +105,95 @@ export class RphFormComponent implements OnInit {
     });
   }
 
-  // Fungsi menggantikan tempat pemegang data dalam templat HTML
-  renderHtml(data: any): void {
+  // Fungsi menggantikan tempat pemegang data dalam templat HTML bagi senarai array RPH
+  renderHtml(dataInput: any): void {
     if (!this.rawHtmlTemplate) return;
 
-    let html = this.rawHtmlTemplate;
+    // Pastikan dataInput bertukar ke bentuk Array (menyokong sehingga 30 keping RPH)
+    const rphList: any[] = Array.isArray(dataInput)
+      ? dataInput
+      : (dataInput && Object.keys(dataInput).length > 0 ? [dataInput] : []);
 
-    const replaceMap: { [key: string]: string } = {
-      '{{minggu}}': data.minggu || '',
-      '{{tarikh}}': data.tarikh || data.tarikh_dan_masa || '',
-      '{{hari}}': data.hari || '',
-      '{{tajuk}}': data.tajuk || data.tajuk_dan_topik || '',
-      '{{isi}}': data.isi || '',
-      '{{objektif}}': data.objektif || data.objektif_pembelajaran || '',
-      '{{aktiviti}}': Array.isArray(data.aktiviti || data.aktiviti_p_dan_p) 
-                        ? (data.aktiviti || data.aktiviti_p_dan_p).join('<br>') 
-                        : (data.aktiviti || data.aktiviti_p_dan_p || ''),
-      '{{abm}}': data.abm || data.bahan_bantu_mengajar || '',
-      '{{refleksi}}': data.refleksi || '',
-      '{{pelajaran}}': data.pelajaran || data.subjek || '',
-      '{{kelas}}': data.kelas || '',
-      '{{masa}}': data.masa_gabung || (data.masa_mula ? `${data.masa_mula} - ${data.masa_tamat}` : ''),
-      '{{nilai_murni}}': data.nilai_murni || '',
-      '{{catatan}}': data.catatan || '',
-      '{{ulasan}}': data.ulasan || ''
-    };
+    if (rphList.length === 0) {
+      this.renderedTemplate = '';
+      return;
+    }
 
-    Object.keys(replaceMap).forEach((key) => {
-      html = html.replace(new RegExp(key, 'g'), replaceMap[key]);
-    });
+    // Loop melalui setiap RPH, gantikan placeholder, dan gabungkan hasilnya
+    const fullHtmlOutput = rphList.map((data) => {
+      let html = this.rawHtmlTemplate;
 
-    this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(html);
+      const replaceMap: { [key: string]: string } = {
+        '{{minggu}}': data.minggu || '',
+        '{{tarikh}}': data.tarikh || data.tarikh_dan_masa || '',
+        '{{hari}}': data.hari || '',
+        '{{tajuk}}': data.tajuk || data.tajuk_dan_topik || '',
+        '{{isi}}': data.isi || '',
+        '{{objektif}}': data.objektif || data.objektif_pembelajaran || '',
+        '{{aktiviti}}': Array.isArray(data.aktiviti || data.aktiviti_p_dan_p) 
+                          ? (data.aktiviti || data.aktiviti_p_dan_p).join('<br>') 
+                          : (data.aktiviti || data.aktiviti_p_dan_p || ''),
+        '{{abm}}': data.abm || data.bahan_bantu_mengajar || '',
+        '{{refleksi}}': data.refleksi || '',
+        '{{pelajaran}}': data.pelajaran || data.subjek || '',
+        '{{kelas}}': data.kelas || '',
+        '{{masa}}': data.masa_gabung || (data.masa_mula ? `${data.masa_mula} - ${data.masa_tamat}` : ''),
+        '{{nilai_murni}}': data.nilai_murni || '',
+        '{{catatan}}': data.catatan || '',
+        '{{ulasan}}': data.ulasan || ''
+      };
+
+      Object.keys(replaceMap).forEach((key) => {
+        html = html.replace(new RegExp(key, 'g'), replaceMap[key]);
+      });
+
+      // Setiap RPH dibungkus supaya ada pemisah halaman semasa cetakan / PDF / Word
+      return `<div class="rph-single-item" style="page-break-after: always; margin-bottom: 20px;">${html}</div>`;
+    }).join('\n');
+
+    this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(fullHtmlOutput);
   }
 
-  // exportPdf(): void {
-  //   window.print();
-  // }
-
   exportPdf(): void {
-  // Tambah gaya CSS sementara khusus untuk cetakan bersih tanpa header/footer
-  const printStyle = document.createElement('style');
-  printStyle.id = 'dynamic-print-style';
-  printStyle.innerHTML = `
-    @media print {
-      @page {
-        size: A4 portrait;
-        margin: 0mm; /* Membuang header/footer sistem penyemak imbas */
+    const printStyle = document.createElement('style');
+    printStyle.id = 'dynamic-print-style';
+    printStyle.innerHTML = `
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 0mm;
+        }
+        body {
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-a4 {
+          background-color: #ffffff !important;
+          margin: 0 auto !important;
+          box-shadow: none !important;
+        }
+        .rph-single-item {
+          page-break-after: always !important;
+          break-after: page !important;
+        }
       }
-      body {
-        background-color: #ffffff !important;
-        background: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .page-a4 {
-        background-color: #ffffff !important;
-        margin: 0 auto !important;
-        box-shadow: none !important;
-      }
-    }
-  `;
-  document.head.appendChild(printStyle);
+    `;
+    document.head.appendChild(printStyle);
 
-  // Panggil dialog cetakan browser
-  window.print();
+    window.print();
 
-  // Buang gaya CSS sementara selepas dialog cetakan ditutup
-  setTimeout(() => {
-    const injectedStyle = document.getElementById('dynamic-print-style');
-    if (injectedStyle) {
-      injectedStyle.remove();
-    }
-  }, 1000);
-}
+    setTimeout(() => {
+      const injectedStyle = document.getElementById('dynamic-print-style');
+      if (injectedStyle) {
+        injectedStyle.remove();
+      }
+    }, 1000);
+  }
 
   exportWord(): void {
     const printElement = document.getElementById('rendered-rph-container');
@@ -173,13 +202,11 @@ export class RphFormComponent implements OnInit {
       return;
     }
 
-    // 1. Muat turun fail templat dari assets/rph-template.html untuk mengambil gaya CSS asal
     this.http.get('assets/rph-template.html', { responseType: 'text' }).subscribe({
       next: (templateHtml) => {
         this.generateWordDocument(templateHtml, printElement.innerHTML);
       },
-      error: (err) => {
-        // Fallback jika fail berada di folder public/rph-template.html
+      error: () => {
         this.http.get('rph-template.html', { responseType: 'text' }).subscribe({
           next: (templateHtml) => {
             this.generateWordDocument(templateHtml, printElement.innerHTML);
@@ -193,9 +220,7 @@ export class RphFormComponent implements OnInit {
     });
   }
 
-  // Fungsi pembantu untuk membina & memuat turun fail .doc
   private generateWordDocument(templateHtml: string, innerContent: string): void {
-    // Ekstrak tag <style> dan <link> daripada assets/rph-template.html jika ada
     let extractedStyles = '';
     if (templateHtml) {
       const styleMatches = templateHtml.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
@@ -204,7 +229,6 @@ export class RphFormComponent implements OnInit {
       }
     }
 
-    // Gaya CSS standard MS Word & Bootstrap RTL
     const wordStyles = `
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
       ${extractedStyles}
@@ -232,6 +256,9 @@ export class RphFormComponent implements OnInit {
           display: flex;
           flex-direction: column;
           direction: rtl;
+        }
+        .rph-single-item {
+          page-break-after: always;
         }
         .b-all { border: 1.5px solid #000000 !important; }
         .b-top { border-top: 1.5px solid #000000 !important; }
@@ -267,7 +294,6 @@ export class RphFormComponent implements OnInit {
 
     const sourceHTML = header + innerContent + footer;
 
-    // Menjana fail MS Word (.doc) berserta BOM UTF-8 (\ufeff)
     const blob = new Blob(['\ufeff' + sourceHTML], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -278,5 +304,4 @@ export class RphFormComponent implements OnInit {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-
 }
