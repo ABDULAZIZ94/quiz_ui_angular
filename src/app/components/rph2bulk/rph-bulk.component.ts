@@ -155,54 +155,72 @@ export class RphBulkComponent implements OnInit {
     this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(combinedHtml);
   }
 
-  // Cetak KESEMUA 10 Halaman PDF dengan rapat ke atas
+// Cetak KESEMUA 10 Halaman PDF tanpa limpahan ke page 2
   exportPdf(): void {
     const printStyle = document.createElement('style');
     printStyle.id = 'dynamic-print-style';
     printStyle.innerHTML = `
       @media print {
+        /* Tetapan saiz A4 tanpa margin pelayar */
         @page {
           size: A4 portrait;
-          margin: 0 !important; /* Buang margin cetak pelayar */
+          margin: 0 !important;
         }
 
+        /* Reset penuh elemen dasar */
         html, body {
           margin: 0 !important;
           padding: 0 !important;
+          height: 100% !important;
+          overflow: visible !important;
           background-color: #ffffff !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
 
+        /* Sembunyikan SEMUA elemen induk Angular & paparan UI */
         body * {
           visibility: hidden !important;
         }
 
-        /* Tampilkan bekas paparan RPH sahaja */
+        /* Tampilkan HANYA elemen RPH sahaja */
         .page-a4, .page-a4 * {
           visibility: visible !important;
         }
 
-        /* Guanakan relative supaya semua RPH dapat disusun mengikut urutan berasingan */
+        /* Sembunyikan elemen bukan RPH yang mengambil ruang atas */
+        app-rph-bulk > *:not(.page-a4),
+        :not(.page-a4) > .page-a4 {
+          margin-top: 0 !important;
+        }
+
+        /* Tetapan khusus bekas RPH A4 */
         .page-a4 {
           position: relative !important;
           display: block !important;
           width: 210mm !important;
-          min-height: 297mm !important;
+          height: 297mm !important; /* Hadkan tinggi persis A4 */
+          max-height: 297mm !important;
           margin: 0 auto !important;
-          padding: 5mm 8mm 5mm 8mm !important; /* Jarak atas 5mm sahaja */
+          padding: 5mm 8mm 5mm 8mm !important; /* Spacing atas kecil */
           box-sizing: border-box !important;
           background-color: #ffffff !important;
           box-shadow: none !important;
-          page-break-after: always !important; /* Pemisah helaian PDF */
+          overflow: hidden !important; /* Elak kandungan melimpah */
+          page-break-before: auto !important;
+          page-break-after: always !important; /* Pemisah setiap RPH */
           break-after: page !important;
         }
 
-        /* Hilangkan margin atas pada jadual RPH pertama dalam setiap halaman */
-        .page-a4 > *:first-child,
+        /* Paksa RPH pertama menempel betul-betul di bucu atas kertas */
+        .page-a4:first-of-type {
+          margin-top: 0 !important;
+          padding-top: 4mm !important;
+        }
+
+        /* Reset margin jadual pertama di dalam RPH */
         .page-a4 table:first-child {
           margin-top: 0 !important;
-          padding-top: 0 !important;
         }
       }
     `;
