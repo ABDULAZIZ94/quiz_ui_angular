@@ -8,7 +8,7 @@ export interface RphRequestData {
   action: string;
   prompt: string;
   arahan_tambahan: string;
-  endpoint_url?: string; // Menambah pilihan URL endpoint
+  endpoint_url?: string;
 }
 
 @Component({
@@ -73,7 +73,7 @@ export class RphFormComponent implements OnInit {
     // Tentukan URL sasaran berdasarkan pilihan pengguna (Standard vs Gemini Lite)
     const targetUrl = this.selectedModel === 'lite' ? this.liteScriptUrl : this.defaultScriptUrl;
 
-    // Masukkan info model URL ke dalam payload jika perlu
+    // Masukkan info model URL ke dalam payload
     this.formData.endpoint_url = targetUrl;
 
     const headers = new HttpHeaders({
@@ -147,8 +147,7 @@ export class RphFormComponent implements OnInit {
         html = html.replace(new RegExp(key, 'g'), replaceMap[key]);
       });
 
-      // Setiap RPH dibungkus supaya ada pemisah halaman semasa cetakan / PDF / Word
-      return `<div class="rph-single-item" style="page-break-after: always; margin-bottom: 20px;">${html}</div>`;
+      return html;
     }).join('\n');
 
     this.renderedTemplate = this.sanitizer.bypassSecurityTrustHtml(fullHtmlOutput);
@@ -163,23 +162,35 @@ export class RphFormComponent implements OnInit {
           size: A4 portrait;
           margin: 0mm;
         }
+        /* Sembunyikan SEMUA elemen asal pada badan dokumen */
+        body * {
+          visibility: hidden !important;
+        }
+        
+        /* Paparkan HANYA elemen bertanda .page-a4 dan anak kandungannya */
+        .page-a4, .page-a4 * {
+          visibility: visible !important;
+        }
+        
+        /* Posisikan .page-a4 secara mutlak di atas skrin untuk cetakan */
+        .page-a4 {
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 10mm !important;
+          background-color: #ffffff !important;
+          box-shadow: none !important;
+          page-break-after: always !important;
+          break-after: page !important;
+        }
+
         body {
           background-color: #ffffff !important;
           background: #ffffff !important;
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-        .page-a4 {
-          background-color: #ffffff !important;
-          margin: 0 auto !important;
-          box-shadow: none !important;
-        }
-        .rph-single-item {
-          page-break-after: always !important;
-          break-after: page !important;
         }
       }
     `;
@@ -256,8 +267,6 @@ export class RphFormComponent implements OnInit {
           display: flex;
           flex-direction: column;
           direction: rtl;
-        }
-        .rph-single-item {
           page-break-after: always;
         }
         .b-all { border: 1.5px solid #000000 !important; }
