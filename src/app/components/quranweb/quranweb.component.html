@@ -1,0 +1,34 @@
+<div class="quran-container">
+    <h2>Quran Web Component</h2>
+
+    <div class="action-bar">
+        <button (click)="padamCacheAndReload()" [disabled]="isLoading">
+            Muat Semula Data (Padam Cache)
+        </button>
+    </div>
+
+    <div *ngIf="isLoading" class="status-msg">
+        Sedang memuat turun data Al-Quran...
+    </div>
+
+    <div *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+    </div>
+
+    <div *ngIf="!isLoading && senaraiAyat.length > 0" class="ayat-list">
+        <div *ngFor="let item of senaraiAyat" class="ayat-card">
+            <div class="ayat-header">
+                <span class="badge">Surah: {{ item.surahNo }}</span>
+                <span class="badge">Ayat: {{ item.ayatNo }}</span>
+            </div>
+
+            <div class="arabic-text">
+                {{ item.teksArab }}
+            </div>
+
+            <div class="translation-text">
+                {{ item.terjemahan }}
+            </div>
+        </div>
+    </div>
+</div>

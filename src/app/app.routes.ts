@@ -17,6 +17,7 @@ import { RphScheduleComponent } from './components/rphschedule/rph-schedule.comp
 import { RphFlowComponent } from './components/rph-flow/rph-flow.component';
 import { RphFormComponent } from './components/rph2/rph-form.component';
 import { RphBulkComponent } from './components/rph2bulk/rph-bulk.component';
+import { QuranwebComponent } from './components/quranweb/quranweb.component';
 
 export const routes: Routes = [
   {
@@ -85,6 +86,10 @@ export const routes: Routes = [
   {
     path: 'rph-bulk',
     component: RphBulkComponent,
+  },
+  {
+    path: 'quranweb',
+    component: QuranwebComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
