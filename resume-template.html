@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Resume Eksekutif & Struktur Pangkalan Data</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Merriweather for Executive Typography -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            600: '#3730a3',
+                            700: '#312e81',
+                            800: '#1e1b4b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 12pt;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .print-shadow-none {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .resume-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        /* Custom scrollbar for modern feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 font-sans text-slate-800 antialiased min-h-screen flex flex-col print:bg-white">
+
+    <!-- Top Navigation Bar (Screen Only) -->
+    <header class="no-print bg-slate-950 border-b border-slate-800 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg font-bold text-lg leading-none">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-slate-100 leading-none">ProResume Studio</h1>
+                    <span class="text-xs text-slate-400">Pakar Builder Resume Senior & Database Schema</span>
+                </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex items-center space-x-2">
+                <button onclick="switchTab('resume')" id="btn-tab-resume"
+                    class="px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-900/50">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Templat Resume Eksekutif</span>
+                </button>
+                <button onclick="switchTab('db')" id="btn-tab-db"
+                    class="px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
+                    <i class="fas fa-database text-indigo-400"></i>
+                    <span>Struktur Database (Schema)</span>
+                </button>
+                <div class="h-6 w-px bg-slate-800 mx-1"></div>
+                <button onclick="toggleEditMode()" id="btn-edit-toggle"
+                    class="px-3 py-2 text-xs md:text-sm font-medium bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fas fa-pen-to-square"></i>
+                    <span id="edit-text">Mod Editor</span>
+                </button>
+                <button onclick="window.print()"
+                    class="px-3 py-2 text-xs md:text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-500 rounded-lg transition flex items-center gap-1.5 shadow-md">
+                    <i class="fas fa-print"></i>
+                    <span class="hidden sm:inline">Cetak / Export PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Info Banner for Editor -->
+    <div id="editor-banner"
+        class="hidden no-print bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-4 text-center text-xs text-amber-200">
+        <i class="fas fa-info-circle mr-1.5 text-amber-400"></i>
+        <strong>Mod Suntingan Aktif:</strong> Klik mana-mana kotak input di bawah untuk menukar maklumat resume. Semua
+        perubahan dikemas kini secara terus (real-time).
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow p-4 md:p-8">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: EXECUTIVE RESUME TEMPLATE          -->
+        <!-- ========================================== -->
+        <div id="view-resume" class="max-w-5xl mx-auto transition-all">
+
+            <div id="resume-document"
+                class="resume-container bg-white rounded-none md:rounded-sm shadow-2xl print-shadow-none p-8 md:p-14 text-slate-800 space-y-10">
+
+                <!-- HEADER SEKSYEN -->
+                <header class="border-b-2 border-slate-900 pb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                        <div class="space-y-2 flex-grow">
+                            <!-- Nama Penuh -->
+                            <div class="view-mode font-serif text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-none"
+                                data-field="fullName">
+                                Ir. Ts. Ahmad Danial Bin Razali
+                            </div>
+                            <input
+                                class="edit-mode hidden w-full text-2xl md:text-4xl font-serif font-bold text-slate-900 border-b-2 border-indigo-500 focus:outline-none py-1"
+                                data-field="fullName" value="Ir. Ts. Ahmad Danial Bin Razali">
+
+                            <!-- Gelaran Jawatan Utama -->
+                            <div class="view-mode text-lg md:text-xl font-bold uppercase tracking-wider text-indigo-700"
+                                data-field="jobTitle">
+                                Principal Software Architect & Head of Engineering
+                            </div>
+                            <input
+                                class="edit-mode hidden w-full text-lg font-bold uppercase tracking-wider text-indigo-700 border-b border-indigo-300 focus:outline-none py-1"
+                                data-field="jobTitle" value="Principal Software Architect & Head of Engineering">
+
+                            <!-- Tagline / Sub-Title Eksekutif -->
+                            <p class="text-xs md:text-sm font-medium text-slate-500 tracking-wide uppercase">
+                                12+ Tahun Pengalaman • Transformasi Digital Enterprise • Cloud Native Architecture & AI
+                                Integration
+                            </p>
+                        </div>
+
+                        <!-- Hubungi & Pautan -->
+                        <div
+                            class="w-full md:w-auto text-xs md:text-sm space-y-2 text-slate-600 border-t md:border-t-0 pt-4 md:pt-0 border-slate-200">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fas fa-envelope text-indigo-700 w-4 text-center"></i>
+                                <span class="view-mode font-medium"
+                                    data-field="email">ahmad.danial@enterprise-tech.my</span>
+                                <input class="edit-mode hidden border border-slate-300 px-2 py-0.5 rounded text-xs"
+                                    data-field="email" value="ahmad.danial@enterprise-tech.my">
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <i class="fas fa-phone text-indigo-700 w-4 text-center"></i>
+                                <span class="view-mode font-medium" data-field="phone">+60 12-388 9012</span>
+                                <input class="edit-mode hidden border border-slate-300 px-2 py-0.5 rounded text-xs"
+                                    data-field="phone" value="+60 12-388 9012">
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <i class="fas fa-location-dot text-indigo-700 w-4 text-center"></i>
+                                <span class="view-mode font-medium" data-field="location">Kuala Lumpur, Malaysia</span>
+                                <input class="edit-mode hidden border border-slate-300 px-2 py-0.5 rounded text-xs"
+                                    data-field="location" value="Kuala Lumpur, Malaysia">
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <i class="fab fa-linkedin text-indigo-700 w-4 text-center"></i>
+                                <span class="view-mode font-medium"
+                                    data-field="linkedin">linkedin.com/in/ahmad-danial-arch</span>
+                                <input class="edit-mode hidden border border-slate-300 px-2 py-0.5 rounded text-xs"
+                                    data-field="linkedin" value="linkedin.com/in/ahmad-danial-arch">
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <i class="fas fa-globe text-indigo-700 w-4 text-center"></i>
+                                <span class="view-mode font-medium" data-field="website">danial-architecture.io</span>
+                                <input class="edit-mode hidden border border-slate-300 px-2 py-0.5 rounded text-xs"
+                                    data-field="website" value="danial-architecture.io">
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- RINGKASAN EKSEKUTIF (EXECUTIVE SUMMARY) -->
+                <section class="space-y-3">
+                    <h2
+                        class="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-200 pb-1">
+                        Ringkasan Eksekutif & Profil Profesional
+                    </h2>
+                    <div class="view-mode text-sm leading-relaxed text-slate-700 text-justify font-serif"
+                        data-field="summary">
+                        Arkitek Perisian & Pemimpin Teknologi berkaliber tinggi dengan pencapaian terbukti selama lebih
+                        12 tahun dalam menerajui transformasi digital bagi sektor perbankan, telekomunikasi, dan
+                        konglomerat multinasional. Berkemahiran tinggi dalam mereka bentuk seni bina microservices
+                        berskala tinggi (high-concurrency), memimpin pasukan kejuruteraan melebihi 40 orang jurutera,
+                        serta menguruskan bajet teknologi (CAPEX/OPEX) bernilai RM15 juta+. Mempunyai kepakaran mendalam
+                        dalam pensijilan AWS Solutions Architect, Kubernetes Enterprise, dan tadbir urus keselamatan
+                        siber (ISO27001/Bank Negara RMiT).
+                    </div>
+                    <textarea
+                        class="edit-mode hidden w-full text-sm font-serif border border-indigo-300 rounded p-2 focus:outline-none"
+                        rows="4"
+                        data-field="summary">Arkitek Perisian & Pemimpin Teknologi berkaliber tinggi dengan pencapaian terbukti selama lebih 12 tahun dalam menerajui transformasi digital bagi sektor perbankan, telekomunikasi, dan konglomerat multinasional. Berkemahiran tinggi dalam mereka bentuk seni bina microservices berskala tinggi (high-concurrency), memimpin pasukan kejuruteraan melebihi 40 orang jurutera, serta menguruskan bajet teknologi (CAPEX/OPEX) bernilai RM15 juta+. Mempunyai kepakaran mendalam dalam pensijilan AWS Solutions Architect, Kubernetes Enterprise, dan tadbir urus keselamatan siber (ISO27001/Bank Negara RMiT).</textarea>
+                </section>
+
+                <!-- LAYOUT UTAMA (2 LAJUR) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+
+                    <!-- LAJUR KIRI: PENGALAMAN KERJA KERJAYA (8/12) -->
+                    <div class="lg:col-span-8 space-y-8">
+
+                        <section class="space-y-6">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1 flex items-center justify-between">
+                                <span>Rekod Pengalaman Kerja & Pencapaian Kepimpinan</span>
+                                <span class="text-[10px] font-normal text-slate-400 normal-case">(Disusun mengikut
+                                    kronologi terkini)</span>
+                            </h2>
+
+                            <!-- PENGALAMAN 1 -->
+                            <div class="space-y-3 relative border-l-2 border-indigo-600 pl-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-base">Head of Software Architecture &
+                                            Cloud Engineering</h3>
+                                        <p class="text-xs font-bold text-indigo-700">Axiata Digital Services Group •
+                                            Kuala Lumpur</p>
+                                    </div>
+                                    <span
+                                        class="inline-block px-2.5 py-1 text-xs font-bold bg-slate-900 text-white rounded">
+                                        Jan 2021 – Kini (3+ Tahun)
+                                    </span>
+                                </div>
+                                <ul
+                                    class="text-xs md:text-sm text-slate-700 space-y-2 list-disc list-outside ml-4 leading-relaxed">
+                                    <li><strong>Kepimpinan Pasukan:</strong> Mengurus dan memimpin 45 jurutera perisian
+                                        (Frontend, Backend, DevOps & QA) dalam membina semula platform teras perbankan
+                                        digital.</li>
+                                    <li><strong>Impak Perniagaan & Prestasi:</strong> Merestruktur seni bina monolithic
+                                        legacy kepada Microservices berasaskan Kubernetes (EKS), mengurangkan kos
+                                        infrastruktur cloud sebanyak <strong>35% (penjimatan RM1.2M/tahun)</strong> dan
+                                        meningkatkan *system uptime* kepada 99.99%.</li>
+                                    <li><strong>Pengendalian Trafik Tinggi:</strong> Mereka bentuk saluran pemprosesan
+                                        data pembayaran yang mampu mengendalikan lebih <strong>4.5 juta transaksi
+                                            harian</strong> semasa waktu puncak tanpa gangguan (zero downtime
+                                        deployment).</li>
+                                    <li><strong>Tadbir Urus & Keselamatan:</strong> Memastikan keseluruhan sistem
+                                        mematuhi piawaian Keselamatan Bank Negara Malaysia (RMiT) dan audit ISO27001.
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- PENGALAMAN 2 -->
+                            <div class="space-y-3 relative border-l-2 border-slate-300 pl-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-base">Principal Solutions Architect
+                                        </h3>
+                                        <p class="text-xs font-bold text-indigo-700">Maybank Group Technology • Kuala
+                                            Lumpur</p>
+                                    </div>
+                                    <span
+                                        class="inline-block px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded border border-slate-300">
+                                        Mac 2017 – Dis 2020 (3.9 Tahun)
+                                    </span>
+                                </div>
+                                <ul
+                                    class="text-xs md:text-sm text-slate-700 space-y-2 list-disc list-outside ml-4 leading-relaxed">
+                                    <li><strong>Inovasi Sistem:</strong> Menerajui pembangunan sistem gerbang pembayaran
+                                        API perbankan terbuka (Open API Banking) bagi integrasi dengan rakan kongsi
+                                        Fintech luaran.</li>
+                                    <li><strong>Pencapaian Kejuruteraan:</strong> Membangunkan *distributed caching
+                                        engine* menggunakan Redis & Apache Kafka yang mempercepatkan tindak balas API
+                                        daripada 850ms kepada <strong>45ms sahaja</strong>.</li>
+                                    <li><strong>Mentorship:</strong> Mengendalikan program latihan dalaman (*Engineering
+                                        Bootcamp*) untuk merapatkan jurang kemahiran 100+ pembangun perisian junior dan
+                                        pertengahan.</li>
+                                </ul>
+                            </div>
+
+                            <!-- PENGALAMAN 3 -->
+                            <div class="space-y-3 relative border-l-2 border-slate-300 pl-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-base">Senior Full Stack Lead Developer
+                                        </h3>
+                                        <p class="text-xs font-bold text-indigo-700">Petronas Digital Solutions •
+                                            Cyberjaya</p>
+                                    </div>
+                                    <span
+                                        class="inline-block px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded border border-slate-300">
+                                        Ogos 2014 – Feb 2017 (2.6 Tahun)
+                                    </span>
+                                </div>
+                                <ul
+                                    class="text-xs md:text-sm text-slate-700 space-y-2 list-disc list-outside ml-4 leading-relaxed">
+                                    <li>Membangunkan aplikasi pemantauan logistik minyak & gas berasaskan IoT dan web
+                                        dashboard masa-nyata (Angular, Node.js, PostgreSQL).</li>
+                                    <li>Mengurangkan *latency* pemprosesan data sensor logistik daripada 15 minit kepada
+                                        saat-nyata (real-time stream processing).</li>
+                                </ul>
+                            </div>
+
+                            <!-- PENGALAMAN 4 -->
+                            <div class="space-y-3 relative border-l-2 border-slate-300 pl-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 text-base">Software Engineer (Full Stack)
+                                        </h3>
+                                        <p class="text-xs font-bold text-indigo-700">MIMOS Berhad • Technology Park
+                                            Malaysia</p>
+                                    </div>
+                                    <span
+                                        class="inline-block px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded border border-slate-300">
+                                        Julai 2012 – Julai 2014 (2.0 Tahun)
+                                    </span>
+                                </div>
+                                <ul
+                                    class="text-xs md:text-sm text-slate-700 space-y-1 list-disc list-outside ml-4 leading-relaxed">
+                                    <li>Terlibar dalam R&D pembangunan enjin carian semantics data besar untuk jabatan
+                                        kerajaan.</li>
+                                    <li>Menulis kod dalam Java (Spring Boot) dan Python untuk analisa data berskala
+                                        besar.</li>
+                                </ul>
+                            </div>
+                        </section>
+
+                        <!-- ANUGERAH & PENCAPAIAN UTAMA -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Anugerah & Pengiktirafan Industri
+                            </h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                    <p class="font-bold text-slate-900">Malaysia Tech Leader Award (2023)</p>
+                                    <p class="text-slate-600 mt-0.5">Dianugerahkan oleh MDEC atas sumbangan seni bina
+                                        awan nasional.</p>
+                                </div>
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded">
+                                    <p class="font-bold text-slate-900">Axiata Innovation Excellence Gold (2022)</p>
+                                    <p class="text-slate-600 mt-0.5">Anugerah projek transformasi microservices
+                                        berprestasi tinggi.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+
+                    <!-- LAJUR KANAN: KEMAHIRAN, PENSIJILAN & PENDIDIKAN (4/12) -->
+                    <div class="lg:col-span-4 space-y-8">
+
+                        <!-- TERAS KEMAHIRAN EKSEKUTIF -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Kemahiran Kepimpinan
+                            </h2>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span
+                                    class="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-300 rounded">Technology
+                                    Strategy</span>
+                                <span
+                                    class="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-300 rounded">Enterprise
+                                    Architecture</span>
+                                <span
+                                    class="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-300 rounded">Engineering
+                                    Management</span>
+                                <span
+                                    class="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-300 rounded">Budgeting
+                                    & Cost Optimization</span>
+                                <span
+                                    class="px-2.5 py-1 bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-300 rounded">Agile
+                                    & DevOps Transformation</span>
+                            </div>
+                        </section>
+
+                        <!-- TEKNIKAL & SENI BINA -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Kepakaran Teknikal
+                            </h2>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Cloud &
+                                        DevOps</p>
+                                    <p class="text-slate-600 font-medium">AWS, GCP, Kubernetes, Docker, Terraform, CI/CD
+                                        Pipelines, Prometheus, Grafana</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Backend &
+                                        Architecture</p>
+                                    <p class="text-slate-600 font-medium">Java (Spring Boot), Node.js/TypeScript, Go,
+                                        Microservices, Event-Driven (Kafka), GraphQL, REST API</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Databases &
+                                        Storage</p>
+                                    <p class="text-slate-600 font-medium">PostgreSQL, MySQL, MongoDB, Redis, Cassandra,
+                                        Elasticsearch</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Frontend &
+                                        Mobile</p>
+                                    <p class="text-slate-600 font-medium">Angular, React.js, Next.js, Tailwind CSS,
+                                        Flutter</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- PENSIJILAN PROFESIONAL -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Pensijilan Profesional
+                            </h2>
+                            <ul class="space-y-2.5 text-xs">
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-certificate text-indigo-700 mt-0.5"></i>
+                                    <div>
+                                        <p class="font-bold text-slate-900">AWS Certified Solutions Architect –
+                                            Professional</p>
+                                        <p class="text-slate-500">Amazon Web Services (Valid thru 2026)</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-certificate text-indigo-700 mt-0.5"></i>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Certified Kubernetes Administrator (CKA)</p>
+                                        <p class="text-slate-500">Cloud Native Computing Foundation</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-certificate text-indigo-700 mt-0.5"></i>
+                                    <div>
+                                        <p class="font-bold text-slate-900">TOGAF 9.2 Certified Enterprise Architect</p>
+                                        <p class="text-slate-500">The Open Group</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fas fa-certificate text-indigo-700 mt-0.5"></i>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Certified ScrumMaster (CSM)</p>
+                                        <p class="text-slate-500">Scrum Alliance</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </section>
+
+                        <!-- PENDIDIKAN TINGGI -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Pendidikan Kelayakan
+                            </h2>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <p class="font-bold text-slate-900">Sarjana Sains (M.Sc) Kejuruteraan Perisian</p>
+                                    <p class="text-indigo-700 font-semibold">Universiti Malaya (UM)</p>
+                                    <p class="text-slate-500">2014 – 2016 • Kelulusan Cemerlang</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Ijazah Sarjana Muda (B.Sc) Sains Komputer</p>
+                                    <p class="text-indigo-700 font-semibold">Universiti Teknologi Malaysia (UTM)</p>
+                                    <p class="text-slate-500">2008 – 2012 • CGPA: 3.88 / 4.00 (Anugerah Canselor)</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- BAHASA -->
+                        <section class="space-y-3">
+                            <h2
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-800 border-b-2 border-indigo-800 pb-1">
+                                Penguasaan Bahasa
+                            </h2>
+                            <div class="space-y-1.5 text-xs">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-slate-800">Bahasa Melayu</span>
+                                    <span class="text-slate-500">Penutur Asli (Native)</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-slate-800">Bahasa Inggeris</span>
+                                    <span class="text-slate-500">Fasih Profesional (CEFR C2)</span>
+                                </div>
+                            </div>
+                        </section>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER DOKUMEN -->
+                <footer
+                    class="border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                    <span>Dokumen Resume Eksekutif Rasmi • Ir. Ts. Ahmad Danial</span>
+                    <span>Halaman 1 daripada 1</span>
+                </footer>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: DATABASE SCHEMA DOCUMENTATION     -->
+        <!-- ========================================== -->
+        <div id="view-db" class="hidden max-w-6xl mx-auto transition-all">
+            <div
+                class="bg-slate-950 border border-slate-800 rounded-xl p-6 md:p-10 text-slate-200 space-y-8 shadow-2xl">
+
+                <div>
+                    <div
+                        class="inline-block px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold rounded-full mb-3">
+                        Model Pangkalan Data Relational Normal (3NF)
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white">Struktur Column & Database Schema</h2>
+                    <p class="text-slate-400 text-sm mt-2 max-w-3xl">
+                        Reka bentuk jadual relational pangkalan data (Relational Schema) bagi menyimpan maklumat resume
+                        eksekutif ini secara dinamik, normalized, dan fleksibel untuk menyokong aplikasi berskala
+                        enterprise.
+                    </p>
+                </div>
+
+                <!-- SENARAI JADUAL DB -->
+                <div class="space-y-8">
+
+                    <!-- JADUAL 1: PROFILES -->
+                    <div class="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                        <div
+                            class="bg-indigo-950/80 border-b border-indigo-800/50 px-5 py-3 flex justify-between items-center">
+                            <span class="font-mono text-sm font-bold text-indigo-300">1. Table: profiles (Profil Utama
+                                Pengguna)</span>
+                            <span
+                                class="text-xs bg-indigo-900/60 text-indigo-200 px-2 py-0.5 rounded border border-indigo-700">Primary
+                                Entity</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs md:text-sm">
+                                <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 font-mono">
+                                    <tr>
+                                        <th class="p-3">Column Name</th>
+                                        <th class="p-3">Data Type</th>
+                                        <th class="p-3">Key / Constraint</th>
+                                        <th class="p-3">Penerangan / Kegunaan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">id</td>
+                                        <td class="p-3">BIGINT</td>
+                                        <td class="p-3 text-amber-400">PK, AUTO_INC</td>
+                                        <td class="p-3 font-sans text-slate-400">ID Unik Profil</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">full_name</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Nama Penuh Pemohon bersama gelaran</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">job_title</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Gelaran Jawatan Eksekutif Utama</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">executive_summary</td>
+                                        <td class="p-3">TEXT</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Ringkasan profil profesional lengkap
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">email</td>
+                                        <td class="p-3">VARCHAR(100)</td>
+                                        <td class="p-3 text-amber-400">UNIQUE, NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Alamat Emel Perhubungan Rasmi</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">phone</td>
+                                        <td class="p-3">VARCHAR(30)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Nombor Telefon Bimbit / Pejabat</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">location</td>
+                                        <td class="p-3">VARCHAR(100)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Bandar & Negara Kediaman</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">linkedin_url</td>
+                                        <td class="p-3">VARCHAR(255)</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Pautan Profil LinkedIn</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">website_url</td>
+                                        <td class="p-3">VARCHAR(255)</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Pautan Portfoli / Laman Web Rasmi</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">created_at</td>
+                                        <td class="p-3">TIMESTAMP</td>
+                                        <td class="p-3 text-slate-500">DEFAULT CURRENT_TIMESTAMP</td>
+                                        <td class="p-3 font-sans text-slate-400">Tarikh Rekod Dicipta</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- JADUAL 2: EXPERIENCES -->
+                    <div class="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                        <div
+                            class="bg-indigo-950/80 border-b border-indigo-800/50 px-5 py-3 flex justify-between items-center">
+                            <span class="font-mono text-sm font-bold text-indigo-300">2. Table: experiences (Pengalaman
+                                Kerja)</span>
+                            <span
+                                class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">1-to-Many
+                                Relationship</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs md:text-sm">
+                                <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 font-mono">
+                                    <tr>
+                                        <th class="p-3">Column Name</th>
+                                        <th class="p-3">Data Type</th>
+                                        <th class="p-3">Key / Constraint</th>
+                                        <th class="p-3">Penerangan / Kegunaan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">id</td>
+                                        <td class="p-3">BIGINT</td>
+                                        <td class="p-3 text-amber-400">PK, AUTO_INC</td>
+                                        <td class="p-3 font-sans text-slate-400">ID Unik Pengalaman Kerja</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">profile_id</td>
+                                        <td class="p-3">BIGINT</td>
+                                        <td class="p-3 text-emerald-400">FK (profiles.id)</td>
+                                        <td class="p-3 font-sans text-slate-400">Rujukan Foreign Key ke Jadual Profiles
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">job_title</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Gelaran Jawatan Disandang</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">company_name</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Nama Syarikat / Organisasi</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">location</td>
+                                        <td class="p-3">VARCHAR(100)</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Lokasi Syarikat Bertapak</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">start_date</td>
+                                        <td class="p-3">DATE</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Tarikh Mula Berkhidmat</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">end_date</td>
+                                        <td class="p-3">DATE</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Tarikh Tamat (NULL jika masih bekerja)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">is_current</td>
+                                        <td class="p-3">BOOLEAN</td>
+                                        <td class="p-3 text-slate-500">DEFAULT FALSE</td>
+                                        <td class="p-3 font-sans text-slate-400">Penanda (1/0) bagi jawatan semasa</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">achievements_json</td>
+                                        <td class="p-3">JSON</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Senarai bullet points pencapaian
+                                            (Stored as JSON Array)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- JADUAL 3: EDUCATIONS -->
+                    <div class="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                        <div
+                            class="bg-indigo-950/80 border-b border-indigo-800/50 px-5 py-3 flex justify-between items-center">
+                            <span class="font-mono text-sm font-bold text-indigo-300">3. Table: educations (Kelayakan
+                                Akademik)</span>
+                            <span
+                                class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">1-to-Many
+                                Relationship</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs md:text-sm">
+                                <thead class="bg-slate-900 text-slate-400 border-b border-slate-800 font-mono">
+                                    <tr>
+                                        <th class="p-3">Column Name</th>
+                                        <th class="p-3">Data Type</th>
+                                        <th class="p-3">Key / Constraint</th>
+                                        <th class="p-3">Penerangan / Kegunaan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/60 font-mono text-slate-300">
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">id</td>
+                                        <td class="p-3">BIGINT</td>
+                                        <td class="p-3 text-amber-400">PK, AUTO_INC</td>
+                                        <td class="p-3 font-sans text-slate-400">ID Unik Rekod Pendidikan</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">profile_id</td>
+                                        <td class="p-3">BIGINT</td>
+                                        <td class="p-3 text-emerald-400">FK (profiles.id)</td>
+                                        <td class="p-3 font-sans text-slate-400">Rujukan Foreign Key ke Profiles</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">degree_name</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Nama Ijazah / Sijil Academic</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">institution</td>
+                                        <td class="p-3">VARCHAR(150)</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Nama Universiti / Institusi Pendidikan
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">start_year</td>
+                                        <td class="p-3">INT</td>
+                                        <td class="p-3 text-slate-500">NOT NULL</td>
+                                        <td class="p-3 font-sans text-slate-400">Tahun Mula Pengajian</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">end_year</td>
+                                        <td class="p-3">INT</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">Tahun Tamat Pengajian</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 text-indigo-400 font-bold">grade_description</td>
+                                        <td class="p-3">VARCHAR(100)</td>
+                                        <td class="p-3 text-slate-500">NULLABLE</td>
+                                        <td class="p-3 font-sans text-slate-400">CGPA / Anugerah Canselor / Kelas
+                                            Pertama</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- JADUAL 4: CERTIFICATIONS & SKILLS -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <div class="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                            <div class="bg-indigo-950/80 border-b border-indigo-800/50 px-5 py-3">
+                                <span class="font-mono text-sm font-bold text-indigo-300">4. Table:
+                                    certifications</span>
+                            </div>
+                            <div class="p-4 space-y-2 font-mono text-xs text-slate-300">
+                                <p><strong class="text-indigo-400">id:</strong> BIGINT (PK)</p>
+                                <p><strong class="text-emerald-400">profile_id:</strong> BIGINT (FK)</p>
+                                <p><strong class="text-slate-200">cert_name:</strong> VARCHAR(150)</p>
+                                <p><strong class="text-slate-200">issuing_body:</strong> VARCHAR(150)</p>
+                                <p><strong class="text-slate-200">issue_year:</strong> INT</p>
+                                <p><strong class="text-slate-200">expiry_year:</strong> INT (Nullable)</p>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-800 rounded-lg overflow-hidden bg-slate-900/50">
+                            <div class="bg-indigo-950/80 border-b border-indigo-800/50 px-5 py-3">
+                                <span class="font-mono text-sm font-bold text-indigo-300">5. Table: skills</span>
+                            </div>
+                            <div class="p-4 space-y-2 font-mono text-xs text-slate-300">
+                                <p><strong class="text-indigo-400">id:</strong> BIGINT (PK)</p>
+                                <p><strong class="text-emerald-400">profile_id:</strong> BIGINT (FK)</p>
+                                <p><strong class="text-slate-200">category:</strong> VARCHAR(50) (e.g. Leadership,
+                                    DevOps)</p>
+                                <p><strong class="text-slate-200">skill_name:</strong> VARCHAR(100)</p>
+                                <p><strong class="text-slate-200">proficiency_level:</strong> VARCHAR(30) (e.g. Expert)
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- SCRIPT TUKAR TAB & MOD EDIT -->
+    <script>
+        let isEditMode = false;
+
+        function switchTab(tab) {
+            const viewResume = document.getElementById('view-resume');
+            const viewDb = document.getElementById('view-db');
+            const btnResume = document.getElementById('btn-tab-resume');
+            const btnDb = document.getElementById('btn-tab-db');
+
+            if (tab === 'resume') {
+                viewResume.classList.remove('hidden');
+                viewDb.classList.add('hidden');
+
+                btnResume.className = "px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-900/50";
+                btnDb.className = "px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white";
+            } else {
+                viewResume.classList.add('hidden');
+                viewDb.classList.remove('hidden');
+
+                btnDb.className = "px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-900/50";
+                btnResume.className = "px-4 py-2 text-xs md:text-sm font-semibold rounded-lg transition-all flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white";
+            }
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+
+            const viewElements = document.querySelectorAll('.view-mode');
+            const editElements = document.querySelectorAll('.edit-mode');
+            const banner = document.getElementById('editor-banner');
+            const btnText = document.getElementById('edit-text');
+
+            if (isEditMode) {
+                viewElements.forEach(el => el.classList.add('hidden'));
+                editElements.forEach(el => el.classList.remove('hidden'));
+                banner.classList.remove('hidden');
+                btnText.textContent = "Tutup Mod Editor";
+            } else {
+                // Kemas kini paparan teks biasa daripada input
+                editElements.forEach(input => {
+                    const field = input.getAttribute('data-field');
+                    if (field) {
+                        const targetView = document.querySelector(`.view-mode[data-field="${field}"]`);
+                        if (targetView) {
+                            targetView.textContent = input.value;
+                        }
+                    }
+                });
+
+                viewElements.forEach(el => el.classList.remove('hidden'));
+                editElements.forEach(el => el.classList.add('hidden'));
+                banner.classList.add('hidden');
+                btnText.textContent = "Mod Editor";
+            }
+        }
+    </script>
+</body>
+
+</html>

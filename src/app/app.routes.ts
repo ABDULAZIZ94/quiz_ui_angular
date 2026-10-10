@@ -19,6 +19,7 @@ import { RphFormComponent } from './components/rph2/rph-form.component';
 import { RphBulkComponent } from './components/rph2bulk/rph-bulk.component';
 import { QuranwebComponent } from './components/quranweb/quranweb.component';
 import { ArabicQuizComponent } from './components/arabic-quiz/arabic-quiz.component';
+import { ResumeComponent } from './components/resume/resume.component';
 
 export const routes: Routes = [
   {
@@ -95,6 +96,10 @@ export const routes: Routes = [
   {
     path: 'arabic-quiz',
     component: ArabicQuizComponent,
+  },
+  {
+    path: 'resume',
+    component: ResumeComponent
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
