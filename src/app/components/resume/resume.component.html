@@ -1,44 +1,59 @@
-<header class="no-print navbar navbar-dark bg-dark border-bottom border-secondary sticky-top shadow">
-    <div class="container-fluid px-3 px-lg-4 gap-3">
-        <a class="navbar-brand d-flex align-items-center gap-3 me-auto" href="javascript:void(0)">
-            <span class="brand-icon"><i class="fas fa-file-contract"></i></span>
-            <span>
-                <strong class="d-block fs-6">ProResume Studio</strong>
-                <small class="text-secondary">Resume & Database Schema</small>
-            </span>
-        </a>
+<header class="no-print app-navbar sticky-top">
+    <div class="container-fluid px-3 px-lg-4">
+        <div class="navbar-inner">
 
-        <div class="d-flex align-items-center flex-wrap gap-2">
-            <button class="btn btn-sm" [class.btn-primary]="activeTab === 'resume'"
-                [class.btn-outline-light]="activeTab !== 'resume'" (click)="switchTab('resume')">
-                <i class="fas fa-user-tie me-1"></i>
-                <span class="d-none d-md-inline">Templat Resume</span>
-            </button>
+            <a class="brand-link" href="javascript:void(0)">
+                <span class="brand-icon">
+                    <i class="fas fa-file-lines"></i>
+                </span>
 
-            <button class="btn btn-sm" [class.btn-primary]="activeTab === 'db'"
-                [class.btn-outline-light]="activeTab !== 'db'" (click)="switchTab('db')">
-                <i class="fas fa-database me-1"></i>
-                <span class="d-none d-md-inline">Database Schema</span>
-            </button>
+                <span class="brand-copy">
+                    <strong>ProResume Studio</strong>
+                    <small>Resume & Database Schema</small>
+                </span>
+            </a>
 
-            <button class="btn btn-sm btn-outline-warning" (click)="toggleEditMode()">
-                <i class="fas fa-pen-to-square me-1"></i>
-                {{ editMode ? 'Tutup Editor' : 'Mod Editor' }}
-            </button>
+            <nav class="nav-actions">
 
-            <button class="btn btn-sm btn-success" (click)="printResume()">
-                <i class="fas fa-print me-1"></i>
-                <span class="d-none d-sm-inline">Cetak / PDF</span>
-            </button>
+                <button type="button" class="app-btn" [class.app-btn-active]="activeTab === 'resume'"
+                    [class.app-btn-muted]="activeTab !== 'resume'" (click)="switchTab('resume')">
+
+                    <i class="fas fa-user-tie"></i>
+                    <span>Templat Resume</span>
+                </button>
+
+                <button type="button" class="app-btn" [class.app-btn-active]="activeTab === 'db'"
+                    [class.app-btn-muted]="activeTab !== 'db'" (click)="switchTab('db')">
+
+                    <i class="fas fa-database"></i>
+                    <span>Database Schema</span>
+                </button>
+
+                <button type="button" class="app-btn app-btn-edit" [class.app-btn-edit-active]="editMode"
+                    (click)="toggleEditMode()">
+
+                    <i [class]="editMode ? 'fas fa-xmark' : 'fas fa-pen-to-square'"></i>
+                    <span>{{ editMode ? 'Tutup Editor' : 'Edit Resume' }}</span>
+                </button>
+
+                <button type="button" class="app-btn app-btn-print" (click)="printResume()">
+
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Cetak / PDF</span>
+                </button>
+
+            </nav>
         </div>
     </div>
 </header>
-<div class="container my-4 no-print">
-    <div class="card shadow-sm">
-        <div class="card-header fw-bold">
-            Jana Resume Baharu
-        </div>
 
+<div class="container my-4 no-print">
+    <div class="card generate-panel">
+        <div class="card-header">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <strong>Jana Resume Baharu</strong>
+        </div>
+        
         <div class="card-body">
             <div class="mb-3">
                 <label for="tema" class="form-label">
@@ -58,7 +73,12 @@
                     placeholder="Contoh: ceritakan pengalaman dan pendidikan saya"></textarea>
             </div>
 
-            <button type="button" class="btn btn-primary" [disabled]="loading" (click)="loadResume()">
+            <button type="button" class="generate-btn" [disabled]="loading" (click)="loadResume()">
+
+                <i [class]="loading
+                    ? 'fas fa-spinner fa-spin'
+                    : 'fas fa-paper-plane'"></i>
+
                 {{ loading ? 'Sedang menjana...' : 'Hantar ke API' }}
             </button>
         </div>
