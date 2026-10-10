@@ -1,6 +1,27 @@
 <div class="quran-container">
     <h2>Quran Web Component</h2>
 
+    <!-- Navigasi Carian Surah & Ayat -->
+    <div class="nav-bar" *ngIf="!isLoading && senaraiAyat.length > 0">
+        <div class="filter-group">
+            <label for="surahSelect">Pilih Surah:</label>
+            <select id="surahSelect" [(ngModel)]="surahDipilih" (change)="tukarSurah()">
+                <option value="0">-- Semua Surah (1-114) --</option>
+                <option *ngFor="let s of senaraiSurahNo" [value]="s">
+                    Surah {{ s }}
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="ayatInput">Cari / Lompat ke Ayat:</label>
+            <input id="ayatInput" type="number" placeholder="Cth: 1" [(ngModel)]="carianAyat"
+                (input)="susunDanTapisAyat()" />
+        </div>
+
+        <button class="reset-btn" (click)="resetPenapis()">Reset Penapis</button>
+    </div>
+
     <div class="action-bar">
         <button (click)="padamCacheAndReload()" [disabled]="isLoading">
             Muat Semula Data (Padam Cache)
@@ -15,8 +36,19 @@
         {{ errorMessage }}
     </div>
 
-    <div *ngIf="!isLoading && senaraiAyat.length > 0" class="ayat-list">
-        <div *ngFor="let item of senaraiAyat" class="ayat-card">
+    <!-- Mesej jika tiada padanan carian -->
+    <div *ngIf="!isLoading && senaraiAyatDipapar.length === 0 && senaraiAyat.length > 0" class="status-msg warning">
+        Tiada ayat ditemui untuk carian ini.
+    </div>
+
+    <!-- Senarai Ayat -->
+    <div *ngIf="!isLoading && senaraiAyatDipapar.length > 0" class="ayat-list">
+        <div class="info-count">
+            Memaparkan <strong>{{ senaraiAyatDipapar.length }}</strong> daripada <strong>{{ senaraiAyatDitapis.length
+                }}</strong> ayat
+        </div>
+
+        <div *ngFor="let item of senaraiAyatDipapar" class="ayat-card">
             <div class="ayat-header">
                 <span class="badge">Surah: {{ item.surahNo }}</span>
                 <span class="badge">Ayat: {{ item.ayatNo }}</span>
@@ -29,6 +61,23 @@
             <div class="translation-text">
                 {{ item.terjemahan }}
             </div>
+        </div>
+
+        <!-- Butang Kawalan Load / Unload (Tambah / Kurang Paparan) -->
+        <div class="pagination-controls" *ngIf="senaraiAyatDitapis.length > 100">
+            <button *ngIf="senaraiAyatDipapar.length < senaraiAyatDitapis.length" (click)="muatLagi()"
+                class="btn btn-load">
+                Muat Lagi (+100 Ayat)
+            </button>
+
+            <button *ngIf="senaraiAyatDipapar.length < senaraiAyatDitapis.length" (click)="muatSemua()"
+                class="btn btn-load-all">
+                Muat Semua ({{ senaraiAyatDitapis.length }})
+            </button>
+
+            <button *ngIf="hadPaparan > 100" (click)="kurangkanPaparan()" class="btn btn-unload">
+                Kurangkan (Kembali ke 100)
+            </button>
         </div>
     </div>
 </div>

@@ -1,0 +1,53 @@
+<div class="quiz-container">
+    <h2>Kuiz Bahasa Arab (Time Attack)</h2>
+
+    <!-- Paparan Memuatkan Data -->
+    <div *ngIf="isLoading" class="loading">
+        <p>Memuatkan data kuiz...</p>
+    </div>
+
+    <!-- Selection Pemilihan Tahap -->
+    <div *ngIf="!isLoading && !isPlaying && !isGameOver" class="difficulty-selection">
+        <h3>Pilih Tahap Kesukaran:</h3>
+        <button (click)="startQuiz('senang')" class="btn btn-easy">Senang (Difficulty ≤ 10)</button>
+        <button (click)="startQuiz('sederhana')" class="btn btn-medium">Sederhana (Difficulty 11-15)</button>
+        <button (click)="startQuiz('susah')" class="btn btn-hard">Susah (Difficulty > 15)</button>
+    </div>
+
+    <!-- Sesi Kuiz Berjalan -->
+    <div *ngIf="isPlaying && filteredQuestions.length > 0" class="quiz-box">
+        <div class="quiz-header">
+            <span>Soalan: {{ currentIndex + 1 }} / {{ filteredQuestions.length }}</span>
+            <span class="timer" [ngClass]="{'warning': timeLeft <= 5}">⏱️ {{ timeLeft }}s</span>
+        </div>
+
+        <div class="question-section">
+            <p class="arabic-text" dir="rtl">{{ filteredQuestions[currentIndex].arabicWord }}</p>
+
+            <!-- Paparan Gambar dari URL -->
+            <div *ngIf="filteredQuestions[currentIndex].image" class="image-container">
+                <img [src]="filteredQuestions[currentIndex].image" alt="Gambar Soalan" class="quiz-img" />
+            </div>
+        </div>
+
+        <!-- Pilihan Jawapan -->
+        <div class="options-section">
+            <button *ngFor="let option of filteredQuestions[currentIndex].options" (click)="selectAnswer(option)"
+                class="btn-option">
+                {{ option }}
+            </button>
+        </div>
+
+        <!-- Butang Tamatkan Kuiz -->
+        <div class="end-quiz-section">
+            <button (click)="endGame()" class="btn-end-quiz">Tamatkan Kuiz</button>
+        </div>
+    </div>
+
+    <!-- Paparan Keputusan (Game Over / Tamat Masa) -->
+    <div *ngIf="isGameOver" class="game-over">
+        <h3>Tamat Permainan! 🎉</h3>
+        <p class="score-text">Markah Keseluruhan: <strong>{{ score }}</strong></p>
+        <button (click)="resetQuiz()" class="btn btn-restart">Main Semula</button>
+    </div>
+</div>

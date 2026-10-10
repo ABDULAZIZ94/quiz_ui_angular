@@ -1,8 +1,10 @@
+
 .quran-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 .action-bar {
@@ -11,12 +13,13 @@
 
 button {
   background-color: #008cba;
-  color: white;
+  color: #ffffff;
   border: none;
   padding: 10px 16px;
   font-size: 14px;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 button:hover {
@@ -33,6 +36,7 @@ button:disabled {
   background-color: #e2f0d9;
   color: #385723;
   border-radius: 4px;
+  margin-bottom: 15px;
 }
 
 .error-msg {
@@ -40,15 +44,17 @@ button:disabled {
   background-color: #f8d7da;
   color: #721c24;
   border-radius: 4px;
+  margin-bottom: 15px;
 }
 
+/* Format Kad Ayat */
 .ayat-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 15px;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .ayat-header {
@@ -58,26 +64,93 @@ button:disabled {
 }
 
 .badge {
-  background-color: #f0f0f0;
-  padding: 4px 8px;
-  border-radius: 4px;
+  background-color: #f0f4f8;
+  border: 1px solid #d0d7de;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 600;
+  color: #1f2328;
 }
 
+/* Format Teks Arab Al-Quran */
 .arabic-text {
-  font-size: 26px;
+  font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  font-size: 30px; /* Diperbesarkan sikit supaya harakat jelas */
   text-align: right;
   direction: rtl;
-  font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade', serif;
-  line-height: 1.8;
-  color: #1a1a1a;
+  line-height: 2.2; /* Line-height lebih tinggi elak tanda baca bertindih */
+  color: #111111;
   margin-bottom: 15px;
+  word-spacing: 4px;
+  padding: 10px 0;
 }
 
+/* Format Terjemahan */
 .translation-text {
   font-size: 15px;
-  color: #4a4a4a;
+  color: #333333;
   line-height: 1.6;
+  text-align: left;
+  border-top: 1px dashed #eeeeee;
+  padding-top: 12px;
+}
+/* Styling Navigasi Bahagian Atas */
+.nav-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #495057;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  border-color: #008cba;
+}
+
+.reset-btn {
+  background-color: #6c757d;
+  padding: 9px 14px;
+}
+
+.reset-btn:hover {
+  background-color: #5a6268;
+}
+
+.info-count {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.status-msg.warning {
+  background-color: #fff3cd;
+  color: #856404;
 }

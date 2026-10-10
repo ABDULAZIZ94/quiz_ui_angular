@@ -18,6 +18,7 @@ import { RphFlowComponent } from './components/rph-flow/rph-flow.component';
 import { RphFormComponent } from './components/rph2/rph-form.component';
 import { RphBulkComponent } from './components/rph2bulk/rph-bulk.component';
 import { QuranwebComponent } from './components/quranweb/quranweb.component';
+import { ArabicQuizComponent } from './components/arabic-quiz/arabic-quiz.component';
 
 export const routes: Routes = [
   {
@@ -90,6 +91,10 @@ export const routes: Routes = [
   {
     path: 'quranweb',
     component: QuranwebComponent,
+  },
+  {
+    path: 'arabic-quiz',
+    component: ArabicQuizComponent,
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
