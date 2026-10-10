@@ -39,6 +39,20 @@
     </div>
     <div *ngIf="errorMessage" class="status-card error">{{ errorMessage }}</div>
 
+    <div class="slide-footer">
+        <button (click)="prevSlide()" [disabled]="currentIndex === 0" class="btn-nav">
+            &laquo; Sebelumnya
+        </button>
+    
+        <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="((currentIndex + 1) / filteredSlides.length) * 100"></div>
+        </div>
+    
+        <button (click)="nextSlide()" [disabled]="currentIndex === filteredSlides.length - 1" class="btn-nav">
+            Seterusnya &raquo;
+        </button>
+    </div>
+
     <!-- Paparan Slaid Semasa (Slider View) -->
     <div *ngIf="!loading && filteredSlides.length > 0" class="slide-card">
         <div class="slide-header">
@@ -57,6 +71,7 @@
                 Slaid {{ currentIndex + 1 }} daripada {{ filteredSlides.length }}
             </span>
         </div>
+        <!-- Navigasi Bawah (Sebelum & Seterusnya) -->
 
         <div class="slide-body">
             <!-- Tajuk Slaid -->
@@ -77,19 +92,5 @@
             </div>
         </div>
 
-        <!-- Navigasi Bawah (Sebelum & Seterusnya) -->
-        <div class="slide-footer">
-            <button (click)="prevSlide()" [disabled]="currentIndex === 0" class="btn-nav">
-                &laquo; Sebelumnya
-            </button>
-
-            <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="((currentIndex + 1) / filteredSlides.length) * 100"></div>
-            </div>
-
-            <button (click)="nextSlide()" [disabled]="currentIndex === filteredSlides.length - 1" class="btn-nav">
-                Seterusnya &raquo;
-            </button>
-        </div>
     </div>
 </div>
