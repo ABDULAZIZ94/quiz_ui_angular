@@ -144,7 +144,7 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
     const nameIdx = headers.findIndex(h => h.toLowerCase().includes('name') || h.toLowerCase().includes('nama'));
     const subjectIdx = headers.findIndex(h => h.toLowerCase().includes('subject') || h.toLowerCase().includes('subjek') || h.toLowerCase().includes('quiz'));
 
-    this.allData = lines.slice(1).map(line => {
+    const rawRecords: ScoreRecord[] = lines.slice(1).map(line => {
       const values = this.parseCsvLine(line);
       const timestampRaw = values[timestampIdx >= 0 ? timestampIdx : 0] || '';
       const scoreVal = Number(values[scoreIdx >= 0 ? scoreIdx : 1]) || 0;
@@ -157,6 +157,27 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
         parsedDate: new Date(timestampRaw) 
       };
     });
+
+    // LOGIK BAHARU: Buang duplikasi & ambil skor tertinggi bagi setiap pemain (mengikut nama & subjek)
+    const map = new Map<string, ScoreRecord>();
+    rawRecords.forEach(record => {
+      // Gunakan kunci gabungan nama dan subjek (supaya skor pemain berbeza subjek tidak bercampur)
+      const key = `${record.name.trim().toLowerCase()}_${record.subject.trim().toLowerCase()}`;
+      
+      if (!map.has(key)) {
+        map.set(key, record);
+      } else {
+        const existing = map.get(key)!;
+        // Jika skor baharu lebih tinggi, atau skor sama tetapi tarikh lebih baharu, gantikan
+        if (record.score > existing.score) {
+          map.set(key, record);
+        } else if (record.score === existing.score && record.parsedDate.getTime() > existing.parsedDate.getTime()) {
+          map.set(key, record);
+        }
+      }
+    });
+
+    this.allData = Array.from(map.values());
 
     const subjects = this.allData.map(item => item.subject);
     this.availableSubjects = [...new Set(subjects)].sort();
@@ -206,7 +227,6 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
       if (a.score !== b.score) {
         return this.sortDescendingScore ? b.score - a.score : a.score - b.score;
       }
-      // Jika markah sama, susun ikut tarikh terkini
       return b.parsedDate.getTime() - a.parsedDate.getTime();
     });
 
