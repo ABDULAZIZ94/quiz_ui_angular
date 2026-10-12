@@ -124,7 +124,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  // Muat data dengan sokongan LocalStorage & Butang Refresh
   loadQuizData(forceRefresh: boolean = false): void {
     this.isLoading = true;
     const cacheKey = 'arabic_quiz_csv_cache';
@@ -141,7 +140,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
         error: (err) => {
           console.error('Ralat memuatkan data kuiz:', err);
           if (cachedData) {
-            this.processCsvData(cachedData); // Fallback ke cache jika gagal
+            this.processCsvData(cachedData);
           } else {
             this.isLoading = false;
           }
@@ -244,20 +243,20 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   selectAnswer(option: string): void {
-    if (this.isAnswerChecked) return; // Elakkan klik bertalu-talu
+    if (this.isAnswerChecked) return;
 
     this.isAnswerChecked = true;
     this.selectedOption = option;
-    clearInterval(this.timer);
+    clearInterval(this.timer); // Hentikan masa sementara melihat jawapan
 
     const currentQ = this.filteredQuestions[this.currentIndex];
     
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
-      this.timeLeft += 5; // Tambah 5 saat jika betul
+      this.timeLeft += 5; // Tambah masa jika betul
     }
 
-    // Beri masa 800ms untuk pengguna lihat warna hijau/merah sebelum ke soalan seterusnya
+    // Buffer masa selama 5 saat (5000ms) sebelum ke soalan seterusnya
     setTimeout(() => {
       this.isAnswerChecked = false;
       this.selectedOption = null;
@@ -268,7 +267,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this.endGame();
       }
-    }, 800);
+    }, 5000);
   }
 
   endGame(): void {

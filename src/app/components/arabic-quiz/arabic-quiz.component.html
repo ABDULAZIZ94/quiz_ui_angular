@@ -1,5 +1,4 @@
 <div class="quiz-container">
-    <!-- Kanvas Three.js Latar Belakang 3D -->
     <canvas #threeCanvas class="three-background"></canvas>
 
     <div class="quiz-content-wrapper">
@@ -9,12 +8,10 @@
 
         <h2>Kuiz Bahasa Arab (Time Attack)</h2>
 
-        <!-- Paparan Memuatkan Data -->
         <div *ngIf="isLoading" class="loading">
             <p>Memuatkan data kuiz...</p>
         </div>
 
-        <!-- Pemilihan 10 Level -->
         <div *ngIf="!isLoading && !isPlaying && !isGameOver" class="difficulty-selection">
             <h3>Pilih Tahap (Level 1 - 10):</h3>
             <div class="levels-grid">
@@ -24,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Sesi Kuiz Berjalan -->
         <div *ngIf="isPlaying && filteredQuestions.length > 0" class="quiz-box">
             <div class="quiz-header">
                 <span>Soalan: {{ currentIndex + 1 }} / {{ filteredQuestions.length }}</span>
@@ -35,13 +31,11 @@
             <div class="question-section">
                 <p class="arabic-text" dir="rtl">{{ filteredQuestions[currentIndex].arabicWord }}</p>
 
-                <!-- Paparan Gambar dari URL -->
                 <div *ngIf="filteredQuestions[currentIndex].image" class="image-container">
                     <img [src]="filteredQuestions[currentIndex].image" alt="Gambar Soalan" class="quiz-img" />
                 </div>
             </div>
 
-            <!-- Pilihan Jawapan -->
             <div class="options-section">
                 <button *ngFor="let option of filteredQuestions[currentIndex].options" (click)="selectAnswer(option)"
                     [disabled]="isAnswerChecked" class="btn-option" [ngClass]="{
@@ -52,13 +46,11 @@
                 </button>
             </div>
 
-            <!-- Butang Tamatkan Kuiz -->
             <div class="end-quiz-section">
                 <button (click)="endGame()" class="btn-end-quiz">Tamatkan Kuiz</button>
             </div>
         </div>
 
-        <!-- Paparan Keputusan (Game Over / Tamat Masa) -->
         <div *ngIf="isGameOver" class="game-over">
             <h3>Tamat Permainan! 🎉</h3>
             <p class="score-text">Tahap Dipilih: <strong>Level {{ selectedLevel }}</strong></p>
