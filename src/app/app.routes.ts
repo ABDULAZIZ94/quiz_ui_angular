@@ -1,25 +1,5 @@
 import { Routes } from '@angular/router';
-
-import { QuizComponent } from './components/quiz/quiz.component';
-import { LandingComponent } from './pages/guest/landing/landing.component';
-import { NotFoundComponent } from './components/404/404.component';
-import { TestabcdComponent } from './components/testabcd/testabcd.component';
-import { QuestionComponent } from './components/question/question.component';
-import { ScoreComponent } from './components/score/score.component';
-import { QuizGeneratorComponent } from './components/quizgenerator/quizgenerator.component';
 import { authGuard } from './auth.guard';
-import { LoginComponent } from './components/login/login.component';
-import { QuizSliderComponent } from './components/quizslider/quiz-slider.component';
-import { Flashcard2Component } from './components/flashcard2/flashcardcomponent';
-import { GenerateSlideComponent } from './components/generateslide/generateslide.component';
-import { RphComponent } from './components/rph/rph.component';
-import { RphScheduleComponent } from './components/rphschedule/rph-schedule.component';
-import { RphFlowComponent } from './components/rph-flow/rph-flow.component';
-import { RphFormComponent } from './components/rph2/rph-form.component';
-import { RphBulkComponent } from './components/rph2bulk/rph-bulk.component';
-import { QuranwebComponent } from './components/quranweb/quranweb.component';
-import { ArabicQuizComponent } from './components/arabic-quiz/arabic-quiz.component';
-import { ResumeComponent } from './components/resume/resume.component';
 
 export const routes: Routes = [
   {
@@ -29,86 +9,85 @@ export const routes: Routes = [
   },
   {
     path: 'landing',
-    component: LandingComponent
+    loadComponent: () => import('./pages/guest/landing/landing.component').then(m => m.LandingComponent)
   },
-    {
+  {
     path: 'login',
-    component: LoginComponent
+    loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
   },
   {
     path: 'quiz',
-    component: QuizComponent
+    loadComponent: () => import('./components/quiz/quiz.component').then(m => m.QuizComponent)
   },
   {
     path: 'testabcd',
-    component: TestabcdComponent
+    loadComponent: () => import('./components/testabcd/testabcd.component').then(m => m.TestabcdComponent)
   },
   {
     path: 'question',
-    component: QuestionComponent
+    loadComponent: () => import('./components/question/question.component').then(m => m.QuestionComponent)
   },
   {
     path: 'highscore',
-    component: ScoreComponent
+    loadComponent: () => import('./components/score/score.component').then(m => m.ScoreComponent)
   },
   {
     path: 'quizgenerator',
-    component: QuizGeneratorComponent,
+    loadComponent: () => import('./components/quizgenerator/quizgenerator.component').then(m => m.QuizGeneratorComponent),
     // canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'quizslider',
-    component: QuizSliderComponent,
+    loadComponent: () => import('./components/quizslider/quiz-slider.component').then(m => m.QuizSliderComponent),
   },
   {
     path: 'generateslide',
-    component: GenerateSlideComponent,
+    loadComponent: () => import('./components/generateslide/generateslide.component').then(m => m.GenerateSlideComponent),
     // canActivate: [authGuard] // Menambah pengawal untuk memastikan hanya pengguna yang sah boleh mengakses laluan ini
   },
   {
     path: 'flashcard2',
-    component: Flashcard2Component,
+    loadComponent: () => import('./components/flashcard2/flashcardcomponent').then(m => m.Flashcard2Component),
   },
   {
     path: 'rph',
-    component: RphComponent,
+    loadComponent: () => import('./components/rph/rph.component').then(m => m.RphComponent),
   },
   {
     path: 'rphschedule',
-    component: RphScheduleComponent,
+    loadComponent: () => import('./components/rphschedule/rph-schedule.component').then(m => m.RphScheduleComponent),
   },
   {
     path: 'rph-flow',
-    component: RphFlowComponent,
+    loadComponent: () => import('./components/rph-flow/rph-flow.component').then(m => m.RphFlowComponent),
   },
   {
     path: 'rph-form',
-    component: RphFormComponent,
+    loadComponent: () => import('./components/rph2/rph-form.component').then(m => m.RphFormComponent),
   },
   {
     path: 'rph-bulk',
-    component: RphBulkComponent,
+    loadComponent: () => import('./components/rph2bulk/rph-bulk.component').then(m => m.RphBulkComponent),
   },
   {
     path: 'quranweb',
-    component: QuranwebComponent,
+    loadComponent: () => import('./components/quranweb/quranweb.component').then(m => m.QuranwebComponent),
   },
   {
     path: 'arabic-quiz',
-    component: ArabicQuizComponent,
+    loadComponent: () => import('./components/arabic-quiz/arabic-quiz.component').then(m => m.ArabicQuizComponent),
   },
   {
     path: 'resume',
-    component: ResumeComponent
+    loadComponent: () => import('./components/resume/resume.component').then(m => m.ResumeComponent)
   },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
-    path: '**', 
-    component: NotFoundComponent 
-  },
-    // Wildcard Route (404 Page) - Mesti berada paling bawah!
-  { 
     path: '404', 
-    component: NotFoundComponent 
+    loadComponent: () => import('./components/404/404.component').then(m => m.NotFoundComponent) 
+  },
+  { 
+    path: '**', 
+    loadComponent: () => import('./components/404/404.component').then(m => m.NotFoundComponent) 
   }
 ];

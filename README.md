@@ -72,3 +72,7 @@ ng build
 firebase init hosting
 firebase deploy --only hosting
 
+# install
+npm install three
+npm install --save-dev @types/three
+
