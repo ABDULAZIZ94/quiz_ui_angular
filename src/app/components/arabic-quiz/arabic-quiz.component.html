@@ -3,6 +3,10 @@
     <canvas #threeCanvas class="three-background"></canvas>
 
     <div class="quiz-content-wrapper">
+        <div class="top-bar" *ngIf="!isLoading && !isPlaying && !isGameOver">
+            <button (click)="refreshQuizData()" class="btn-refresh">🔄 Refresh Quiz Data</button>
+        </div>
+
         <h2>Kuiz Bahasa Arab (Time Attack)</h2>
 
         <!-- Paparan Memuatkan Data -->
@@ -40,7 +44,10 @@
             <!-- Pilihan Jawapan -->
             <div class="options-section">
                 <button *ngFor="let option of filteredQuestions[currentIndex].options" (click)="selectAnswer(option)"
-                    class="btn-option">
+                    [disabled]="isAnswerChecked" class="btn-option" [ngClass]="{
+                        'correct': isAnswerChecked && option === filteredQuestions[currentIndex].answer,
+                        'wrong': isAnswerChecked && selectedOption === option && option !== filteredQuestions[currentIndex].answer
+                    }">
                     {{ option }}
                 </button>
             </div>

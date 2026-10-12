@@ -52,6 +52,10 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   timeLeft: number = 15;
   timer: any;
 
+  // State untuk warna jawapan (hijau / merah)
+  selectedOption: string | null = null;
+  isAnswerChecked: boolean = false;
+
   // Three.js variables
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
@@ -62,7 +66,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.fetchQuizData();
+    this.loadQuizData(false);
   }
 
   ngAfterViewInit(): void {
@@ -80,7 +84,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Cipta Zarah 3D (Particles)
     const particlesGeometry = new THREE.BufferGeometry();
     const particlesCount = 700;
     const posArray = new Float32Array(particlesCount * 3);
@@ -102,7 +105,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.scene.add(this.particlesMesh);
 
     this.animateThreeJS();
-
     window.addEventListener('resize', this.onWindowResize.bind(this));
   }
 
@@ -122,20 +124,41 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  fetchQuizData(): void {
+  // Muat data dengan sokongan LocalStorage & Butang Refresh
+  loadQuizData(forceRefresh: boolean = false): void {
     this.isLoading = true;
-    this.http.get('https://quizapi.ezcigu.online/quizcsv', { responseType: 'text' }).subscribe({
-      next: (csvText) => {
-        const items = this.parseCSV(csvText);
-        this.rawData = items;
-        this.allQuestions = this.transformDataToQuestions(items);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Ralat memuatkan data kuiz:', err);
-        this.isLoading = false;
-      }
-    });
+    const cacheKey = 'arabic_quiz_csv_cache';
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData && !forceRefresh) {
+      this.processCsvData(cachedData);
+    } else {
+      this.http.get('https://quizapi.ezcigu.online/quizcsv', { responseType: 'text' }).subscribe({
+        next: (csvText) => {
+          localStorage.setItem(cacheKey, csvText);
+          this.processCsvData(csvText);
+        },
+        error: (err) => {
+          console.error('Ralat memuatkan data kuiz:', err);
+          if (cachedData) {
+            this.processCsvData(cachedData); // Fallback ke cache jika gagal
+          } else {
+            this.isLoading = false;
+          }
+        }
+      });
+    }
+  }
+
+  refreshQuizData(): void {
+    this.loadQuizData(true);
+  }
+
+  private processCsvData(csvText: string): void {
+    const items = this.parseCSV(csvText);
+    this.rawData = items;
+    this.allQuestions = this.transformDataToQuestions(items);
+    this.isLoading = false;
   }
 
   private parseCSV(csvText: string): ArabicItem[] {
@@ -165,7 +188,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
 
     return items.map(item => {
       const diffNum = Number(item.Difficulty) || 1;
-      // Pecahkan kepada 10 Level berdasarkan nilai Difficulty (skala 1 hingga 10)
       let calculatedLevel = Math.ceil(diffNum / 2);
       if (calculatedLevel < 1) calculatedLevel = 1;
       if (calculatedLevel > 10) calculatedLevel = 10;
@@ -202,6 +224,8 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isGameOver = false;
     this.currentIndex = 0;
     this.score = 0;
+    this.isAnswerChecked = false;
+    this.selectedOption = null;
 
     this.startTimer();
   }
@@ -220,22 +244,31 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   selectAnswer(option: string): void {
+    if (this.isAnswerChecked) return; // Elakkan klik bertalu-talu
+
+    this.isAnswerChecked = true;
+    this.selectedOption = option;
+    clearInterval(this.timer);
+
     const currentQ = this.filteredQuestions[this.currentIndex];
+    
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
+      this.timeLeft += 5; // Tambah 5 saat jika betul
     }
-    this.nextQuestion();
-  }
 
-  nextQuestion(): void {
-    clearInterval(this.timer);
-    this.currentIndex++;
+    // Beri masa 800ms untuk pengguna lihat warna hijau/merah sebelum ke soalan seterusnya
+    setTimeout(() => {
+      this.isAnswerChecked = false;
+      this.selectedOption = null;
+      this.currentIndex++;
 
-    if (this.currentIndex < this.filteredQuestions.length) {
-      this.startTimer();
-    } else {
-      this.endGame();
-    }
+      if (this.currentIndex < this.filteredQuestions.length) {
+        this.startTimer();
+      } else {
+        this.endGame();
+      }
+    }, 800);
   }
 
   endGame(): void {
