@@ -225,13 +225,15 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.score = 0;
     this.isAnswerChecked = false;
     this.selectedOption = null;
+    this.timeLeft = 15; // Mula kuiz dengan 15 saat
 
     this.startTimer();
   }
 
   startTimer(): void {
     clearInterval(this.timer);
-    this.timeLeft = 15;
+    // Nota: 'this.timeLeft = 15' dibuang dari sini supaya masa tidak di-reset ke 15 saat setiap kali soalan bertukar.
+    // Sebaliknya ia akan meneruskan baki masa yang ada (atau masa tambahan jika dijawab betul).
 
     this.timer = setInterval(() => {
       this.timeLeft--;
@@ -253,7 +255,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
-      this.timeLeft += 5; // Tambah masa jika betul
+      this.timeLeft += 5; // Tambah 5 saat pada baki masa jika jawapan betul
     }
 
     // Buffer masa selama 5 saat (5000ms) sebelum ke soalan seterusnya
@@ -263,7 +265,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       this.currentIndex++;
 
       if (this.currentIndex < this.filteredQuestions.length) {
-        this.startTimer();
+        this.startTimer(); // Sambung semula timer dengan baki masa terkumpul
       } else {
         this.endGame();
       }

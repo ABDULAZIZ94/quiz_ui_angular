@@ -1,15 +1,28 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FlashcardService } from '../../services/flashcard.service';
 
 @Component({
   selector: 'app-flashcard',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './flashcard.component.html',
-  styleUrl: './flashcard.component.css'
+  styleUrls: ['./flashcard.component.css']
 })
 export class FlashcardComponent {
   flashcardService = inject(FlashcardService);
 
   // Buat array [1, 2, 3, ..., 100]
   readonly levels = Array.from({ length: 100 }, (_, i) => i + 1);
+
+  refreshData(): void {
+    // Panggil fungsi refresh pada service untuk memuatkan semula data terkini (paksa muat semula cache)
+    if (typeof (this.flashcardService as any).loadFlashcardData === 'function') {
+      (this.flashcardService as any).loadFlashcardData(true);
+    } else if (typeof (this.flashcardService as any).refreshData === 'function') {
+      (this.flashcardService as any).refreshData();
+    } else {
+      window.location.reload();
+    }
+  }
 }

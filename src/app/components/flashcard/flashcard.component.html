@@ -1,18 +1,25 @@
-<!-- Bahagian Filter 1-10 & Balloon/Badge Jumlah Kad -->
-<div class="filter-container">
-  <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === null"
-    (click)="flashcardService.setDifficulty(null)">
-    Semua
-    <span class="badge">{{ flashcardService.totalWordsCount() }}</span>
-  </button>
+<!-- Header Moden dengan Butang Refresh & Filter Tahap -->
+<div class="quiz-header-bar">
+  <div class="filter-container">
+    <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === null"
+      (click)="flashcardService.setDifficulty(null)">
+      Semua
+      <span class="badge-count">{{ flashcardService.totalWordsCount() }}</span>
+    </button>
 
-  @for (level of levels; track level) {
-  <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
-    (click)="flashcardService.setDifficulty(level)">
-    Tahap {{ level }}
-    <span class="badge">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
+    @for (level of levels; track level) {
+    <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
+      (click)="flashcardService.setDifficulty(level)">
+      Tahap {{ level }}
+      <span class="badge-count">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
+    </button>
+    }
+  </div>
+
+  <!-- Butang Refresh Moden -->
+  <button class="refresh-btn" (click)="refreshData()" title="Muat Semula Data">
+    🔄 <span class="refresh-text">Segar Semula</span>
   </button>
-  }
 </div>
 
 <!-- Container Utama Kad Flashcard -->
@@ -22,42 +29,58 @@
 
     <!-- Muka Depan Kad -->
     <div class="card-face card-front">
-
-      <!-- Paparan Gambar (Jika imageUrl Wujud) -->
       @if (word.imageUrl) {
       <div class="image-wrapper">
         <img [src]="word.imageUrl" [alt]="word.english" class="card-image" />
       </div>
       }
 
-      <div class="arabic-text">{{ word.arabic }}</div>
-      <div class="hint">Sentuh untuk lihat maksud</div>
+      <div class="main-arabic-section">
+        <div class="arabic-text">{{ word.arabic }}</div>
+      </div>
+      <div class="hint">Sentuh untuk lihat maksud 👆</div>
     </div>
 
     <!-- Muka Belakang Kad -->
-    <div class="card-face card-back">
-      <!-- Label ditambah di sini -->
-      <div class="english"><strong>Inggeris:</strong> {{ word.english }}</div>
-      <div class="english"><strong>Melayu:</strong> {{ word.malay }}</div>
-      <div class="english"><strong>Rohingya:</strong> {{ word.rohingya }}</div>
+    <div class="card-face card-back" (click)="$event.stopPropagation()">
+      <div class="back-content">
+        <div class="translations-grid">
+          <div class="trans-item">
+            <span class="label">Inggeris</span>
+            <span class="value">{{ word.english }}</span>
+          </div>
+          <div class="trans-item">
+            <span class="label">Melayu</span>
+            <span class="value">{{ word.malay }}</span>
+          </div>
+          <div class="trans-item" *ngIf="word.rohingya">
+            <span class="label">Rohingya</span>
+            <span class="value">{{ word.rohingya }}</span>
+          </div>
+          <div class="trans-item" *ngIf="word.transliteration">
+            <span class="label">Sebutan</span>
+            <span class="value">{{ word.transliteration }}</span>
+          </div>
+        </div>
 
-      <div class="translit"><strong>Sebutan:</strong> {{ word.transliteration }}</div>
-      <div class="category"><strong>Kategori:</strong> {{ word.category }}</div>
+        <div class="category-box" *ngIf="word.category">
+          <span class="label">Kategori:</span> <span class="cat-val">{{ word.category }}</span>
+        </div>
 
-      <!-- Label untuk innerHTML diasingkan ke dalam span -->
-      <div class="example">
-        <strong>Contoh (Arab):</strong> <span [innerHTML]="word.exampleArabic"></span>
+        <div class="example-box" *ngIf="word.exampleArabic || word.exampleMalay">
+          <div class="example-arabic" *ngIf="word.exampleArabic" [innerHTML]="word.exampleArabic"></div>
+          <div class="example-malay" *ngIf="word.exampleMalay" [innerHTML]="word.exampleMalay"></div>
+        </div>
       </div>
-      <div class="example">
-        <strong>Contoh (Melayu):</strong> <span [innerHTML]="word.exampleMalay"></span>
-      </div>
 
-      <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()">🔊</button>
+      <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()"
+        title="Dengar Sebutan">🔊</button>
     </div>
 
   </div>
   } @else if (flashcardService.loading()) {
   <div class="loading-state">
+    <div class="spinner"></div>
     <p>Memuatkan kad perkataan...</p>
   </div>
   } @else {

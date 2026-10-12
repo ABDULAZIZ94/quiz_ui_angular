@@ -47,7 +47,7 @@ export const routes: Routes = [
   },
   {
     path: 'flashcard2',
-    loadComponent: () => import('./components/flashcard2/flashcardcomponent').then(m => m.Flashcard2Component),
+    loadComponent: () => import('./components/flashcard2/flashcard2.component').then(m => m.Flashcard2Component),
   },
   {
     path: 'rph',
