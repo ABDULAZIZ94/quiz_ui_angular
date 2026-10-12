@@ -2,23 +2,23 @@
   display: flex;
   flex-direction: column;
   width: 100vw;
-  height: 100dvh; /* Menggunakan Dynamic Viewport Height untuk keserasian Safari iOS */
+  height: 100dvh; /* Ketinggian dinamik selamat untuk peranti iOS Safari */
   margin: 0;
-  padding: 10px;
+  padding: 12px;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: #f1f5f9;
+  background: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Bahagian Atas: Bar Filter & Refresh */
+/* Bahagian Atas: Bar Filter & Refresh yang Elegan */
 .quiz-header-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
   max-width: 520px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 12px auto;
   flex-shrink: 0;
 }
 
@@ -28,79 +28,85 @@
   overflow-x: auto;
   white-space: nowrap;
   padding-bottom: 4px;
-  scrollbar-width: none; /* Hilangkan scrollbar di Firefox */
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   flex-grow: 1;
 }
 
 .filter-container::-webkit-scrollbar {
-  display: none; /* Hilangkan scrollbar di Safari/Chrome */
+  display: none;
 }
 
 .filter-btn {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
-  padding: 6px 12px;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn.active {
-  background: #0284c7;
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
   color: #ffffff;
-  border-color: #0284c7;
-  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
 }
 
 .badge-count {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 2px 6px;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 0.75rem;
 }
 
 .filter-btn.active .badge-count {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .refresh-btn {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #0284c7;
-  padding: 6px 12px;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #38bdf8;
+  padding: 8px 14px;
+  border-radius: 16px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .refresh-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 @media (max-width: 480px) {
   .refresh-text {
-    display: none; /* Sembunyikan teks pada skrin kecil demi menjimatkan ruang, kekalkan ikon */
+    display: none;
   }
 }
 
-/* Container Kad Flashcard */
+/* Container Utama Mengaktifkan Kesan 3D Realistik */
 .card-container {
-  perspective: 1200px;
-  -webkit-perspective: 1200px;
+  perspective: 1600px;
+  -webkit-perspective: 1600px;
   width: 100%;
   max-width: 520px;
   flex-grow: 1;
@@ -111,14 +117,21 @@
   padding-bottom: 10px;
 }
 
-.card {
+.card-wrapper-3d {
   width: 100%;
   height: 100%;
   max-height: 750px;
+  perspective: 1600px;
+  -webkit-perspective: 1600px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
   position: relative;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.75s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efek beralih 3D melantun (springy) yang power */
   cursor: pointer;
 }
 
@@ -134,33 +147,35 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 24px;
+  -webkit-backface-visibility: hidden; /* Mengelakkan glitch pada Safari iOS */
+  border-radius: 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* Melancarkan skrol dalaman pada peranti iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Muka Depan */
+/* Muka Depan Kad (Eksklusif Gaya Premium Dark 3D) */
 .card-front {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  background: linear-gradient(145deg, #1e293b, #0f172a);
   color: #ffffff;
-  border: 1px solid #334155;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   text-align: center;
 }
 
 .image-wrapper {
   width: 100%;
-  max-height: 180px;
-  border-radius: 16px;
+  max-height: 190px;
+  border-radius: 18px;
   overflow: hidden;
   margin-bottom: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
 }
 
@@ -181,27 +196,30 @@
 
 .arabic-text {
   font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
-  font-size: clamp(2.5rem, 7vh, 4rem);
+  font-size: clamp(2.8rem, 8vh, 4.5rem);
   line-height: 1.4;
   direction: rtl;
   font-weight: 700;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
 }
 
 .card-front .hint {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: #38bdf8;
   margin-top: auto;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-/* Muka Belakang */
+/* Muka Belakang Kad (Clean, Bersih & Profesional) */
 .card-back {
   background: #ffffff;
   color: #0f172a;
   transform: rotateY(180deg);
   -webkit-transform: rotateY(180deg);
-  border: 2px solid #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 }
 
 .back-content {
@@ -216,8 +234,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   background: #f8fafc;
-  padding: 12px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 18px;
   border: 1px solid #e2e8f0;
 }
 
@@ -231,21 +249,24 @@
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .trans-item .value {
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #0f172a;
   word-break: break-word;
+  margin-top: 2px;
 }
 
 .category-box {
   background: #f0f9ff;
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
   font-size: 0.85rem;
   color: #0369a1;
+  border: 1px solid #e0f2fe;
 }
 
 .category-box .label {
@@ -254,18 +275,21 @@
 
 .example-box {
   background: #f8fafc;
-  padding: 12px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 18px;
   border-left: 4px solid #0284c7;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .example-arabic {
   font-family: 'Amiri', 'Scheherazade New', serif;
   font-size: 1.2rem;
-  color: #0369a1;
+  color: #0284c7;
   direction: rtl;
   text-align: right;
   font-weight: 700;
@@ -278,104 +302,48 @@
 }
 
 .speak-btn {
-  background: #0284c7;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
   color: white;
   border: none;
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
   transition: transform 0.2s, background-color 0.2s;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
   margin: 10px auto 0 auto;
   flex-shrink: 0;
 }
 
 .speak-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
+/* Status Loading & Empty */
 .loading-state, .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 500;
+  height: 100%;
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #0284c7;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #38bdf8;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Container Utama Mengaktifkan Kesan 3D */
-.card-container {
-  perspective: 1500px;
-  -webkit-perspective: 1500px;
-  width: 100%;
-  max-width: 520px;
-  flex-grow: 1;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 10px;
-}
-
-.card-wrapper-3d {
-  width: 100%;
-  height: 100%;
-  max-height: 750px;
-  perspective: 1500px;
-  -webkit-perspective: 1500px;
-}
-
-.card {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); /* Kesan melantun 3D yang moden */
-  cursor: pointer;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  border-radius: 24px;
-}
-
-.card.flipped {
-  transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-}
-
-.card-face {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden; /* Penting untuk kestabilan Safari / iPhone */
-  border-radius: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
