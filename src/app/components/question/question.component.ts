@@ -51,6 +51,7 @@ export class QuestionComponent implements OnInit, OnDestroy {
   quizQuestions: Question[] = [];
   userAnswers: { [key: number]: string } = {};
   score: number = 0;
+  isLoading: boolean = false;
 
   // Pemasa
   timeLeft: number = 0;
@@ -58,33 +59,52 @@ export class QuestionComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private ngZone: NgZone // Digunakan untuk memastikan kemaskini UI berfungsi selepas fetch
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
-    this.loadCSVData();
+    this.loadCSVData(false);
   }
 
   ngOnDestroy(): void {
     this.clearTimer();
   }
 
-  // 1. Ambil Data CSV melalui HTTP GET
-  loadCSVData() {
-    this.http.get(this.csvUrl, { responseType: 'text' }).subscribe({
-      next: (data) => {
-        this.parseCSV(data);
-      },
-      error: (err) => console.error('Ralat mengambil CSV:', err)
-    });
+  // Ambil Data CSV dengan sokongan Local Cache & Force Refresh
+  loadCSVData(forceRefresh: boolean = false) {
+    const cacheKey = 'question_component_csv_cache';
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData && !forceRefresh) {
+      this.parseCSV(cachedData);
+    } else {
+      this.isLoading = true;
+      this.http.get(this.csvUrl, { responseType: 'text' }).subscribe({
+        next: (data) => {
+          localStorage.setItem(cacheKey, data);
+          this.parseCSV(data);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Ralat mengambil CSV:', err);
+          if (cachedData) {
+            this.parseCSV(cachedData); // Fallback ke cache jika gagal rangkaian
+          }
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
-  // 2. Fungsi Parse CSV secara Manual
+  refreshData() {
+    this.loadCSVData(true);
+  }
+
+  // Parse CSV secara Manual
   parseCSV(csv: string) {
-    const lines = csv.split(/\r?\n/); // Menyokong format pembatas baris Windows (\r\n) dan Unix (\n)
+    const lines = csv.split(/\r?\n/);
     const parsedData: Question[] = [];
     
-    // Bermula dari indeks 1 untuk melangkau baris tajuk (header)
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
       
@@ -106,8 +126,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
       }
     }
     this.allQuestions = parsedData;
-    
-    // Mengekstrak senarai subjek unik
     this.availableSubjects = [...new Set(this.allQuestions.map(q => q.Subject))].filter(Boolean);
   }
 
@@ -117,7 +135,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
       return;
     }
     
-    // 1. Tapis mengikut subjek
     const filteredQuestions = this.allQuestions.filter(q => q.Subject === this.selectedSubject);
     
     if (filteredQuestions.length === 0) {
@@ -125,7 +142,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // 2. Rawak (Shuffle) soalan dan potong mengikut `selectedQuestionCount`
     const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
     this.quizQuestions = shuffled.slice(0, Number(this.selectedQuestionCount));
 
@@ -202,10 +218,8 @@ export class QuestionComponent implements OnInit, OnDestroy {
       body: JSON.stringify(payload)
     })
     .then(() => {
-      // Jalankan dalam NgZone untuk memastikan Angular mengemas kini paparan (UI)
       this.ngZone.run(() => {
         this.state = 'submitted';
-        console.log('Skor berjaya dihantar ke Google Apps Script.');
       });
     })
     .catch((err) => {
