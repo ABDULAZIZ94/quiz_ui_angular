@@ -22,61 +22,63 @@
   </button>
 </div>
 
-<!-- Container Utama Kad Flashcard -->
+<!-- Container Utama Kad Flashcard (3D Perspective) -->
 <div class="card-container">
   @if (flashcardService.currentWord; as word) {
-  <div class="card" [class.flipped]="flashcardService.isFlipped()" (click)="flashcardService.flip()">
+  <div class="card-wrapper-3d">
+    <div class="card" [class.flipped]="flashcardService.isFlipped()" (click)="flashcardService.flip()">
 
-    <!-- Muka Depan Kad -->
-    <div class="card-face card-front">
-      @if (word.imageUrl) {
-      <div class="image-wrapper">
-        <img [src]="word.imageUrl" [alt]="word.english" class="card-image" />
-      </div>
-      }
+      <!-- Muka Depan Kad -->
+      <div class="card-face card-front">
+        @if (word.imageUrl) {
+        <div class="image-wrapper">
+          <img [src]="word.imageUrl" [alt]="word.english" class="card-image" />
+        </div>
+        }
 
-      <div class="main-arabic-section">
-        <div class="arabic-text">{{ word.arabic }}</div>
+        <div class="main-arabic-section">
+          <div class="arabic-text">{{ word.arabic }}</div>
+        </div>
+        <div class="hint">Sentuh untuk lihat maksud 👆</div>
       </div>
-      <div class="hint">Sentuh untuk lihat maksud 👆</div>
+
+      <!-- Muka Belakang Kad -->
+      <div class="card-face card-back" (click)="$event.stopPropagation()">
+        <div class="back-content">
+          <div class="translations-grid">
+            <div class="trans-item">
+              <span class="label">Inggeris</span>
+              <span class="value">{{ word.english }}</span>
+            </div>
+            <div class="trans-item">
+              <span class="label">Melayu</span>
+              <span class="value">{{ word.malay }}</span>
+            </div>
+            <div class="trans-item" *ngIf="word.rohingya">
+              <span class="label">Rohingya</span>
+              <span class="value">{{ word.rohingya }}</span>
+            </div>
+            <div class="trans-item" *ngIf="word.transliteration">
+              <span class="label">Sebutan</span>
+              <span class="value">{{ word.transliteration }}</span>
+            </div>
+          </div>
+
+          <div class="category-box" *ngIf="word.category">
+            <span class="label">Kategori:</span> <span class="cat-val">{{ word.category }}</span>
+          </div>
+
+          <div class="example-box" *ngIf="word.exampleArabic || word.exampleMalay">
+            <div class="example-arabic" *ngIf="word.exampleArabic" [innerHTML]="word.exampleArabic"></div>
+            <div class="example-malay" *ngIf="word.exampleMalay" [innerHTML]="word.exampleMalay"></div>
+          </div>
+        </div>
+
+        <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()"
+          title="Dengar Sebutan">🔊</button>
+      </div>
+
     </div>
-
-    <!-- Muka Belakang Kad -->
-    <div class="card-face card-back" (click)="$event.stopPropagation()">
-      <div class="back-content">
-        <div class="translations-grid">
-          <div class="trans-item">
-            <span class="label">Inggeris</span>
-            <span class="value">{{ word.english }}</span>
-          </div>
-          <div class="trans-item">
-            <span class="label">Melayu</span>
-            <span class="value">{{ word.malay }}</span>
-          </div>
-          <div class="trans-item" *ngIf="word.rohingya">
-            <span class="label">Rohingya</span>
-            <span class="value">{{ word.rohingya }}</span>
-          </div>
-          <div class="trans-item" *ngIf="word.transliteration">
-            <span class="label">Sebutan</span>
-            <span class="value">{{ word.transliteration }}</span>
-          </div>
-        </div>
-
-        <div class="category-box" *ngIf="word.category">
-          <span class="label">Kategori:</span> <span class="cat-val">{{ word.category }}</span>
-        </div>
-
-        <div class="example-box" *ngIf="word.exampleArabic || word.exampleMalay">
-          <div class="example-arabic" *ngIf="word.exampleArabic" [innerHTML]="word.exampleArabic"></div>
-          <div class="example-malay" *ngIf="word.exampleMalay" [innerHTML]="word.exampleMalay"></div>
-        </div>
-      </div>
-
-      <button class="speak-btn" (click)="$event.stopPropagation(); flashcardService.speak()"
-        title="Dengar Sebutan">🔊</button>
-    </div>
-
   </div>
   } @else if (flashcardService.loading()) {
   <div class="loading-state">
