@@ -3,6 +3,10 @@
 
     <!-- Skrin Mula -->
     <div *ngIf="gameState === 'start'" class="screen">
+        <div class="top-bar">
+            <button (click)="refreshQuizData()" class="btn-refresh">🔄 Refresh Quiz Data</button>
+        </div>
+
         <label>Nama Pemain:</label>
         <input type="text" [(ngModel)]="playerName" placeholder="Masukkan nama anda" />
 
@@ -29,7 +33,6 @@
         <div class="question-box" *ngIf="currentQuestion">
             <h2>Apakah maksud perkataan ini dalam Bahasa Melayu?</h2>
 
-            <!-- LOGIK: Bahagian ini ditambah untuk memaparkan gambar -->
             <div class="image-container" *ngIf="currentQuestion.imageUrl">
                 <img [src]="currentQuestion.imageUrl" alt="Gambar rujukan soalan" class="question-image" />
             </div>
@@ -37,7 +40,11 @@
             <h3 class="word">{{ currentQuestion.questionWord }}</h3>
 
             <div class="options-grid">
-                <button *ngFor="let option of currentQuestion.options; let i = index" (click)="submitAnswer(option)">
+                <button *ngFor="let option of currentQuestion.options; let i = index" (click)="submitAnswer(option)"
+                    [disabled]="isAnswerChecked" [ngClass]="{
+                        'correct': isAnswerChecked && option === currentQuestion.correctAnswer,
+                        'wrong': isAnswerChecked && selectedOption === option && option !== currentQuestion.correctAnswer
+                    }">
                     {{ getLabel(i) }}. {{ option }}
                 </button>
             </div>

@@ -39,23 +39,42 @@ export class TestabcdComponent implements OnInit, OnDestroy {
   currentQuestion: Question | null = null;
   timerInterval: any;
 
+  // Status untuk semakan jawapan (warna hijau/merah & buffer)
+  selectedOption: string | null = null;
+  isAnswerChecked: boolean = false;
+
   ngOnInit() {
-    this.fetchData();
+    this.loadData(false);
   }
 
   ngOnDestroy() {
     this.clearTimer();
   }
 
-  async fetchData() {
-    try {
-      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
-      const response = await fetch(url);
-      const csvText = await response.text();
-      this.parseCSV(csvText);
-    } catch (error) {
-      console.error('Gagal memuat turun data:', error);
+  async loadData(forceRefresh: boolean = false) {
+    const cacheKey = 'testabcd_quiz_csv_cache';
+    const cachedData = localStorage.getItem(cacheKey);
+
+    if (cachedData && !forceRefresh) {
+      this.parseCSV(cachedData);
+    } else {
+      try {
+        const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=594182469&single=true&output=csv';
+        const response = await fetch(url);
+        const csvText = await response.text();
+        localStorage.setItem(cacheKey, csvText);
+        this.parseCSV(csvText);
+      } catch (error) {
+        console.error('Gagal memuat turun data:', error);
+        if (cachedData) {
+          this.parseCSV(cachedData); // Fallback ke cache jika gagal rangkaian
+        }
+      }
     }
+  }
+
+  refreshQuizData() {
+    this.loadData(true);
   }
 
   parseCSV(csv: string) {
@@ -84,6 +103,8 @@ export class TestabcdComponent implements OnInit, OnDestroy {
   startGame() {
     this.score = 0;
     this.gameState = 'playing';
+    this.isAnswerChecked = false;
+    this.selectedOption = null;
     
     switch (this.difficulty) {
       case 'easy': this.timeLeft = 60; break;
@@ -131,12 +152,17 @@ export class TestabcdComponent implements OnInit, OnDestroy {
       questionWord: correctWord.english || correctWord.arabic, 
       correctAnswer: correctWord.malay,
       options: this.shuffleArray(options),
-      // LOGIK DIPERBARUI: Hasilkan gambar menggunakan .png, ?text=, dan encodeURIComponent
       imageUrl: `https://dummyimage.com/400x200/007bff/ffffff.png?text=${encodeURIComponent(wordForImage)}`
     };
   }
 
   submitAnswer(selected: string) {
+    if (this.isAnswerChecked) return;
+
+    this.isAnswerChecked = true;
+    this.selectedOption = selected;
+    this.clearTimer(); // Hentikan masa sementara melihat maklum balas
+
     if (this.currentQuestion && selected === this.currentQuestion.correctAnswer) {
       let points = 0;
       switch (this.difficulty) {
@@ -150,11 +176,18 @@ export class TestabcdComponent implements OnInit, OnDestroy {
       this.timeLeft = Math.max(0, this.timeLeft - 5);
     }
     
-    if (this.timeLeft > 0) {
-      this.generateQuestion();
-    } else {
-      this.endGame();
-    }
+    // Buffer masa selama 5 saat (5000ms) sebelum ke soalan seterusnya
+    setTimeout(() => {
+      this.isAnswerChecked = false;
+      this.selectedOption = null;
+
+      if (this.timeLeft > 0) {
+        this.generateQuestion();
+        this.startTimer();
+      } else {
+        this.endGame();
+      }
+    }, 5000);
   }
 
   endGame() {
@@ -165,6 +198,8 @@ export class TestabcdComponent implements OnInit, OnDestroy {
   resetGame() {
     this.gameState = 'start';
     this.playerName = '';
+    this.isAnswerChecked = false;
+    this.selectedOption = null;
   }
 
   getLabel(index: number): string {
