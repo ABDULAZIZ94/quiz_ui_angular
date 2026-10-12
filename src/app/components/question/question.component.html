@@ -55,42 +55,64 @@
                 </div>
             </div>
 
-            <div class="questions-scroll-area">
-                <div *ngFor="let q of quizQuestions; let i = index" class="question-item">
-                    <div class="question-title">
-                        <span class="q-number">Soalan {{ i + 1 }}</span>
-                        <span class="difficulty-tag" [ngClass]="q.Dificulity.toLowerCase()">{{ q.Dificulity }}</span>
-                    </div>
-                    <p class="question-text">{{ q.Question }}</p>
-
-                    <div class="options-grid">
-                        <label class="option-label" [class.selected]="userAnswers[i] === 'A'">
-                            <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'A')"
-                                [checked]="userAnswers[i] === 'A'" />
-                            <span class="option-letter">A</span> {{ q.A }}
-                        </label>
-                        <label class="option-label" [class.selected]="userAnswers[i] === 'B'">
-                            <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'B')"
-                                [checked]="userAnswers[i] === 'B'" />
-                            <span class="option-letter">B</span> {{ q.B }}
-                        </label>
-                        <label class="option-label" [class.selected]="userAnswers[i] === 'C'">
-                            <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'C')"
-                                [checked]="userAnswers[i] === 'C'" />
-                            <span class="option-letter">C</span> {{ q.C }}
-                        </label>
-                        <label class="option-label" [class.selected]="userAnswers[i] === 'D'">
-                            <input type="radio" [name]="'q'+i" (change)="selectAnswer(i, 'D')"
-                                [checked]="userAnswers[i] === 'D'" />
-                            <span class="option-letter">D</span> {{ q.D }}
-                        </label>
-                    </div>
-                </div>
+            <!-- Palet Nombor Soalan (Boleh Ditekan) -->
+            <div class="question-palette">
+                <button *ngFor="let q of quizQuestions; let i = index" (click)="goToQuestion(i)" class="palette-btn"
+                    [class.active]="currentIndex === i" [class.answered]="isAnswered(i)">
+                    {{ i + 1 }}
+                </button>
             </div>
 
-            <button (click)="finishAttempt()" class="btn btn-success btn-block mt-4">
-                Hantar Jawapan 📤
-            </button>
+            <!-- Paparan Soalan Tunggal -->
+            <div class="question-item" *ngIf="quizQuestions[currentIndex]">
+                <div class="question-title">
+                    <span class="q-number">Soalan {{ currentIndex + 1 }} daripada {{ quizQuestions.length }}</span>
+                    <span class="difficulty-tag" [ngClass]="quizQuestions[currentIndex].Dificulity.toLowerCase()">
+                        {{ quizQuestions[currentIndex].Dificulity }}
+                    </span>
+                </div>
+                <p class="question-text">{{ quizQuestions[currentIndex].Question }}</p>
+
+                <div class="options-grid">
+                    <label class="option-label" [class.selected]="userAnswers[currentIndex] === 'A'">
+                        <input type="radio" name="currentQuizOption" (change)="selectAnswer('A')"
+                            [checked]="userAnswers[currentIndex] === 'A'" />
+                        <span class="option-letter">1</span> {{ quizQuestions[currentIndex].A }}
+                    </label>
+                    <label class="option-label" [class.selected]="userAnswers[currentIndex] === 'B'">
+                        <input type="radio" name="currentQuizOption" (change)="selectAnswer('B')"
+                            [checked]="userAnswers[currentIndex] === 'B'" />
+                        <span class="option-letter">2</span> {{ quizQuestions[currentIndex].B }}
+                    </label>
+                    <label class="option-label" [class.selected]="userAnswers[currentIndex] === 'C'">
+                        <input type="radio" name="currentQuizOption" (change)="selectAnswer('C')"
+                            [checked]="userAnswers[currentIndex] === 'C'" />
+                        <span class="option-letter">3</span> {{ quizQuestions[currentIndex].C }}
+                    </label>
+                    <label class="option-label" [class.selected]="userAnswers[currentIndex] === 'D'">
+                        <input type="radio" name="currentQuizOption" (change)="selectAnswer('D')"
+                            [checked]="userAnswers[currentIndex] === 'D'" />
+                        <span class="option-letter">4</span> {{ quizQuestions[currentIndex].D }}
+                    </label>
+                </div>
+                <small class="keyboard-hint">💡 Pintasan: Tekan kekunci <b>1-4</b> untuk pilih jawapan, <b>Panah
+                        Kiri/Kanan</b> untuk tukar soalan.</small>
+            </div>
+
+            <!-- Butang Navigasi -->
+            <div class="navigation-buttons">
+                <button (click)="prevQuestion()" [disabled]="currentIndex === 0" class="btn btn-secondary">
+                    ⬅️ Sebelumnya
+                </button>
+                <button *ngIf="currentIndex < quizQuestions.length - 1" (click)="nextQuestion()"
+                    class="btn btn-primary">
+                    Seterusnya ➡️
+                </button>
+                <button *ngIf="currentIndex === quizQuestions.length - 1" (click)="finishAttempt()"
+                    class="btn btn-success">
+                    Hantar Jawapan 📤
+                </button>
+            </div>
         </div>
 
         <!-- BAHAGIAN 3: SEMAKAN JAWAPAN (REVIEW) -->
@@ -111,11 +133,11 @@
                         <p>
                             Jawapan Anda:
                             <strong [style.color]="userAnswers[i] === q.Answer ? '#16a34a' : '#dc2626'">
-                                {{ userAnswers[i] ? userAnswers[i] : 'Tiada Jawapan' }}
+                                {{ getAnswerText(q, userAnswers[i]) }}
                             </strong>
                         </p>
                         <p *ngIf="userAnswers[i] !== q.Answer" class="correct-answer-text">
-                            Jawapan Betul: <strong>{{ q.Answer }}</strong>
+                            Jawapan Betul: <strong>{{ getAnswerText(q, q.Answer) }}</strong>
                         </p>
                     </div>
                 </div>

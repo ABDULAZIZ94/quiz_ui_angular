@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -30,12 +30,10 @@ export class QuestionComponent implements OnInit, OnDestroy {
   allQuestions: Question[] = [];
   availableSubjects: string[] = [];
   
-  // Tetapan Borang
   playerName: string = '';
   selectedSubject: string = '';
   selectedTime: number = 300; 
 
-  // Pilihan jumlah soalan
   questionCountOptions: number[] = [5, 10, 15, 20];
   selectedQuestionCount: number = 10;
   
@@ -46,14 +44,14 @@ export class QuestionComponent implements OnInit, OnDestroy {
     { label: '30 Minit', value: 1800 }
   ];
 
-  // Status Kuiz
   state: 'setup' | 'playing' | 'review' | 'submitted' = 'setup';
   quizQuestions: Question[] = [];
   userAnswers: { [key: number]: string } = {};
   score: number = 0;
   isLoading: boolean = false;
 
-  // Pemasa
+  currentIndex: number = 0;
+
   timeLeft: number = 0;
   timerInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -70,7 +68,37 @@ export class QuestionComponent implements OnInit, OnDestroy {
     this.clearTimer();
   }
 
-  // Ambil Data CSV dengan sokongan Local Cache & Force Refresh
+  // Tangkap kekunci papan kekunci semasa kuiz berjalan
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.state !== 'playing') return;
+
+    // Jangan aktifkan jika pengguna sedang menaip di dalam input teks
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement).tagName)) {
+      return;
+    }
+
+    if (event.key === 'ArrowRight') {
+      this.nextQuestion();
+      event.preventDefault();
+    } else if (event.key === 'ArrowLeft') {
+      this.prevQuestion();
+      event.preventDefault();
+    } else if (event.key === '1') {
+      this.selectAnswer('A');
+      event.preventDefault();
+    } else if (event.key === '2') {
+      this.selectAnswer('B');
+      event.preventDefault();
+    } else if (event.key === '3') {
+      this.selectAnswer('C');
+      event.preventDefault();
+    } else if (event.key === '4') {
+      this.selectAnswer('D');
+      event.preventDefault();
+    }
+  }
+
   loadCSVData(forceRefresh: boolean = false) {
     const cacheKey = 'question_component_csv_cache';
     const cachedData = localStorage.getItem(cacheKey);
@@ -88,7 +116,7 @@ export class QuestionComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Ralat mengambil CSV:', err);
           if (cachedData) {
-            this.parseCSV(cachedData); // Fallback ke cache jika gagal rangkaian
+            this.parseCSV(cachedData);
           }
           this.isLoading = false;
         }
@@ -100,7 +128,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
     this.loadCSVData(true);
   }
 
-  // Parse CSV secara Manual
   parseCSV(csv: string) {
     const lines = csv.split(/\r?\n/);
     const parsedData: Question[] = [];
@@ -147,6 +174,7 @@ export class QuestionComponent implements OnInit, OnDestroy {
 
     this.userAnswers = {};
     this.score = 0;
+    this.currentIndex = 0;
     this.state = 'playing';
     
     this.timeLeft = Number(this.selectedTime);
@@ -177,8 +205,39 @@ export class QuestionComponent implements OnInit, OnDestroy {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 
-  selectAnswer(index: number, answer: string) {
-    this.userAnswers[index] = answer;
+  selectAnswer(answer: string) {
+    this.userAnswers[this.currentIndex] = answer;
+  }
+
+  nextQuestion() {
+    if (this.currentIndex < this.quizQuestions.length - 1) {
+      this.currentIndex++;
+    }
+  }
+
+  prevQuestion() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
+
+  goToQuestion(index: number) {
+    this.currentIndex = index;
+  }
+
+  isAnswered(index: number): boolean {
+    return !!this.userAnswers[index];
+  }
+
+  getAnswerText(q: Question, key: string): string {
+    if (!key) return 'Tiada Jawapan';
+    switch (key.toUpperCase()) {
+      case 'A': return `A. ${q.A}`;
+      case 'B': return `B. ${q.B}`;
+      case 'C': return `C. ${q.C}`;
+      case 'D': return `D. ${q.D}`;
+      default: return key;
+    }
   }
 
   finishAttempt() {
@@ -235,5 +294,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
     this.selectedSubject = '';
     this.userAnswers = {};
     this.score = 0;
+    this.currentIndex = 0;
   }
 }

@@ -76,14 +76,19 @@
 }
 
 .btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
+    padding: 12px 20px;
+    font-size: 15px;
     font-weight: 600;
     border-radius: 10px;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
 }
 
 .btn-primary {
@@ -94,6 +99,15 @@
 .btn-primary:hover:not(:disabled) {
     background-color: #2563eb;
     transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #cbd5e1;
 }
 
 .btn-success {
@@ -121,11 +135,10 @@
 }
 
 button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Playing Section */
 .quiz-play-header {
     display: flex;
     justify-content: space-between;
@@ -133,7 +146,7 @@ button:disabled {
     background: #f1f5f9;
     padding: 12px 20px;
     border-radius: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .subject-tag {
@@ -157,10 +170,45 @@ button:disabled {
     animation: pulse 1s infinite;
 }
 
-.questions-scroll-area {
-    max-height: 500px;
-    overflow-y: auto;
-    padding-right: 5px;
+/* Palet Nombor Soalan */
+.question-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    justify-content: center;
+}
+
+.palette-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.palette-btn:hover {
+    border-color: #94a3b8;
+}
+
+.palette-btn.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.palette-btn.answered {
+    background-color: #10b981;
+    color: white;
+    border-color: #059669;
 }
 
 .question-item {
@@ -207,6 +255,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 12px;
 }
 
 .option-label {
@@ -256,7 +305,20 @@ button:disabled {
     color: white;
 }
 
-/* Review & Score */
+.keyboard-hint {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 8px;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
 .score-banner {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: white;
@@ -269,6 +331,12 @@ button:disabled {
 .score-banner h1 {
     margin: 5px 0 0 0;
     font-size: 36px;
+}
+
+.questions-scroll-area {
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
 .review-item {
