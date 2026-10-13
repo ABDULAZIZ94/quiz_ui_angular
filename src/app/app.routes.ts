@@ -49,26 +49,26 @@ export const routes: Routes = [
     path: 'flashcard2',
     loadComponent: () => import('./components/flashcard2/flashcard2.component').then(m => m.Flashcard2Component),
   },
-  {
-    path: 'rph',
-    loadComponent: () => import('./components/rph/rph.component').then(m => m.RphComponent),
-  },
-  {
-    path: 'rphschedule',
-    loadComponent: () => import('./components/rphschedule/rph-schedule.component').then(m => m.RphScheduleComponent),
-  },
-  {
-    path: 'rph-flow',
-    loadComponent: () => import('./components/rph-flow/rph-flow.component').then(m => m.RphFlowComponent),
-  },
-  {
-    path: 'rph-form',
-    loadComponent: () => import('./components/rph2/rph-form.component').then(m => m.RphFormComponent),
-  },
-  {
-    path: 'rph-bulk',
-    loadComponent: () => import('./components/rph2bulk/rph-bulk.component').then(m => m.RphBulkComponent),
-  },
+  // {
+  //   path: 'rph',
+  //   loadComponent: () => import('./components/rph/rph.component').then(m => m.RphComponent),
+  // },
+  // {
+  //   path: 'rphschedule',
+  //   loadComponent: () => import('./components/rphschedule/rph-schedule.component').then(m => m.RphScheduleComponent),
+  // },
+  // {
+  //   path: 'rph-flow',
+  //   loadComponent: () => import('./components/rph-flow/rph-flow.component').then(m => m.RphFlowComponent),
+  // },
+  // {
+  //   path: 'rph-form',
+  //   loadComponent: () => import('./components/rph2/rph-form.component').then(m => m.RphFormComponent),
+  // },
+  // {
+  //   path: 'rph-bulk',
+  //   loadComponent: () => import('./components/rph2bulk/rph-bulk.component').then(m => m.RphBulkComponent),
+  // },
   {
     path: 'quranweb',
     loadComponent: () => import('./components/quranweb/quranweb.component').then(m => m.QuranwebComponent),
