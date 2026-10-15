@@ -1,0 +1,56 @@
+<div class="quiz-container">
+    <!-- Skrin Mula -->
+    <div *ngIf="gameState === 'start'" class="card start-screen">
+        <h2>Kuiz Bahasa Urdu (Time Attack)</h2>
+        <p>Uji kepantasan anda merentasi 5 tahap berasaskan data kosa kata rasmi!</p>
+        <input type="text" [(ngModel)]="playerName" placeholder="Masukkan Nama Anda" class="input-name" />
+        <button (click)="startQuiz()" class="btn-primary">Mula Kuiz</button>
+    </div>
+
+    <!-- Skrin Permainan (Playing) -->
+    <div *ngIf="gameState === 'playing'" class="card game-screen">
+        <div class="game-header">
+            <span>Tahap: <strong>{{ currentLevel }} / {{ maxLevels }}</strong></span>
+            <span class="timer" [ngClass]="{'danger': timer <= 10}">Masa: {{ timer }}s</span>
+            <span>Skor: <strong>{{ score }}</strong></span>
+        </div>
+
+        <!-- Paparan Imej jika ada URL -->
+        <div *ngIf="currentQuestions[currentIndex]?.imageUrl" class="image-box">
+            <img [src]="currentQuestions[currentIndex].imageUrl" alt="Rujukan Kuiz" class="quiz-img" />
+        </div>
+
+        <div class="question-box">
+            <span class="badge" *ngIf="currentQuestions[currentIndex]?.category">{{
+                currentQuestions[currentIndex].category }}</span>
+            <h3>{{ currentQuestions[currentIndex].promptText }}</h3>
+        </div>
+
+        <div class="options-grid" dir="rtl">
+            <button *ngFor="let opt of currentQuestions[currentIndex]?.options" (click)="selectOption(opt)"
+                [disabled]="isAnswered" [ngClass]="{
+          'correct': isAnswered && opt === currentQuestions[currentIndex].answer,
+          'incorrect': isAnswered && selectedOption === opt && opt !== currentQuestions[currentIndex].answer
+        }" class="btn-option">
+                {{ opt }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Skrin Tamat Masa / Game Over -->
+    <div *ngIf="gameState === 'gameover'" class="card result-screen">
+        <h2>Masa Habis! (Game Over)</h2>
+        <p>Maaf, {{ playerName }}, masa anda telah tamat di Tahap {{ currentLevel }}.</p>
+        <p class="final-score">Skor Akhir: {{ score }}</p>
+        <button (click)="restartGame()" class="btn-primary">Cuba Lagi</button>
+    </div>
+
+    <!-- Skrin Tamat Kuiz (Completed) -->
+    <div *ngIf="gameState === 'completed'" class="card result-screen">
+        <h2>Tahniah! 🎉</h2>
+        <p>Syabas {{ playerName }}, anda telah berjaya mengharungi kesemua 5 tahap kuiz Urdu!</p>
+        <p class="final-score">Skor Penuh: {{ score }}</p>
+        <p class="saved-notice">Skor anda telah berjaya dihantar dan direkodkan.</p>
+        <button (click)="restartGame()" class="btn-primary">Main Semula</button>
+    </div>
+</div>

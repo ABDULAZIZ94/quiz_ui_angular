@@ -49,6 +49,7 @@ export class QuestionComponent implements OnInit, OnDestroy {
   userAnswers: { [key: number]: string } = {};
   score: number = 0;
   isLoading: boolean = false;
+  isSavingScore: boolean = false; // Pembolehubah baru untuk status simpan
 
   currentIndex: number = 0;
 
@@ -73,7 +74,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
   handleKeyboardEvent(event: KeyboardEvent) {
     if (this.state !== 'playing') return;
 
-    // Jangan aktifkan jika pengguna sedang menaip di dalam input teks
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes((event.target as HTMLElement).tagName)) {
       return;
     }
@@ -262,6 +262,9 @@ export class QuestionComponent implements OnInit, OnDestroy {
   }
 
   submitHighscore() {
+    if (this.isSavingScore) return; // Elakkan hantaran bertindih jika sedang simpan
+
+    this.isSavingScore = true;
     const payload = {
       name: this.playerName,
       quiz_name: this.selectedSubject,
@@ -278,12 +281,16 @@ export class QuestionComponent implements OnInit, OnDestroy {
     })
     .then(() => {
       this.ngZone.run(() => {
+        this.isSavingScore = false;
         this.state = 'submitted';
       });
     })
     .catch((err) => {
       console.error('Ralat menghantar skor:', err);
-      alert('Berlaku ralat semasa menghantar skor.');
+      this.ngZone.run(() => {
+        this.isSavingScore = false;
+        alert('Berlaku ralat semasa menghantar skor. Sila cuba lagi.');
+      });
     });
   }
 
@@ -295,5 +302,6 @@ export class QuestionComponent implements OnInit, OnDestroy {
     this.userAnswers = {};
     this.score = 0;
     this.currentIndex = 0;
+    this.isSavingScore = false;
   }
 }

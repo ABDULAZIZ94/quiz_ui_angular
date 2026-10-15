@@ -143,8 +143,8 @@
                 </div>
             </div>
 
-            <button (click)="submitHighscore()" class="btn btn-primary btn-block mt-4">
-                Simpan Highscore 💾
+            <button (click)="submitHighscore()" [disabled]="isSavingScore" class="btn btn-primary btn-block mt-4">
+                {{ isSavingScore ? '⏳ Sedang Menyimpan Skor...' : 'Simpan Highscore 💾' }}
             </button>
         </div>
 

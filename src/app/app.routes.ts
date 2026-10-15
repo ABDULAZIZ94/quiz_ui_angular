@@ -81,6 +81,10 @@ export const routes: Routes = [
     path: 'resume',
     loadComponent: () => import('./components/resume/resume.component').then(m => m.ResumeComponent)
   },
+  {
+    path:'urdu-quiz',
+    loadComponent: () => import('./components/urdu-quiz/urdu-quiz.component').then(m => m.UrduQuizComponent)
+  },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
     path: '404', 
