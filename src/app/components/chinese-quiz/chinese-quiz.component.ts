@@ -32,13 +32,13 @@ export class ChineseQuizComponent implements OnInit, OnDestroy {
   timeLeft = 30;
   timer: any;
   freezeTimer: any;
-  isFrozen = false; // Status beku selepas menjawab
+  isFrozen = false;
 
   // Status Pilihan Jawapan
   selectedOption: string | null = null;
   correctOption: string | null = null;
 
-  // Input nama pemain
+  // Input nama pemain & Status Skor
   playerName = 'Larim'; 
   submittingScore = false;
   scoreSubmitted = false;
@@ -124,6 +124,7 @@ export class ChineseQuizComponent implements OnInit, OnDestroy {
     this.score = 0;
     this.isFlipped = false;
     this.scoreSubmitted = false;
+    this.submittingScore = false;
     this.timeLeft = 30;
     this.isFrozen = false;
     this.selectedOption = null;
@@ -170,14 +171,12 @@ export class ChineseQuizComponent implements OnInit, OnDestroy {
       this.score += 10;
     }
 
-    // Freeze selama 5 saat sebelum bertukar ke soalan seterusnya
     this.clearFreezeTimer();
     this.freezeTimer = setTimeout(() => {
       this.nextQuestion();
     }, 5000);
   }
 
-  // Butang Instant Skip untuk melangkau tempoh beku 5 saat
   instantSkip(): void {
     if (this.isFrozen) {
       this.clearFreezeTimer();

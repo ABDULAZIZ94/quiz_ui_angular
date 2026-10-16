@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
-interface QuizItem {
+interface CardItem {
   hanzi: string;
   pinyin: string;
   meaning: string;
-  isFlipped?: boolean; // Untuk kawalan flip setiap kad secara individu
+  isFlipped?: boolean;
 }
 
 @Component({
@@ -20,8 +20,8 @@ interface QuizItem {
 export class ChineseCardComponent implements OnInit {
   csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=847252225&single=true&output=csv';
 
-  cardList: QuizItem[] = [];
-  filteredCardList: QuizItem[] = [];
+  cardList: CardItem[] = [];
+  filteredCardList: CardItem[] = [];
   searchTerm = '';
   loading = true;
 
@@ -46,9 +46,9 @@ export class ChineseCardComponent implements OnInit {
     });
   }
 
-  parseCSV(csvText: string): QuizItem[] {
+  parseCSV(csvText: string): CardItem[] {
     const lines = csvText.split('\n');
-    const result: QuizItem[] = [];
+    const result: CardItem[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       const row = this.parseCSVRow(lines[i]);
@@ -69,7 +69,6 @@ export class ChineseCardComponent implements OnInit {
     return row.split(re).map(val => val.replace(/^"|"$/g, '').trim());
   }
 
-  // Fungsi carian untuk menapis kad mengikut Hanzi, Pinyin, atau Maksud
   filterCards(): void {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
@@ -83,8 +82,7 @@ export class ChineseCardComponent implements OnInit {
     }
   }
 
-  // Toggle flip untuk kad individu
-  flipCard(card: QuizItem): void {
+  flipCard(card: CardItem): void {
     card.isFlipped = !card.isFlipped;
   }
 }

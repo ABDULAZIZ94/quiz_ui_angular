@@ -1,5 +1,5 @@
 <div class="card-list-container">
-    <h2>Senarai Kad Bahasa Cina (Chinese Card List)</h2>
+    <h2>Senarai Kad Bahasa Cina (Chinese Card)</h2>
 
     <!-- Kotak Carian -->
     <div class="search-box">
@@ -18,13 +18,11 @@
             (click)="flipCard(card)">
 
             <div class="card-inner">
-                <!-- Muka Depan (Hanzi) -->
                 <div class="card-front">
                     <h1>{{ card.hanzi }}</h1>
                     <p class="hint">Tekan untuk lihat maksud</p>
                 </div>
 
-                <!-- Muka Belakang (Pinyin & Maksud) -->
                 <div class="card-back">
                     <h3>{{ card.pinyin }}</h3>
                     <p class="meaning">{{ card.meaning }}</p>

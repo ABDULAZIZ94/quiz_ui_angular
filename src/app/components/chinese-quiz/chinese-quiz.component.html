@@ -24,19 +24,19 @@
         <div class="flashcard" [class.flipped]="isFlipped" (click)="flipCard()">
             <div class="card-inner">
                 <div class="card-front">
-                    <h1>{{ quizList[currentIndex]?.hanzi }}</h1>
+                    <h1>{{ quizList[currentIndex].hanzi }}</h1>
                     <p class="hint">Tekan kad untuk lihat Pinyin</p>
                 </div>
                 <div class="card-back">
-                    <h2>{{ quizList[currentIndex]?.pinyin }}</h2>
+                    <h2>{{ quizList[currentIndex].pinyin }}</h2>
                     <p class="hint">Tekan semula untuk kembali</p>
                 </div>
             </div>
         </div>
 
-        <!-- Pilihan Jawapan (Hijau jika betul, Merah jika salah semasa freeze) -->
+        <!-- Pilihan Jawapan -->
         <div class="options-grid">
-            <button *ngFor="let opt of quizList[currentIndex]?.options" class="option-btn"
+            <button *ngFor="let opt of quizList[currentIndex].options" class="option-btn"
                 [class.correct]="isFrozen && opt === correctOption"
                 [class.incorrect]="isFrozen && opt === selectedOption && opt !== correctOption" [disabled]="isFrozen"
                 (click)="answerQuestion(opt)">
