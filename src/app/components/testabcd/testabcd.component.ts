@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -38,17 +38,44 @@ export class TestabcdComponent implements OnInit, OnDestroy {
   
   currentQuestion: Question | null = null;
   timerInterval: any;
+  freezeTimerInterval: any;
 
-  // Status untuk semakan jawapan (warna hijau/merah & buffer)
   selectedOption: string | null = null;
   isAnswerChecked: boolean = false;
+  freezeTimeLeft: number = 10;
 
   ngOnInit() {
     this.loadData(false);
   }
 
   ngOnDestroy() {
-    this.clearTimer();
+    this.clearAllTimers();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.gameState === 'playing') {
+      if (this.isAnswerChecked) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.skipFreezeTime();
+        }
+      } else {
+        if (['1', '2', '3', '4'].includes(event.key)) {
+          event.preventDefault();
+          const index = parseInt(event.key, 10) - 1;
+          if (this.currentQuestion && this.currentQuestion.options[index]) {
+            this.submitAnswer(this.currentQuestion.options[index]);
+          }
+        }
+      }
+    } else if (this.gameState === 'start' && event.key === 'Enter') {
+      if (this.playerName && this.words.length > 0) {
+        this.startGame();
+      }
+    } else if (this.gameState === 'gameover' && event.key === 'Enter') {
+      this.resetGame();
+    }
   }
 
   async loadData(forceRefresh: boolean = false) {
@@ -67,7 +94,7 @@ export class TestabcdComponent implements OnInit, OnDestroy {
       } catch (error) {
         console.error('Gagal memuat turun data:', error);
         if (cachedData) {
-          this.parseCSV(cachedData); // Fallback ke cache jika gagal rangkaian
+          this.parseCSV(cachedData);
         }
       }
     }
@@ -117,7 +144,7 @@ export class TestabcdComponent implements OnInit, OnDestroy {
   }
 
   startTimer() {
-    this.clearTimer();
+    this.clearAllTimers();
     this.timerInterval = setInterval(() => {
       this.timeLeft--;
       if (this.timeLeft <= 0) {
@@ -126,9 +153,39 @@ export class TestabcdComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  clearTimer() {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
+  startFreezeTimer() {
+    this.clearAllTimers();
+    this.freezeTimeLeft = 10;
+
+    this.freezeTimerInterval = setInterval(() => {
+      this.freezeTimeLeft--;
+      if (this.freezeTimeLeft <= 0) {
+        this.proceedToNextQuestion();
+      }
+    }, 1000);
+  }
+
+  clearAllTimers() {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.freezeTimerInterval) clearInterval(this.freezeTimerInterval);
+  }
+
+  skipFreezeTime() {
+    if (this.isAnswerChecked) {
+      this.proceedToNextQuestion();
+    }
+  }
+
+  proceedToNextQuestion() {
+    this.clearAllTimers();
+    this.isAnswerChecked = false;
+    this.selectedOption = null;
+
+    if (this.timeLeft > 0) {
+      this.generateQuestion();
+      this.startTimer();
+    } else {
+      this.endGame();
     }
   }
 
@@ -161,7 +218,7 @@ export class TestabcdComponent implements OnInit, OnDestroy {
 
     this.isAnswerChecked = true;
     this.selectedOption = selected;
-    this.clearTimer(); // Hentikan masa sementara melihat maklum balas
+    this.clearAllTimers(); 
 
     if (this.currentQuestion && selected === this.currentQuestion.correctAnswer) {
       let points = 0;
@@ -176,22 +233,11 @@ export class TestabcdComponent implements OnInit, OnDestroy {
       this.timeLeft = Math.max(0, this.timeLeft - 5);
     }
     
-    // Buffer masa selama 5 saat (5000ms) sebelum ke soalan seterusnya
-    setTimeout(() => {
-      this.isAnswerChecked = false;
-      this.selectedOption = null;
-
-      if (this.timeLeft > 0) {
-        this.generateQuestion();
-        this.startTimer();
-      } else {
-        this.endGame();
-      }
-    }, 5000);
+    this.startFreezeTimer();
   }
 
   endGame() {
-    this.clearTimer();
+    this.clearAllTimers();
     this.gameState = 'gameover';
   }
 

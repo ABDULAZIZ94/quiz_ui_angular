@@ -1,14 +1,15 @@
 <div class="game-container">
-    <h1>Kuiz Bahasa: Time Attack</h1>
+    <h1 class="animate-title">Kuiz Bahasa: Time Attack</h1>
 
     <!-- Skrin Mula -->
-    <div *ngIf="gameState === 'start'" class="screen">
+    <div *ngIf="gameState === 'start'" class="screen animate-fade-in">
         <div class="top-bar">
             <button (click)="refreshQuizData()" class="btn-refresh">🔄 Refresh Quiz Data</button>
         </div>
 
         <label>Nama Pemain:</label>
-        <input type="text" [(ngModel)]="playerName" placeholder="Masukkan nama anda" />
+        <input type="text" [(ngModel)]="playerName" placeholder="Masukkan nama anda"
+            (keydown.enter)="playerName && words.length > 0 && startGame()" />
 
         <label>Tahap Kesukaran:</label>
         <select [(ngModel)]="difficulty">
@@ -17,20 +18,30 @@
             <option value="hard">Sukar (Masa singkat, Markah x3)</option>
         </select>
 
-        <button (click)="startGame()" [disabled]="!playerName || words.length === 0">
+        <button class="btn-start" (click)="startGame()" [disabled]="!playerName || words.length === 0">
             {{ words.length === 0 ? 'Sedang memuat turun data...' : 'Mula Permainan' }}
         </button>
     </div>
 
     <!-- Skrin Permainan -->
-    <div *ngIf="gameState === 'playing'" class="screen">
+    <div *ngIf="gameState === 'playing'" class="screen game-playing-screen animate-fade-in">
         <div class="header-info">
             <span>Pemain: <strong>{{ playerName }}</strong></span>
-            <span>Markah: <strong>{{ score }}</strong></span>
-            <span class="timer" [class.warning]="timeLeft <= 5">Masa: {{ timeLeft }}s</span>
+            <span>Markah: <strong class="score-highlight">{{ score }}</strong></span>
+            <span class="timer" [class.warning]="timeLeft <= 5 && !isAnswerChecked">
+                {{ isAnswerChecked ? 'Freeze: ' + freezeTimeLeft + 's' : 'Masa: ' + timeLeft + 's' }}
+            </span>
         </div>
 
-        <div class="question-box" *ngIf="currentQuestion">
+        <!-- Banner Jeda (Dipaparkan di atas tanpa menutup pilihan jawapan) -->
+        <div class="freeze-banner animate-pop" *ngIf="isAnswerChecked">
+            <p>Keputusan direkodkan! Sila semak jawapan di bawah. (Tekan <strong>Enter</strong> untuk skip)</p>
+            <button class="btn-skip-freeze" (click)="skipFreezeTime()">
+                ⏩ Langkau Jeda (Enter)
+            </button>
+        </div>
+
+        <div class="question-box animate-pop" *ngIf="currentQuestion">
             <h2>Apakah maksud perkataan ini dalam Bahasa Melayu?</h2>
 
             <div class="image-container" *ngIf="currentQuestion.imageUrl">
@@ -41,22 +52,22 @@
 
             <div class="options-grid">
                 <button *ngFor="let option of currentQuestion.options; let i = index" (click)="submitAnswer(option)"
-                    [disabled]="isAnswerChecked" [ngClass]="{
+                    class="option-btn" [disabled]="isAnswerChecked" [ngClass]="{
                         'correct': isAnswerChecked && option === currentQuestion.correctAnswer,
                         'wrong': isAnswerChecked && selectedOption === option && option !== currentQuestion.correctAnswer
                     }">
-                    {{ getLabel(i) }}. {{ option }}
+                    <span class="key-hint">[{{ i + 1 }}]</span> {{ getLabel(i) }}. {{ option }}
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Skrin Tamat -->
-    <div *ngIf="gameState === 'gameover'" class="screen">
+    <div *ngIf="gameState === 'gameover'" class="screen animate-scale-up">
         <h2>Masa Tamat!</h2>
         <p>Tahniah, <strong>{{ playerName }}</strong>!</p>
         <p>Tahap: <strong>{{ difficulty | titlecase }}</strong></p>
         <p class="final-score">Markah Akhir Anda: <strong>{{ score }}</strong></p>
-        <button (click)="resetGame()">Main Semula</button>
+        <button class="btn-restart" (click)="resetGame()">Main Semula</button>
     </div>
 </div>
