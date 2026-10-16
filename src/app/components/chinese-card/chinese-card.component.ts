@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 interface QuizItem {
   hanzi: string;
@@ -12,7 +13,7 @@ interface QuizItem {
 @Component({
   selector: 'app-chinese-card',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, FormsModule],
   templateUrl: './chinese-card.component.html',
   styleUrls: ['./chinese-card.component.css']
 })
@@ -28,7 +29,7 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
   gameOver = false;
   
   // Time Attack variables
-  timeLeft = 30; // 30 saat untuk Time Attack
+  timeLeft = 30;
   timer: any;
 
   // Input nama pemain
@@ -50,6 +51,7 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
     this.http.get(this.csvUrl, { responseType: 'text' }).subscribe({
       next: (data) => {
         this.quizList = this.parseCSV(data);
+        console.log('Quiz data loaded successfully:', this.quizList);
       },
       error: (err) => {
         console.error('Ralat memuatkan data CSV:', err);
@@ -62,7 +64,6 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
     const result: QuizItem[] = [];
     const meaningsSet: string[] = [];
 
-    // Kumpul semua maksud (meanings) untuk pilihan jawapan salah nanti
     for (let i = 1; i < lines.length; i++) {
       const row = this.parseCSVRow(lines[i]);
       if (row.length >= 3 && row[2]) {
@@ -107,6 +108,10 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
   }
 
   startQuiz(): void {
+    if (this.quizList.length === 0) {
+      alert('Data kuiz masih dimuatkan atau kosong. Sila cuba sebentar lagi.');
+      return;
+    }
     this.quizStarted = true;
     this.gameOver = false;
     this.currentIndex = 0;
@@ -168,20 +173,18 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
     this.submittingScore = true;
     const payload = {
       name: this.playerName || 'Larim',
-      quiz_name: 'Chinese Quiz',
+      quiz_name: 'Tajwid',
       score: this.score
     };
 
-    // Menggunakan no-cors jika Apps Script mengalami isu CORS, atau hantar biasa
     this.http.post(this.apiScoreUrl, payload, { responseType: 'text' }).subscribe({
       next: () => {
         this.submittingScore = false;
         this.scoreSubmitted = true;
       },
       error: (err) => {
-        // Kadangkala Google Apps Script mengembalikan ralat CORS walaupun data berjaya disimpan
         this.submittingScore = false;
-        this.scoreSubmitted = true; 
+        this.scoreSubmitted = true; // Dianggap Berjaya walaupun isu CORS dari Google Apps Script
         console.log('Status hantar skor:', err);
       }
     });
