@@ -20,18 +20,10 @@
             <span>Skor: {{ score }}</span>
         </div>
 
-        <!-- Kad Kuiz -->
-        <div class="flashcard" [class.flipped]="isFlipped" (click)="flipCard()">
-            <div class="card-inner">
-                <div class="card-front">
-                    <h1>{{ quizList[currentIndex].hanzi }}</h1>
-                    <p class="hint">Tekan kad untuk lihat Pinyin</p>
-                </div>
-                <div class="card-back">
-                    <h2>{{ quizList[currentIndex].pinyin }}</h2>
-                    <p class="hint">Tekan semula untuk kembali</p>
-                </div>
-            </div>
+        <!-- Kad Kuiz (Pinyin & Hanzi sentiasa kelihatan serentak) -->
+        <div class="flashcard-static">
+            <h1 class="hanzi">{{ quizList[currentIndex].hanzi }}</h1>
+            <h3 class="pinyin">{{ quizList[currentIndex].pinyin }}</h3>
         </div>
 
         <!-- Pilihan Jawapan -->
