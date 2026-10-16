@@ -1,56 +1,41 @@
-<div class="quiz-container">
-    <h2>Kuiz Kad Bahasa Cina (Time Attack)</h2>
+<div class="card-list-container">
+    <h2>Senarai Kad Bahasa Cina (Chinese Card List)</h2>
 
-    <!-- Paparan Mula -->
-    <div *ngIf="!quizStarted && !gameOver" class="start-screen">
-        <div class="input-group">
-            <label for="playerName">Nama Anda:</label>
-            <input type="text" id="playerName" [(ngModel)]="playerName" placeholder="Masukkan nama..." />
-        </div>
-        <button class="btn-primary" (click)="startQuiz()" [disabled]="quizList.length === 0">
-            {{ quizList.length === 0 ? 'Memuatkan Data...' : 'Mula Time Attack!' }}
-        </button>
+    <!-- Kotak Carian -->
+    <div class="search-box">
+        <input type="text" [(ngModel)]="searchTerm" (input)="filterCards()"
+            placeholder="Cari Hanzi, Pinyin, atau Maksud..." />
     </div>
 
-    <!-- Paparan Kuiz Semasa Berjalan -->
-    <div *ngIf="quizStarted && !gameOver && quizList.length > 0" class="quiz-play-area">
-        <div class="hud">
-            <span>Soalan: {{ currentIndex + 1 }} / {{ quizList.length }}</span>
-            <span class="timer" [class.warning]="timeLeft <= 10">Masa: ⏱️ {{ timeLeft }}s</span>
-            <span>Skor: {{ score }}</span>
-        </div>
+    <!-- Status Memuatkan -->
+    <div *ngIf="loading" class="loading-msg">
+        Memuatkan senarai kad dari pangkalan data... ⏳
+    </div>
 
-        <!-- Kad Kuiz -->
-        <div class="flashcard" [class.flipped]="isFlipped" (click)="flipCard()">
+    <!-- Grid Senarai Kad -->
+    <div *ngIf="!loading" class="cards-grid">
+        <div *ngFor="let card of filteredCardList" class="flashcard-item" [class.flipped]="card.isFlipped"
+            (click)="flipCard(card)">
+
             <div class="card-inner">
+                <!-- Muka Depan (Hanzi) -->
                 <div class="card-front">
-                    <h1>{{ quizList[currentIndex]?.hanzi }}</h1>
-                    <p class="hint">Tekan kad untuk lihat Pinyin</p>
+                    <h1>{{ card.hanzi }}</h1>
+                    <p class="hint">Tekan untuk lihat maksud</p>
                 </div>
+
+                <!-- Muka Belakang (Pinyin & Maksud) -->
                 <div class="card-back">
-                    <h2>{{ quizList[currentIndex]?.pinyin }}</h2>
+                    <h3>{{ card.pinyin }}</h3>
+                    <p class="meaning">{{ card.meaning }}</p>
                     <p class="hint">Tekan semula untuk kembali</p>
                 </div>
             </div>
         </div>
-
-        <!-- Pilihan Jawapan -->
-        <div class="options-grid">
-            <button *ngFor="let opt of quizList[currentIndex]?.options" class="option-btn"
-                (click)="answerQuestion(opt)">
-                {{ opt }}
-            </button>
-        </div>
     </div>
 
-    <!-- Paparan Tamat Permainan -->
-    <div *ngIf="gameOver" class="game-over-screen">
-        <h3>Masa Tamat! 🎉</h3>
-        <p>Skor Akhir Anda: <strong>{{ score }}</strong></p>
-
-        <div *ngIf="submittingScore" class="loading-msg">Menyimpan skor ke pelayan...</div>
-        <div *ngIf="scoreSubmitted" class="success-msg">✅ Skor berjaya direkodkan!</div>
-
-        <button class="btn-primary" (click)="startQuiz()">Main Semula</button>
+    <!-- Jika tiada keputusan carian -->
+    <div *ngIf="!loading && filteredCardList.length === 0" class="no-result">
+        Tiada kad yang sepadan dengan carian anda.
     </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +7,7 @@ interface QuizItem {
   hanzi: string;
   pinyin: string;
   meaning: string;
-  options: string[];
+  isFlipped?: boolean; // Untuk kawalan flip setiap kad secara individu
 }
 
 @Component({
@@ -17,44 +17,31 @@ interface QuizItem {
   templateUrl: './chinese-card.component.html',
   styleUrls: ['./chinese-card.component.css']
 })
-export class ChineseCardComponent implements OnInit, OnDestroy {
+export class ChineseCardComponent implements OnInit {
   csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=847252225&single=true&output=csv';
-  apiScoreUrl = 'https://script.google.com/macros/s/AKfycbwhElUCuUPskUXPVCV8UPnVpUUjqkLsdcv2YXVbHq3yRA2-GAIphdHCcnx02GNfNkFBrg/exec';
 
-  quizList: QuizItem[] = [];
-  currentIndex = 0;
-  score = 0;
-  isFlipped = false;
-  quizStarted = false;
-  gameOver = false;
-  
-  // Time Attack variables
-  timeLeft = 30;
-  timer: any;
-
-  // Input nama pemain
-  playerName = 'Larim'; 
-  submittingScore = false;
-  scoreSubmitted = false;
+  cardList: QuizItem[] = [];
+  filteredCardList: QuizItem[] = [];
+  searchTerm = '';
+  loading = true;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadQuizData();
+    this.loadCardData();
   }
 
-  ngOnDestroy(): void {
-    this.stopTimer();
-  }
-
-  loadQuizData(): void {
+  loadCardData(): void {
+    this.loading = true;
     this.http.get(this.csvUrl, { responseType: 'text' }).subscribe({
       next: (data) => {
-        this.quizList = this.parseCSV(data);
-        console.log('Quiz data loaded successfully:', this.quizList);
+        this.cardList = this.parseCSV(data);
+        this.filteredCardList = [...this.cardList];
+        this.loading = false;
       },
       error: (err) => {
         console.error('Ralat memuatkan data CSV:', err);
+        this.loading = false;
       }
     });
   }
@@ -62,29 +49,19 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
   parseCSV(csvText: string): QuizItem[] {
     const lines = csvText.split('\n');
     const result: QuizItem[] = [];
-    const meaningsSet: string[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const row = this.parseCSVRow(lines[i]);
-      if (row.length >= 3 && row[2]) {
-        meaningsSet.push(row[2].trim());
-      }
-    }
 
     for (let i = 1; i < lines.length; i++) {
       const row = this.parseCSVRow(lines[i]);
       if (row.length >= 3 && row[0] && row[1] && row[2]) {
-        const meaning = row[2].trim();
-        const options = this.generateOptions(meaning, meaningsSet);
         result.push({
           hanzi: row[0].trim(),
           pinyin: row[1].trim(),
-          meaning: meaning,
-          options: options
+          meaning: row[2].trim(),
+          isFlipped: false
         });
       }
     }
-    return this.shuffleArray(result);
+    return result;
   }
 
   parseCSVRow(row: string): string[] {
@@ -92,101 +69,22 @@ export class ChineseCardComponent implements OnInit, OnDestroy {
     return row.split(re).map(val => val.replace(/^"|"$/g, '').trim());
   }
 
-  generateOptions(correctMeaning: string, allMeanings: string[]): string[] {
-    const filtered = allMeanings.filter(m => m !== correctMeaning);
-    const shuffledFiltered = this.shuffleArray([...filtered]);
-    const options = [correctMeaning, ...shuffledFiltered.slice(0, 3)];
-    return this.shuffleArray(options);
-  }
-
-  shuffleArray<T>(array: T[]): T[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  startQuiz(): void {
-    if (this.quizList.length === 0) {
-      alert('Data kuiz masih dimuatkan atau kosong. Sila cuba sebentar lagi.');
-      return;
-    }
-    this.quizStarted = true;
-    this.gameOver = false;
-    this.currentIndex = 0;
-    this.score = 0;
-    this.isFlipped = false;
-    this.scoreSubmitted = false;
-    this.timeLeft = 30;
-    this.startTimer();
-  }
-
-  startTimer(): void {
-    this.stopTimer();
-    this.timer = setInterval(() => {
-      if (this.timeLeft > 0) {
-        this.timeLeft--;
-      } else {
-        this.endQuiz();
-      }
-    }, 1000);
-  }
-
-  stopTimer(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-  }
-
-  flipCard(): void {
-    this.isFlipped = !this.isFlipped;
-  }
-
-  answerQuestion(selectedOption: string): void {
-    if (this.gameOver) return;
-
-    const currentItem = this.quizList[this.currentIndex];
-    if (selectedOption === currentItem.meaning) {
-      this.score += 10;
-    }
-
-    this.nextQuestion();
-  }
-
-  nextQuestion(): void {
-    this.isFlipped = false;
-    if (this.currentIndex < this.quizList.length - 1) {
-      this.currentIndex++;
+  // Fungsi carian untuk menapis kad mengikut Hanzi, Pinyin, atau Maksud
+  filterCards(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    if (!term) {
+      this.filteredCardList = [...this.cardList];
     } else {
-      this.endQuiz();
+      this.filteredCardList = this.cardList.filter(card => 
+        card.hanzi.toLowerCase().includes(term) ||
+        card.pinyin.toLowerCase().includes(term) ||
+        card.meaning.toLowerCase().includes(term)
+      );
     }
   }
 
-  endQuiz(): void {
-    this.stopTimer();
-    this.gameOver = true;
-    this.submitHighScore();
-  }
-
-  submitHighScore(): void {
-    this.submittingScore = true;
-    const payload = {
-      name: this.playerName || 'Larim',
-      quiz_name: 'Tajwid',
-      score: this.score
-    };
-
-    this.http.post(this.apiScoreUrl, payload, { responseType: 'text' }).subscribe({
-      next: () => {
-        this.submittingScore = false;
-        this.scoreSubmitted = true;
-      },
-      error: (err) => {
-        this.submittingScore = false;
-        this.scoreSubmitted = true; // Dianggap Berjaya walaupun isu CORS dari Google Apps Script
-        console.log('Status hantar skor:', err);
-      }
-    });
+  // Toggle flip untuk kad individu
+  flipCard(card: QuizItem): void {
+    card.isFlipped = !card.isFlipped;
   }
 }
