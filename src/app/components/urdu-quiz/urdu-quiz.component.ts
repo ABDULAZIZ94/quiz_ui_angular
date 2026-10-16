@@ -42,7 +42,7 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   quizName: string = 'Urdu Time Attack';
   
   allQuizData: QuizItem[] = [];
-  shuffledQuizData: QuizItem[] = []; // Senarai perkataan yang sudah di-acakkan untuk sesi permainan ini
+  shuffledQuizData: QuizItem[] = [];
   currentQuestions: Question[] = [];
   currentIndex: number = 0;
   
@@ -53,6 +53,10 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   selectedOption: string | null = null;
   isAnswered: boolean = false;
   isCorrect: boolean | null = null;
+
+  // Pembolehubah untuk Jeda 10 Saat & Skip
+  feedbackTimer: number = 10;
+  feedbackInterval: any;
 
   // Endpoint Google Apps Script & API CSV
   private scriptUrl = 'https://script.google.com/macros/s/AKfycbwhElUCuUPskUXPVCV8UPnVpUUjqkLsdcv2YXVbHq3yRA2-GAIphdHCcnx02GNfNkFBrg/exec';
@@ -79,7 +83,6 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Parse CSV mengikut susunan kolum sebenar
   parseCSV(csvText: string): QuizItem[] {
     const lines = csvText.split('\n');
     const result: QuizItem[] = [];
@@ -138,9 +141,7 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Acakkan (shuffle) keseluruhan senarai perkataan setiap kali permainan baharu dimulakan
     this.shuffledQuizData = [...this.allQuizData].sort(() => 0.5 - Math.random());
-
     this.currentLevel = 1;
     this.score = 0;
     this.gameState = 'playing';
@@ -150,7 +151,6 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   loadLevel(): void {
     this.currentIndex = 0;
     
-    // Ambil 5 soalan secara rawak mengikut peringkat (level) berdasarkan senarai yang telah di-acakkan
     const startIndex = (this.currentLevel - 1) * 5;
     let levelItems = this.shuffledQuizData.slice(startIndex, startIndex + 5);
     
@@ -199,6 +199,9 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+    if (this.feedbackInterval) {
+      clearInterval(this.feedbackInterval);
+    }
   }
 
   loadNextQuestion(): void {
@@ -223,27 +226,47 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
       if (this.timer < 0) this.timer = 0;
     }
 
-    setTimeout(() => {
-      if (this.timer <= 0) {
-        this.clearIntervals();
-        this.gameState = 'gameover';
-        return;
-      }
+    // Mulakan Kiraan Jeda 10 Saat
+    this.feedbackTimer = 10;
+    if (this.feedbackInterval) clearInterval(this.feedbackInterval);
 
-      this.currentIndex++;
-      if (this.currentIndex < this.currentQuestions.length) {
-        this.loadNextQuestion();
-      } else {
-        if (this.currentLevel < this.maxLevels) {
-          this.currentLevel++;
-          this.loadLevel();
-        } else {
-          this.clearIntervals();
-          this.gameState = 'completed';
-          this.saveScore();
-        }
+    this.feedbackInterval = setInterval(() => {
+      this.feedbackTimer--;
+      if (this.feedbackTimer <= 0) {
+        this.proceedToNext();
       }
     }, 1000);
+  }
+
+  // Fungsi untuk skip jeda 10 saat secara manual
+  skipFeedback(): void {
+    if (this.feedbackInterval) clearInterval(this.feedbackInterval);
+    this.proceedToNext();
+  }
+
+  // Logik untuk beralih ke soalan seterusnya atau peringkat seterusnya
+  proceedToNext(): void {
+    if (this.feedbackInterval) clearInterval(this.feedbackInterval);
+
+    if (this.timer <= 0) {
+      this.clearIntervals();
+      this.gameState = 'gameover';
+      return;
+    }
+
+    this.currentIndex++;
+    if (this.currentIndex < this.currentQuestions.length) {
+      this.loadNextQuestion();
+    } else {
+      if (this.currentLevel < this.maxLevels) {
+        this.currentLevel++;
+        this.loadLevel();
+      } else {
+        this.clearIntervals();
+        this.gameState = 'completed';
+        this.saveScore();
+      }
+    }
   }
 
   saveScore(): void {
@@ -260,6 +283,7 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   }
 
   restartGame(): void {
+    this.clearIntervals();
     this.gameState = 'start';
     this.playerName = '';
   }

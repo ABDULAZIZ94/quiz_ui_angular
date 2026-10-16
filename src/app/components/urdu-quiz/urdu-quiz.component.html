@@ -35,6 +35,18 @@
                 {{ opt }}
             </button>
         </div>
+
+        <!-- Bahagian Jeda & Butang Skip (Muncul Selepas Menjawab) -->
+        <div *ngIf="isAnswered" class="feedback-container" style="margin-top: 20px; text-align: center;">
+            <p [style.color]="isCorrect ? 'green' : 'red'" style="font-weight: bold; font-size: 1.1rem;">
+                {{ isCorrect ? 'Tahniah! Jawapan anda betul.' : 'Maaf, jawapan anda salah.' }}
+            </p>
+            <p class="skip-timer-text">Seterusnya dalam <strong>{{ feedbackTimer }}s</strong></p>
+            <button (click)="skipFeedback()" class="btn-secondary"
+                style="padding: 10px 20px; cursor: pointer; background-color: #ff9800; color: white; border: none; border-radius: 5px; font-weight: bold;">
+                Langkau / Seterusnya ⏭
+            </button>
+        </div>
     </div>
 
     <!-- Skrin Tamat Masa / Game Over -->

@@ -4,100 +4,141 @@
   align-items: center;
   min-height: 85vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f7f6;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 20px;
 }
 
 .card {
   background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 500px;
+  max-width: 520px;
   text-align: center;
+  transition: all 0.3s ease;
 }
 
 .start-screen h2, .result-screen h2 {
-  color: #2c3e50;
-  margin-bottom: 10px;
+  color: #1e293b;
+  font-weight: 800;
+  margin-bottom: 12px;
+  font-size: 26px;
+}
+
+.start-screen p, .result-screen p {
+  color: #64748b;
+  font-size: 15px;
 }
 
 .input-name {
-  width: 80%;
-  padding: 12px;
-  margin: 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  width: 85%;
+  padding: 14px 18px;
+  margin: 25px 0 20px 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 16px;
+  font-family: inherit;
+  transition: all 0.2s;
+  outline: none;
+  background: #f8fafc;
+}
+
+.input-name:focus {
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .btn-primary {
-  background-color: #3498db;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   border: none;
-  padding: 12px 25px;
+  padding: 14px 28px;
   font-size: 16px;
-  border-radius: 6px;
+  font-weight: 600;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.3s;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: all 0.25s ease;
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .game-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 20px;
   font-size: 15px;
-  color: #555;
+  color: #475569;
+  font-weight: 500;
+  background: #f8fafc;
+  padding: 10px 16px;
+  border-radius: 10px;
 }
 
 .timer {
-  font-weight: bold;
-  color: #27ae60;
+  font-weight: 700;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
 }
 
 .timer.danger {
-  color: #c0392b;
+  color: #ef4444;
+  background: #fee2e2;
   animation: pulse 1s infinite;
 }
 
 .image-box {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .quiz-img {
-  max-height: 120px;
-  border-radius: 6px;
+  max-height: 140px;
+  border-radius: 12px;
   object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .question-box {
-  background: #ecf0f1;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  color: #2c3e50;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 22px;
+  color: #1e293b;
   text-align: left;
 }
 
 .badge {
   display: inline-block;
-  background: #bdc3c7;
-  color: #2c3e50;
+  background: #e0e7ff;
+  color: #4f46e5;
   font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .question-box h3 {
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 600;
   margin: 0;
+  line-height: 1.5;
 }
 
 .options-grid {
@@ -108,47 +149,96 @@
 
 .btn-option {
   background: #ffffff;
-  border: 2px solid #bdc3c7;
-  padding: 12px;
-  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  padding: 14px 18px;
+  border-radius: 12px;
   font-size: 18px;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   font-family: inherit;
+  text-align: center;
 }
 
 .btn-option:hover:not(:disabled) {
-  background: #ecf0f1;
-  border-color: #95a5a6;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.btn-option:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn-option.correct {
-  background-color: #2ecc71 !important;
-  color: white;
-  border-color: #27ae60;
+  background-color: #10b981 !important;
+  color: white !important;
+  border-color: #059669 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-option.incorrect {
-  background-color: #e74c3c !important;
-  color: white;
-  border-color: #c0392b;
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .final-score {
-  font-size: 22px;
-  font-weight: bold;
-  color: #e67e22;
+  font-size: 26px;
+  font-weight: 800;
+  color: #f59e0b;
   margin: 15px 0;
 }
 
 .saved-notice {
   font-size: 14px;
-  color: #27ae60;
-  margin-bottom: 15px;
+  color: #10b981;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+/* Panel maklum balas / butang skip */
+.feedback-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  border-radius: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.skip-timer-text {
+  color: #64748b;
+  font-size: 14px;
+  margin: 8px 0 14px 0;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4) !important;
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
