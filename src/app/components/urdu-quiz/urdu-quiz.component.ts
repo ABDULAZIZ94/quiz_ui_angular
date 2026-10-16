@@ -42,6 +42,7 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   quizName: string = 'Urdu Time Attack';
   
   allQuizData: QuizItem[] = [];
+  shuffledQuizData: QuizItem[] = []; // Senarai perkataan yang sudah di-acakkan untuk sesi permainan ini
   currentQuestions: Question[] = [];
   currentIndex: number = 0;
   
@@ -136,6 +137,10 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
       alert('Data kuiz masih belum siap dimuat turun. Sila cuba sebentar lagi.');
       return;
     }
+
+    // Acakkan (shuffle) keseluruhan senarai perkataan setiap kali permainan baharu dimulakan
+    this.shuffledQuizData = [...this.allQuizData].sort(() => 0.5 - Math.random());
+
     this.currentLevel = 1;
     this.score = 0;
     this.gameState = 'playing';
@@ -145,11 +150,12 @@ export class UrduQuizComponent implements OnInit, OnDestroy {
   loadLevel(): void {
     this.currentIndex = 0;
     
+    // Ambil 5 soalan secara rawak mengikut peringkat (level) berdasarkan senarai yang telah di-acakkan
     const startIndex = (this.currentLevel - 1) * 5;
-    let levelItems = this.allQuizData.slice(startIndex, startIndex + 5);
+    let levelItems = this.shuffledQuizData.slice(startIndex, startIndex + 5);
     
     if (levelItems.length === 0) {
-      levelItems = this.allQuizData.slice(0, 5);
+      levelItems = this.shuffledQuizData.slice(0, 5);
     }
 
     this.currentQuestions = levelItems.map(item => {

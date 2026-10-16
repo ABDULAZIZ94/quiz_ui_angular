@@ -76,3 +76,13 @@ firebase deploy --only hosting
 npm install three
 npm install --save-dev @types/three
 
+# card prompt
+darida csv url=
+flashcard 
+
+# quiz prompt
+darida csv url=
+quiz
+ada timer / time attack
+skipable
+simpan highscore url=
