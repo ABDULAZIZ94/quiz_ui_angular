@@ -85,6 +85,10 @@ export const routes: Routes = [
     path:'urdu-quiz',
     loadComponent: () => import('./components/urdu-quiz/urdu-quiz.component').then(m => m.UrduQuizComponent)
   },
+  {
+    path:'chinese-card',
+    loadComponent: () => import('./components/chinese-card/chinese-card.component').then(m => m.ChineseCardComponent)
+  },
   // Wildcard Route (404 Page) - Mesti berada paling bawah!
   { 
     path: '404', 
