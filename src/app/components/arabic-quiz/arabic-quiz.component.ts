@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import * as THREE from 'three';
@@ -48,13 +48,15 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   currentIndex: number = 0;
   score: number = 0;
 
-  // Time Attack Settings
+  // Time Attack Settings (Tiada had maksimum untuk timeLeft)
   timeLeft: number = 15;
   timer: any;
+  private freeTimer: any; 
 
-  // State untuk warna jawapan (hijau / merah)
+  // State untuk warna jawapan & animasi masa
   selectedOption: string | null = null;
   isAnswerChecked: boolean = false;
+  isTimeAdded: boolean = false;
 
   // Three.js variables
   private renderer!: THREE.WebGLRenderer;
@@ -71,6 +73,34 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initThreeJS();
+  }
+
+  // Listener untuk papan kekunci (Keyboard Shortcuts)
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    if (!this.isPlaying) return;
+
+    const currentQ = this.filteredQuestions[this.currentIndex];
+    if (!currentQ) return;
+
+    // Jika belum jawab, tekan 1, 2, 3, 4 untuk pilih A, B, C, D
+    if (!this.isAnswerChecked) {
+      let optionIndex = -1;
+      if (event.key === '1') optionIndex = 0;
+      else if (event.key === '2') optionIndex = 1;
+      else if (event.key === '3') optionIndex = 2;
+      else if (event.key === '4') optionIndex = 3;
+
+      if (optionIndex !== -1 && currentQ.options[optionIndex]) {
+        this.selectAnswer(currentQ.options[optionIndex]);
+      }
+    } 
+    // Jika sudah jawab (sedang masa jeda 10 saat), tekan Enter untuk skip jeda
+    else {
+      if (event.key === 'Enter') {
+        this.proceedToNextQuestion();
+      }
+    }
   }
 
   initThreeJS(): void {
@@ -225,15 +255,14 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.score = 0;
     this.isAnswerChecked = false;
     this.selectedOption = null;
-    this.timeLeft = 15; // Mula kuiz dengan 15 saat
+    this.isTimeAdded = false;
+    this.timeLeft = 15; // Permulaan 15 saat, tanpa had maksimum
 
     this.startTimer();
   }
 
   startTimer(): void {
     clearInterval(this.timer);
-    // Nota: 'this.timeLeft = 15' dibuang dari sini supaya masa tidak di-reset ke 15 saat setiap kali soalan bertukar.
-    // Sebaliknya ia akan meneruskan baki masa yang ada (atau masa tambahan jika dijawab betul).
 
     this.timer = setInterval(() => {
       this.timeLeft--;
@@ -249,31 +278,43 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.isAnswerChecked = true;
     this.selectedOption = option;
-    clearInterval(this.timer); // Hentikan masa sementara melihat jawapan
+    clearInterval(this.timer); // Jeda masa (Free 10 seconds)
 
     const currentQ = this.filteredQuestions[this.currentIndex];
     
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
-      this.timeLeft += 5; // Tambah 5 saat pada baki masa jika jawapan betul
+      this.timeLeft += 5; // Betul: Tambah 5 saat tanpa had maksimum (unlimited accumulation)
+      
+      this.isTimeAdded = true;
+      setTimeout(() => {
+        this.isTimeAdded = false;
+      }, 1500);
     }
 
-    // Buffer masa selama 5 saat (5000ms) sebelum ke soalan seterusnya
-    setTimeout(() => {
-      this.isAnswerChecked = false;
-      this.selectedOption = null;
-      this.currentIndex++;
+    // Tunggu 10 saat sebelum ke soalan seterusnya secara automatik
+    this.freeTimer = setTimeout(() => {
+      this.proceedToNextQuestion();
+    }, 10000);
+  }
 
-      if (this.currentIndex < this.filteredQuestions.length) {
-        this.startTimer(); // Sambung semula timer dengan baki masa terkumpul
-      } else {
-        this.endGame();
-      }
-    }, 5000);
+  proceedToNextQuestion(): void {
+    clearTimeout(this.freeTimer);
+    this.isAnswerChecked = false;
+    this.selectedOption = null;
+    this.isTimeAdded = false;
+    this.currentIndex++;
+
+    if (this.currentIndex < this.filteredQuestions.length) {
+      this.startTimer(); // Sambung semula baki masa terkumpul (tanpa reset ke 15 saat)
+    } else {
+      this.endGame();
+    }
   }
 
   endGame(): void {
     clearInterval(this.timer);
+    clearTimeout(this.freeTimer);
     this.isPlaying = false;
     this.isGameOver = true;
   }
@@ -286,6 +327,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     clearInterval(this.timer);
+    clearTimeout(this.freeTimer);
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
