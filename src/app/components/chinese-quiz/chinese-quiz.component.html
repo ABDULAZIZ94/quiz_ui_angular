@@ -1,0 +1,64 @@
+<div class="quiz-container">
+    <h2>Kuiz Kad Bahasa Cina (Time Attack)</h2>
+
+    <!-- Paparan Mula -->
+    <div *ngIf="!quizStarted && !gameOver" class="start-screen">
+        <div class="input-group">
+            <label for="playerName">Nama Anda:</label>
+            <input type="text" id="playerName" [(ngModel)]="playerName" placeholder="Masukkan nama..." />
+        </div>
+        <button class="btn-primary" (click)="startQuiz()" [disabled]="quizList.length === 0">
+            {{ quizList.length === 0 ? 'Memuatkan Data...' : 'Mula Time Attack!' }}
+        </button>
+    </div>
+
+    <!-- Paparan Kuiz Semasa Berjalan -->
+    <div *ngIf="quizStarted && !gameOver && quizList.length > 0" class="quiz-play-area">
+        <div class="hud">
+            <span>Soalan: {{ currentIndex + 1 }} / {{ quizList.length }}</span>
+            <span class="timer" [class.warning]="timeLeft <= 10">Masa: ⏱️ {{ timeLeft }}s</span>
+            <span>Skor: {{ score }}</span>
+        </div>
+
+        <!-- Kad Kuiz -->
+        <div class="flashcard" [class.flipped]="isFlipped" (click)="flipCard()">
+            <div class="card-inner">
+                <div class="card-front">
+                    <h1>{{ quizList[currentIndex]?.hanzi }}</h1>
+                    <p class="hint">Tekan kad untuk lihat Pinyin</p>
+                </div>
+                <div class="card-back">
+                    <h2>{{ quizList[currentIndex]?.pinyin }}</h2>
+                    <p class="hint">Tekan semula untuk kembali</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pilihan Jawapan (Hijau jika betul, Merah jika salah semasa freeze) -->
+        <div class="options-grid">
+            <button *ngFor="let opt of quizList[currentIndex]?.options" class="option-btn"
+                [class.correct]="isFrozen && opt === correctOption"
+                [class.incorrect]="isFrozen && opt === selectedOption && opt !== correctOption" [disabled]="isFrozen"
+                (click)="answerQuestion(opt)">
+                {{ opt }}
+            </button>
+        </div>
+
+        <!-- Bahagian Freeze & Butang Instant Skip -->
+        <div class="skip-area" *ngIf="isFrozen">
+            <p class="freeze-notice">⏸️ Beku 5 saat (Menilai jawapan)...</p>
+            <button class="btn-skip" (click)="instantSkip()">Langkau Segera ⏩</button>
+        </div>
+    </div>
+
+    <!-- Paparan Tamat Permainan -->
+    <div *ngIf="gameOver" class="game-over-screen">
+        <h3>Masa Tamat! 🎉</h3>
+        <p>Skor Akhir Anda: <strong>{{ score }}</strong></p>
+
+        <div *ngIf="submittingScore" class="loading-msg">Menyimpan skor ke pelayan...</div>
+        <div *ngIf="scoreSubmitted" class="success-msg">✅ Skor berjaya direkodkan!</div>
+
+        <button class="btn-primary" (click)="startQuiz()">Main Semula</button>
+    </div>
+</div>
