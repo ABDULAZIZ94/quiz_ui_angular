@@ -15,6 +15,18 @@ export class FlashcardComponent {
   // Buat array [1, 2, 3, ..., 100]
   readonly levels = Array.from({ length: 100 }, (_, i) => i + 1);
 
+  // Kawalan buka/tutup modal tahap (Penyelesaian ralat NG9)
+  isLevelModalOpen = false;
+
+  toggleLevelModal(open: boolean): void {
+    this.isLevelModalOpen = open;
+  }
+
+  selectDifficultyAndClose(level: number | null): void {
+    this.flashcardService.setDifficulty(level);
+    this.isLevelModalOpen = false;
+  }
+
   refreshData(): void {
     if (typeof (this.flashcardService as any).loadFlashcardData === 'function') {
       (this.flashcardService as any).loadFlashcardData(true);

@@ -2,13 +2,13 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 520px;
+  max-width: 480px; /* Dikurangkan sedikit supaya lebih kemas */
   height: 100dvh;
   margin: 0 auto;
-  padding: 10px;
+  padding: 8px;
   box-sizing: border-box;
   overflow: hidden;
-  background: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
+  background: radial-gradient(circle at top, #1e1b4b 0%, #09090b 100%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -16,83 +16,157 @@
 .quiz-header-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 6px;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   flex-shrink: 0;
 }
 
-.filter-container {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding-bottom: 2px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
-  -webkit-overflow-scrolling: touch;
-  flex-grow: 1;
-}
-
-.filter-container::-webkit-scrollbar {
-  height: 3px;
-}
-
-.filter-container::-webkit-scrollbar-thumb {
-  background: rgba(56, 189, 248, 0.3);
-  border-radius: 4px;
-}
-
-.filter-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  padding: 5px 12px;
+.level-picker-trigger-btn {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border: none;
+  color: #ffffff;
+  padding: 6px 12px;
   border-radius: 16px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(236, 72, 153, 0.3);
+  flex-grow: 1;
+  justify-content: center;
 }
 
-.filter-btn.active {
-  background: linear-gradient(135deg, #38bdf8, #0284c7);
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-}
-
-.badge-count {
-  background: rgba(0, 0, 0, 0.25);
+.level-picker-trigger-btn .badge-count {
+  background: rgba(0, 0, 0, 0.3);
   padding: 1px 6px;
   border-radius: 10px;
   font-size: 0.7rem;
 }
 
-.filter-btn.active .badge-count {
-  background: rgba(255, 255, 255, 0.25);
+/* Modal Pilihan Tahap */
+.anime-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.anime-modal-content {
+  background: linear-gradient(145deg, #1e1b4b, #0f172a);
+  border: 2px solid rgba(236, 72, 153, 0.4);
+  width: 100%;
+  max-width: 400px;
+  max-height: 75vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 6px;
+}
+
+.modal-header h3 {
+  color: #f472b6;
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 800;
+}
+
+.close-modal-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.level-grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 lajur agar senarai lebih padat & pendek */
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 55vh;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #ec4899 transparent;
+}
+
+.level-grid-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 8px 4px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.level-grid-btn.all-btn {
+  grid-column: span 4;
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  margin-bottom: 6px;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
+.level-grid-btn.active {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.grid-badge {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1px 4px;
+  border-radius: 6px;
+  font-size: 0.6rem;
+  color: #e2e8f0;
 }
 
 .refresh-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #38bdf8;
-  padding: 6px 12px;
+  padding: 6px 10px;
   border-radius: 14px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 @media (max-width: 480px) {
@@ -101,26 +175,24 @@
   }
 }
 
-/* Container Kad */
+/* Container Kad (Diminimumkan Saiz Ketinggian) */
 .card-container {
-  perspective: 1600px;
-  -webkit-perspective: 1600px;
+  perspective: 1400px;
   width: 100%;
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   overflow: hidden;
-  max-height: calc(100dvh - 65px);
+  max-height: calc(100dvh - 55px);
 }
 
 .card-wrapper-3d {
   width: 100%;
   height: 100%;
-  max-height: 480px; /* Saiz optimum mengelakkan kad terlalu tinggi */
-  perspective: 1600px;
-  -webkit-perspective: 1600px;
+  max-height: 410px; /* Dihadkan supaya kad tidak terlalu tinggi/besar */
+  perspective: 1400px;
 }
 
 .card {
@@ -128,14 +200,12 @@
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
   cursor: pointer;
 }
 
 .card.flipped {
   transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
 }
 
 .card-face {
@@ -145,32 +215,31 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 20px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 14px;
+  padding: 10px; /* Padding dikurangkan */
   box-sizing: border-box;
   overflow: hidden;
 }
 
 /* Muka Depan Kad */
 .card-front {
-  background: linear-gradient(145deg, #1e293b, #0f172a);
+  background: linear-gradient(145deg, #1e1b4b, #0f172a);
   color: #ffffff;
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(236, 72, 153, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   text-align: center;
 }
 
 .image-wrapper {
   width: 100%;
-  max-height: 95px; /* Gambar dikecilkan sedikit untuk jimat ruang */
-  border-radius: 12px;
+  max-height: 75px; /* Gambar dikecilkan untuk jimat ruang */
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
@@ -189,44 +258,41 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 0 4px;
 }
 
-/* Saiz tulisan Arab dikawal ketat agar tidak makan ruang tinggi */
 .arabic-text {
   font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
-  font-size: clamp(2rem, 5.5vh, 3rem);
-  line-height: 1.25;
+  font-size: clamp(1.8rem, 4.5vh, 2.6rem); /* Saiz teks Arab disesuaikan lebih padat */
+  line-height: 1.2;
   direction: rtl;
   font-weight: 700;
   color: #ffffff;
-  text-shadow: 0 2px 12px rgba(56, 189, 248, 0.3);
+  text-shadow: 0 2px 10px rgba(236, 72, 153, 0.4);
   text-align: center;
   word-break: break-word;
 }
 
 .card-front .hint {
-  font-size: 0.7rem;
-  color: #38bdf8;
+  font-size: 0.65rem;
+  color: #f472b6;
   margin-top: auto;
   font-weight: 500;
 }
 
-/* Muka Belakang Kad */
+/* Muka Belakang Kad (Padat & Tersusun) */
 .card-back {
   background: #ffffff;
   color: #0f172a;
   transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   justify-content: space-between;
 }
 
 .back-content {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px; /* Jurang dikurangkan */
   width: 100%;
   flex-grow: 1;
   justify-content: center;
@@ -235,92 +301,77 @@
 .translations-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  gap: 4px;
   background: #f8fafc;
-  padding: 8px;
-  border-radius: 10px;
+  padding: 6px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
 
-.trans-item {
-  display: flex;
-  flex-direction: column;
-}
-
 .trans-item .label {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .trans-item .value {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #0f172a;
-  word-break: break-word;
-  margin-top: 1px;
+  margin-top: 0px;
 }
 
 .category-box {
-  background: #f0f9ff;
-  padding: 5px 8px;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  color: #0369a1;
-  border: 1px solid #e0f2fe;
-}
-
-.category-box .label {
-  font-weight: 700;
+  background: #fdf2f8;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  color: #db2777;
+  border: 1px solid #fce7f3;
 }
 
 .example-box {
   background: #f8fafc;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border-left: 3px solid #0284c7;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border-left: 3px solid #ec4899;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   border: 1px solid #f1f5f9;
 }
 
 .example-arabic {
   font-family: 'Amiri', 'Scheherazade New', serif;
-  font-size: 0.95rem;
-  color: #0284c7;
+  font-size: 0.85rem;
+  color: #db2777;
   direction: rtl;
   text-align: right;
   font-weight: 700;
 }
 
 .example-malay {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #475569;
   font-style: italic;
 }
 
 .speak-btn {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
   color: white;
   border: none;
-  width: 34px;
-  height: 34px;
+  width: 28px; /* Dikecilkan */
+  height: 28px;
   border-radius: 50%;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 3px 8px rgba(236, 72, 153, 0.3);
   margin: 2px auto 0 auto;
   flex-shrink: 0;
-}
-
-.speak-btn:active {
-  transform: scale(0.9);
 }
 
 /* Status Loading & Empty */
@@ -335,13 +386,13 @@
 }
 
 .spinner {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #38bdf8;
+  border-top-color: #ec4899;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 @keyframes spin {

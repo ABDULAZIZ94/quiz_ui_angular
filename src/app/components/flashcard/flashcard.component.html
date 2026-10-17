@@ -1,28 +1,46 @@
-<!-- Header Moden dengan Butang Refresh & Filter Tahap -->
+<!-- Header Moden Tema Anime dengan Butang Pilih Tahap & Refresh -->
 <div class="quiz-header-bar">
-  <div class="filter-container" role="region" aria-label="Penapis Tahap Flashcard">
-    <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === null"
-      (click)="flashcardService.setDifficulty(null)">
-      Semua
-      <span class="badge-count">{{ flashcardService.totalWordsCount() }}</span>
-    </button>
+  <button class="level-picker-trigger-btn" (click)="toggleLevelModal(true)">
+    <span class="icon">⭐</span>
+    <span class="label">Tahap {{ flashcardService.selectedDifficulty() ?? 'Semua' }}</span>
+    <span class="badge-count">{{ flashcardService.selectedDifficulty() === null ? flashcardService.totalWordsCount() :
+      flashcardService.getWordCountByDifficulty(flashcardService.selectedDifficulty()!) }}</span>
+  </button>
 
-    @for (level of levels; track level) {
-    <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === level"
-      (click)="flashcardService.setDifficulty(level)">
-      Tahap {{ level }}
-      <span class="badge-count">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
-    </button>
-    }
-  </div>
-
-  <!-- Butang Refresh Moden -->
   <button class="refresh-btn" (click)="refreshData()" title="Muat Semula Data">
     🔄 <span class="refresh-text">Segar Semula</span>
   </button>
 </div>
 
-<!-- Container Utama Kad Flashcard (3D Perspective) -->
+<!-- Modal Pilihan Tahap Pantas (Grid 1 hingga 100) -->
+@if (isLevelModalOpen) {
+<div class="anime-modal-overlay" (click)="toggleLevelModal(false)">
+  <div class="anime-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>✨ Pilih Tahap Flashcard</h3>
+      <button class="close-modal-btn" (click)="toggleLevelModal(false)">✕</button>
+    </div>
+
+    <button class="level-grid-btn all-btn" [class.active]="flashcardService.selectedDifficulty() === null"
+      (click)="selectDifficultyAndClose(null)">
+      <span>🌐 Semua Tahap</span>
+      <span class="grid-badge">{{ flashcardService.totalWordsCount() }}</span>
+    </button>
+
+    <div class="level-grid-container">
+      @for (level of levels; track level) {
+      <button class="level-grid-btn" [class.active]="flashcardService.selectedDifficulty() === level"
+        (click)="selectDifficultyAndClose(level)">
+        <span>Tahap {{ level }}</span>
+        <span class="grid-badge">{{ flashcardService.getWordCountByDifficulty(level) }}</span>
+      </button>
+      }
+    </div>
+  </div>
+</div>
+}
+
+<!-- Container Utama Kad Flashcard (3D Perspective Dipadatkan) -->
 <div class="card-container">
   @if (flashcardService.currentWord; as word) {
   <div class="card-wrapper-3d">
@@ -87,7 +105,7 @@
   </div>
   } @else {
   <div class="empty-state">
-    <p>Tiada data perkataan ditemui.</p>
+    <p>Tiada data perkataan ditemui untuk tahap ini.</p>
   </div>
   }
 </div>
