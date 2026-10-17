@@ -1,6 +1,6 @@
 <!-- Header Moden dengan Butang Refresh & Filter Tahap -->
 <div class="quiz-header-bar">
-  <div class="filter-container">
+  <div class="filter-container" role="region" aria-label="Penapis Tahap Flashcard">
     <button class="filter-btn" [class.active]="flashcardService.selectedDifficulty() === null"
       (click)="flashcardService.setDifficulty(null)">
       Semua

@@ -3,65 +3,168 @@
   width: 100%;
 }
 
-.word-list {
-  max-width: 700px;
+.word-list-container {
+  max-width: 800px;
   width: 100%;
-  margin: 40px auto 0;
+  margin: 30px auto;
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
 }
 
-.word-list h2 {
-  text-align: center;
-  color: var(--primary-dark);
+.word-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
-  font-size: 1.3em;
+  padding: 0 5px;
+}
+
+.word-list-header h2 {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.word-count {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Kotak senarai dengan skrol tetap (Menyelesaikan masalah senarai terlalu panjang dari 1-100) */
+.word-scroll-box {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* Custom Scrollbar yang kemas */
+.word-scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+
+.word-scroll-box::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.word-scroll-box::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.word-scroll-box::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .word-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .word-item {
   background: white;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-left: 4px solid var(--primary);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  border-left: 4px solid var(--primary, #3b82f6);
 }
 
 .word-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.word-number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  width: 35px;
+  flex-shrink: 0;
+}
+
+.word-info {
+  flex-grow: 1;
+  padding: 0 10px;
 }
 
 .w-arabic {
   font-family: 'Amiri', 'Traditional Arabic', serif;
-  font-size: 2.6em;
-  color: var(--primary-dark);
+  font-size: 1.8rem;
+  color: #0f172a;
+  line-height: 1.2;
 }
 
 .w-english {
-  font-size: 1.95em;
-  color: var(--text-light);
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-top: 2px;
 }
 
-.w-mini-speak {
-  background: var(--accent);
-  color: white;
+.word-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Butang kecil tambahan (📌) untuk paparan utama */
+.w-mini-action {
+  background: #f1f5f9;
+  color: #475569;
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 0.85em;
+  width: 34px;
+  height: 34px;
+  font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.w-mini-action:hover {
+  background: #e2e8f0;
+}
+
+.w-mini-speak {
+  background: var(--accent, #10b981);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.w-mini-speak:hover {
+  opacity: 0.9;
+}
+
+/* Responsif untuk skrin kecil */
+@media (min-width: 640px) {
+  .word-grid {
+    grid-template-columns: repeat(2, 1fr); /* Paparan 2 kolum jika skrin luas sikit */
+  }
 }

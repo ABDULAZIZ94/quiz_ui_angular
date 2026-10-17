@@ -20,19 +20,20 @@ export interface AyatQuran {
 export class QuranwebComponent implements OnInit {
   csvUrl: string = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS91-d01z7LUoPmnmxiBE_7gbBlAaRZcgjcQk8A9X3KE1b7UDc32-e5ylGxlPetbljIywgT3zsk3izV/pub?gid=708503811&single=true&output=csv';
   storageKey: string = 'quran_data_cache';
-  
-  senaraiAyat: AyatQuran[] = [];        // Data penuh
-  senaraiAyatDitapis: AyatQuran[] = []; // Data selepas penapisan & penyusunan
-  senaraiAyatDipapar: AyatQuran[] = []; // Data yang dipotong (slice) untuk paparan UI
+  hafalKey: string = 'quran_hafal_list';
+
+  senaraiAyat: AyatQuran[] = [];
+  senaraiAyatDitapis: AyatQuran[] = [];
   
   senaraiSurahNo: number[] = Array.from({ length: 114 }, (_, i) => i + 1);
-  
   surahDipilih: number = 0;
-  carianAyat: string = '';
 
-  // Pagination / Had Paparan
-  hadPaparan: number = 100;
-  saizLangkah: number = 100; // Bilangan ayat ditambah setiap kali tekan 'Muat Lagi'
+  // Indeks ayat yang sedang dipaparkan
+  currentIndex: number = 0;
+  isFullscreen: boolean = false;
+
+  // Set simpanan kunci ayat yang dah dihafal (Cth: "1:2" untuk Surah 1 Ayat 2)
+  setHafal: Set<string> = new Set<string>();
 
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -40,7 +41,15 @@ export class QuranwebComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    this.muatHafalCache();
     this.muatDataQuran();
+  }
+
+  get ayatSemasa(): AyatQuran | null {
+    if (this.senaraiAyatDitapis.length > 0 && this.currentIndex < this.senaraiAyatDitapis.length) {
+      return this.senaraiAyatDitapis[this.currentIndex];
+    }
+    return null;
   }
 
   muatDataQuran(): void {
@@ -124,71 +133,92 @@ export class QuranwebComponent implements OnInit {
   }
 
   tukarSurah(): void {
-    this.hadPaparan = 100; // Set semula had paparan ke 100 apabila bertukar penapis
+    this.currentIndex = 0;
     this.susunDanTapisAyat();
   }
 
   susunDanTapisAyat(): void {
     let temp = [...this.senaraiAyat];
 
-    // 1. Susun ikut Surah (1 - 114) dan Ayat (1 - akhir)
     temp.sort((a, b) => {
       const sA = Number(a.surahNo);
       const sB = Number(b.surahNo);
-      if (sA !== sB) {
-        return sA - sB;
-      }
+      if (sA !== sB) return sA - sB;
       return Number(a.ayatNo) - Number(b.ayatNo);
     });
 
-    // 2. Penapis Surah
     if (this.surahDipilih && Number(this.surahDipilih) !== 0) {
       temp = temp.filter(a => Number(a.surahNo) === Number(this.surahDipilih));
     }
 
-    // 3. Penapis Ayat
-    if (this.carianAyat && this.carianAyat.trim() !== '') {
-      temp = temp.filter(a => a.ayatNo.toString().includes(this.carianAyat.trim()));
-    }
-
     this.senaraiAyatDitapis = temp;
-    this.kemaskiniPaparan();
+    if (this.currentIndex >= this.senaraiAyatDitapis.length) {
+      this.currentIndex = 0;
+    }
   }
 
-  kemaskiniPaparan(): void {
-    // Hadkan paparan mengikut nilai 'hadPaparan'
-    this.senaraiAyatDipapar = this.senaraiAyatDitapis.slice(0, this.hadPaparan);
+  // Fungsi Navigasi (Menukar indeks tanpa trigger scroll)
+  pilihAyat(index: number, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    this.currentIndex = index;
   }
 
-  // Fungsi Kawalan Paparan (Load & Unload)
-  muatLagi(): void {
-    this.hadPaparan += this.saizLangkah;
-    this.kemaskiniPaparan();
+  nextAyat(): void {
+    if (this.currentIndex < this.senaraiAyatDitapis.length - 1) {
+      this.currentIndex++;
+    }
   }
 
-  muatSemua(): void {
-    this.hadPaparan = this.senaraiAyatDitapis.length;
-    this.kemaskiniPaparan();
+  prevAyat(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
   }
 
-  kurangkanPaparan(): void {
-    this.hadPaparan = 100;
-    this.kemaskiniPaparan();
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
   }
 
-  resetPenapis(): void {
-    this.surahDipilih = 0;
-    this.carianAyat = '';
-    this.hadPaparan = 100;
-    this.susunDanTapisAyat();
+  // Pengurusan Tanda Dah Hafal
+  getAyatKey(item: AyatQuran): string {
+    return `${item.surahNo}:${item.ayatNo}`;
+  }
+
+  isHafal(item: AyatQuran): boolean {
+    return this.setHafal.has(this.getAyatKey(item));
+  }
+
+  toggleHafal(item: AyatQuran): void {
+    const key = this.getAyatKey(item);
+    if (this.setHafal.has(key)) {
+      this.setHafal.delete(key);
+    } else {
+      this.setHafal.add(key);
+    }
+    localStorage.setItem(this.hafalKey, JSON.stringify(Array.from(this.setHafal)));
+  }
+
+  muatHafalCache(): void {
+    const data = localStorage.getItem(this.hafalKey);
+    if (data) {
+      try {
+        const list = JSON.parse(data);
+        if (Array.isArray(list)) {
+          this.setHafal = new Set(list);
+        }
+      } catch (e) {
+        console.error('Ralat memuatkan cache hafal:', e);
+      }
+    }
   }
 
   padamCacheAndReload(): void {
     localStorage.removeItem(this.storageKey);
     this.senaraiAyat = [];
     this.senaraiAyatDitapis = [];
-    this.senaraiAyatDipapar = [];
-    this.resetPenapis();
+    this.currentIndex = 0;
     this.fetchAndSaveCsv();
   }
 }

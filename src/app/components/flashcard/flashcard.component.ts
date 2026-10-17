@@ -16,7 +16,6 @@ export class FlashcardComponent {
   readonly levels = Array.from({ length: 100 }, (_, i) => i + 1);
 
   refreshData(): void {
-    // Panggil fungsi refresh pada service untuk memuatkan semula data terkini (paksa muat semula cache)
     if (typeof (this.flashcardService as any).loadFlashcardData === 'function') {
       (this.flashcardService as any).loadFlashcardData(true);
     } else if (typeof (this.flashcardService as any).refreshData === 'function') {

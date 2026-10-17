@@ -1,14 +1,29 @@
-<div class="word-list">
-  <h2>All Words — Quick Reference</h2>
-  <div class="word-grid">
-    @for (w of flashcardService.words(); track $index; let i = $index) {
-      <div class="word-item" (click)="selectWord(i)">
-        <div>
+<div class="word-list-container">
+  <div class="word-list-header">
+    <h2>All Words — Quick Reference (1 - 100)</h2>
+    <span class="word-count">{{ flashcardService.words().length }} Perkataan</span>
+  </div>
+
+  <div class="word-scroll-box">
+    <div class="word-grid">
+      @for (w of flashcardService.words(); track $index; let i = $index) {
+      <div class="word-item" (click)="selectWord(i, $event)">
+        <div class="word-number">{{ i + 1 }}</div>
+        <div class="word-info">
           <div class="w-arabic">{{ w.arabic }}</div>
           <div class="w-english">{{ w.english }} · <em>{{ w.transliteration }}</em></div>
         </div>
-        <button class="w-mini-speak" (click)="speakWord($event, i)">🔊</button>
+        <div class="word-actions">
+          <!-- Butang kecil untuk papar di main flashcard tanpa paksa skrol ke atas, atau terus pilih -->
+          <button class="w-mini-action" (click)="displayOnMain($event, i)" title="Papar di Flashcard Utama">
+            📌
+          </button>
+          <button class="w-mini-speak" (click)="speakWord($event, i)" title="Dengar Sebutan">
+            🔊
+          </button>
+        </div>
       </div>
-    }
+      }
+    </div>
   </div>
 </div>

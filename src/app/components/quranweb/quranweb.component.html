@@ -1,7 +1,7 @@
-<div class="quran-container">
+<div class="quran-container" [class.fullscreen-mode]="isFullscreen">
     <h2>Quran Web Component</h2>
 
-    <!-- Navigasi Carian Surah & Ayat -->
+    <!-- Bar Navigasi Surah & Butang Tindakan -->
     <div class="nav-bar" *ngIf="!isLoading && senaraiAyat.length > 0">
         <div class="filter-group">
             <label for="surahSelect">Pilih Surah:</label>
@@ -13,71 +13,67 @@
             </select>
         </div>
 
-        <div class="filter-group">
-            <label for="ayatInput">Cari / Lompat ke Ayat:</label>
-            <input id="ayatInput" type="number" placeholder="Cth: 1" [(ngModel)]="carianAyat"
-                (input)="susunDanTapisAyat()" />
-        </div>
+        <button class="btn btn-fullscreen" (click)="toggleFullscreen()">
+            {{ isFullscreen ? 'Keluar Fullscreen' : 'Fullscreen' }}
+        </button>
 
-        <button class="reset-btn" (click)="resetPenapis()">Reset Penapis</button>
-    </div>
-
-    <div class="action-bar">
-        <button (click)="padamCacheAndReload()" [disabled]="isLoading">
-            Muat Semula Data (Padam Cache)
+        <button class="reset-btn" (click)="padamCacheAndReload()" [disabled]="isLoading">
+            Muat Semula Data
         </button>
     </div>
 
+    <!-- Mesej Status / Error -->
     <div *ngIf="isLoading" class="status-msg">
         Sedang memuat turun data Al-Quran...
     </div>
-
     <div *ngIf="errorMessage" class="error-msg">
         {{ errorMessage }}
     </div>
-
-    <!-- Mesej jika tiada padanan carian -->
-    <div *ngIf="!isLoading && senaraiAyatDipapar.length === 0 && senaraiAyat.length > 0" class="status-msg warning">
-        Tiada ayat ditemui untuk carian ini.
+    <div *ngIf="!isLoading && senaraiAyatDitapis.length === 0 && senaraiAyat.length > 0" class="status-msg warning">
+        Tiada ayat ditemui.
     </div>
 
-    <!-- Senarai Ayat -->
-    <div *ngIf="!isLoading && senaraiAyatDipapar.length > 0" class="ayat-list">
-        <div class="info-count">
-            Memaparkan <strong>{{ senaraiAyatDipapar.length }}</strong> daripada <strong>{{ senaraiAyatDitapis.length
-                }}</strong> ayat
+    <!-- Bahagian Paparan 1 Ayat & Navigasi Nombor -->
+    <div *ngIf="!isLoading && senaraiAyatDitapis.length > 0" class="single-ayat-wrapper">
+
+        <!-- Senarai Nombor Ayat Boleh Diklik -->
+        <div class="number-bar">
+            <button *ngFor="let item of senaraiAyatDitapis; let i = index" class="num-btn"
+                [class.active]="i === currentIndex" [class.hafal]="isHafal(item)" (click)="pilihAyat(i)">
+                {{ item.ayatNo }}
+            </button>
         </div>
 
-        <div *ngFor="let item of senaraiAyatDipapar" class="ayat-card">
+        <!-- Kad Ayat Utama (1 Ayat Sahaja) -->
+        <div class="ayat-card" *ngIf="ayatSemasa">
             <div class="ayat-header">
-                <span class="badge">Surah: {{ item.surahNo }}</span>
-                <span class="badge">Ayat: {{ item.ayatNo }}</span>
+                <span class="badge">Surah: {{ ayatSemasa.surahNo }}</span>
+                <span class="badge">Ayat: {{ ayatSemasa.ayatNo }}</span>
+                <button class="btn-hafal" [class.marked]="isHafal(ayatSemasa)" (click)="toggleHafal(ayatSemasa)">
+                    {{ isHafal(ayatSemasa) ? '✓ Dah Hafal' : 'Tanda Dah Hafal' }}
+                </button>
             </div>
 
             <div class="arabic-text">
-                {{ item.teksArab }}
+                {{ ayatSemasa.teksArab }}
             </div>
 
             <div class="translation-text">
-                {{ item.terjemahan }}
+                {{ ayatSemasa.terjemahan }}
+            </div>
+
+            <!-- Butang Kawalan Prev & Next -->
+            <div class="card-controls">
+                <button class="btn nav-btn" (click)="prevAyat()" [disabled]="currentIndex === 0">
+                    &laquo; Prev
+                </button>
+                <span class="info-posisi">{{ currentIndex + 1 }} / {{ senaraiAyatDitapis.length }}</span>
+                <button class="btn nav-btn" (click)="nextAyat()"
+                    [disabled]="currentIndex === senaraiAyatDitapis.length - 1">
+                    Next &raquo;
+                </button>
             </div>
         </div>
 
-        <!-- Butang Kawalan Load / Unload (Tambah / Kurang Paparan) -->
-        <div class="pagination-controls" *ngIf="senaraiAyatDitapis.length > 100">
-            <button *ngIf="senaraiAyatDipapar.length < senaraiAyatDitapis.length" (click)="muatLagi()"
-                class="btn btn-load">
-                Muat Lagi (+100 Ayat)
-            </button>
-
-            <button *ngIf="senaraiAyatDipapar.length < senaraiAyatDitapis.length" (click)="muatSemua()"
-                class="btn btn-load-all">
-                Muat Semua ({{ senaraiAyatDitapis.length }})
-            </button>
-
-            <button *ngIf="hadPaparan > 100" (click)="kurangkanPaparan()" class="btn btn-unload">
-                Kurangkan (Kembali ke 100)
-            </button>
-        </div>
     </div>
 </div>
