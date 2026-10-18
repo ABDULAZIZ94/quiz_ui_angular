@@ -18,6 +18,7 @@ interface Hadith {
   arabic: string;
   english: string;
   malay: string;
+  malayTranslated?: boolean;
   narrator: string;
   source: string;
 }
@@ -45,9 +46,13 @@ interface HadithBrowserData {
 export class HadithHafazanComponent implements OnInit {
   private readonly apiUrl = 'https://www.ummahapi.com/api';
 
-  // Untuk aplikasi produksi, simpan API key di backend.
+  // Untuk aplikasi produksi, lebih selamat panggil Ummah API melalui backend.
   private readonly apiKey =
     'umh_b1e6188b4913ed6ac1e37d4871911156bcdb426a';
+
+  // Endpoint Google Translate biasa; bukan Google Cloud Translation API.
+  private readonly googleTranslateUrl =
+    'https://translate.googleapis.com/translate_a/single';
 
   private readonly browserDataKey = 'hadith-hafazan-data-v1';
   private readonly hadithCacheKey = 'hadith-cache-v1';
@@ -146,6 +151,8 @@ export class HadithHafazanComponent implements OnInit {
   currentHadith: Hadith | null = null;
 
   loading = false;
+  translationLoading = false;
+  translationError = '';
   error = '';
   cacheStatus = '';
   saveMessage = '';
@@ -400,18 +407,20 @@ export class HadithHafazanComponent implements OnInit {
       requestedNumber < 1 ||
       requestedNumber > this.totalHadiths
     ) {
-      this.error = `Masukkan nombor antara 1 hingga ${this.totalHadiths}.`;
+      this.error =
+        `Masukkan nombor antara 1 hingga ${this.totalHadiths}.`;
       return;
     }
 
     const collectionKey = this.selectedCollection;
-    const requestNumber = ++this.requestId;
+    const activeRequestId = ++this.requestId;
 
     this.selectedNumber = requestedNumber;
     this.searchNumber = String(requestedNumber);
     this.error = '';
+    this.translationError = '';
+    this.translationLoading = false;
 
-    // Paparkan cache terlebih dahulu jika tersedia.
     const cachedHadith = this.getCachedHadith(
       collectionKey,
       requestedNumber
@@ -421,6 +430,19 @@ export class HadithHafazanComponent implements OnInit {
       this.currentHadith = cachedHadith;
       this.loading = false;
       this.cacheStatus = 'Dipaparkan daripada cache browser.';
+
+      // Terjemahkan jika belum ada terjemahan dalam cache.
+      if (
+        !cachedHadith.malayTranslated ||
+        !cachedHadith.malay.trim()
+      ) {
+        this.translateArabicToMalay(
+          cachedHadith,
+          collectionKey,
+          requestedNumber,
+          activeRequestId
+        );
+      }
     } else {
       this.currentHadith = null;
       this.loading = true;
@@ -441,8 +463,7 @@ export class HadithHafazanComponent implements OnInit {
 
     this.http.get<any>(url, { params }).subscribe({
       next: response => {
-        // Abaikan respons lama jika pengguna sudah memilih hadis lain.
-        if (requestNumber !== this.requestId) {
+        if (activeRequestId !== this.requestId) {
           return;
         }
 
@@ -450,12 +471,15 @@ export class HadithHafazanComponent implements OnInit {
           response?.data?.hadith ??
           response?.data?.item ??
           response?.data?.hadiths?.[0] ??
-          response?.data;
+          response?.data?.data ??
+          response?.data ??
+          response?.hadith ??
+          response;
 
         if (response?.success === false || !item) {
           this.handleLoadFailure(
             'Hadis tidak ditemui.',
-            requestNumber,
+            activeRequestId,
             !!cachedHadith
           );
           return;
@@ -467,18 +491,35 @@ export class HadithHafazanComponent implements OnInit {
           collectionKey
         );
 
-        if (!hadith.arabic && !hadith.english && !hadith.malay) {
+        if (!hadith.arabic.trim()) {
           this.handleLoadFailure(
-            'Format teks hadis tidak dikenali. Semak respons Ummah API.',
-            requestNumber,
+            'Teks Arab tidak ditemui. Semak format respons Ummah API.',
+            activeRequestId,
             !!cachedHadith
           );
           return;
         }
 
+        // Utamakan terjemahan yang telah disimpan dalam cache.
+        const latestCached = this.getCachedHadith(
+          collectionKey,
+          requestedNumber
+        );
+
+        if (
+          latestCached?.malayTranslated &&
+          latestCached.malay.trim()
+        ) {
+          hadith.malay = latestCached.malay;
+          hadith.malayTranslated = true;
+        } else {
+          // Jangan gunakan terjemahan Melayu daripada Ummah API.
+          hadith.malay = '';
+          hadith.malayTranslated = false;
+        }
+
         this.currentHadith = hadith;
 
-        // Gunakan nombor yang diminta sebagai kunci cache.
         this.saveHadithCache(
           collectionKey,
           requestedNumber,
@@ -488,6 +529,18 @@ export class HadithHafazanComponent implements OnInit {
         this.loading = false;
         this.cacheStatus = 'Cache hadis dikemas kini daripada API.';
         this.saveBrowserData();
+
+        if (
+          !hadith.malayTranslated ||
+          !hadith.malay.trim()
+        ) {
+          this.translateArabicToMalay(
+            hadith,
+            collectionKey,
+            requestedNumber,
+            activeRequestId
+          );
+        }
       },
 
       error: err => {
@@ -495,7 +548,7 @@ export class HadithHafazanComponent implements OnInit {
 
         this.handleLoadFailure(
           'Gagal mendapatkan hadis daripada API.',
-          requestNumber,
+          activeRequestId,
           !!cachedHadith
         );
       }
@@ -517,59 +570,62 @@ export class HadithHafazanComponent implements OnInit {
       return typeof value === 'string' ? value.trim() : '';
     };
 
+    const collectionName =
+      this.collections.find(
+        collection => collection.key === collectionKey
+      )?.name ?? collectionKey;
+
     return {
       number: String(
-        item.number ??
-        item.hadith_number ??
-        item.hadithNumber ??
+        item?.number ??
+        item?.hadith_number ??
+        item?.hadithNumber ??
         requestedNumber
       ),
 
       arabic: text(
-        item.arabic,
-        item.arabic_text,
-        item.text_arabic,
-        item.arab,
-        item.text
+        item?.arabic,
+        item?.arabic_text,
+        item?.arabicText,
+        item?.text_arabic,
+        item?.text_ar,
+        item?.arab
       ),
 
       english: text(
-        item.english,
-        item.english_text,
-        item.text_english,
-        item.translation
+        item?.english,
+        item?.english_text,
+        item?.englishText,
+        item?.text_english,
+        item?.text_en
       ),
 
-      malay: text(
-        item.malay,
-        item.malay_text,
-        item.text_malay,
-        item.translation_ms,
-        item.translation_malay
-      ),
+      // Terjemahan Melayu akan dijana daripada teks Arab.
+      malay: '',
+      malayTranslated: false,
 
       narrator: text(
-        item.narrator,
-        item.narrator_name,
-        item.rawi
+        item?.narrator,
+        item?.narrator_name,
+        item?.narratorName,
+        item?.rawi
       ),
 
       source: text(
-        item.source,
-        item.book,
-        this.collections.find(
-          collection => collection.key === collectionKey
-        )?.name
+        item?.source,
+        item?.book,
+        item?.collection,
+        collectionName
       )
     };
   }
 
   private handleLoadFailure(
     message: string,
-    requestNumber: number,
+    activeRequestId: number,
     hasCache: boolean
   ): void {
-    if (requestNumber !== this.requestId) {
+    if (activeRequestId !== this.requestId) {
       return;
     }
 
@@ -584,6 +640,108 @@ export class HadithHafazanComponent implements OnInit {
       this.cacheStatus = 'Tiada cache tersedia untuk hadis ini.';
     }
   }
+
+  // ==============================
+  // GOOGLE TRANSLATE: ARABIC -> MALAY
+  // ==============================
+
+  private translateArabicToMalay(
+    hadith: Hadith,
+    collectionKey: string,
+    requestedNumber: number,
+    activeRequestId: number
+  ): void {
+    if (!hadith.arabic.trim()) {
+      this.translationError =
+        'Teks Arab tidak tersedia untuk diterjemahkan.';
+      return;
+    }
+
+    if (hadith.malayTranslated && hadith.malay.trim()) {
+      return;
+    }
+
+    this.translationLoading = true;
+    this.translationError = '';
+
+    const params = new HttpParams()
+      .set('client', 'gtx')
+      .set('sl', 'ar')
+      .set('tl', 'ms')
+      .set('dt', 't')
+      .set('q', hadith.arabic);
+
+    this.http.get<any>(
+      this.googleTranslateUrl,
+      { params }
+    ).subscribe({
+      next: response => {
+        const translatedText = Array.isArray(response?.[0])
+          ? response[0]
+              .map((part: any[]) => part?.[0] ?? '')
+              .join('')
+              .trim()
+          : '';
+
+        if (!translatedText) {
+          if (activeRequestId === this.requestId) {
+            this.translationLoading = false;
+            this.translationError =
+              'Google Translate tidak memulangkan terjemahan.';
+          }
+          return;
+        }
+
+        const translatedHadith: Hadith = {
+          ...hadith,
+          malay: translatedText,
+          malayTranslated: true
+        };
+
+        // Simpan teks hadis dan terjemahan dalam cache browser.
+        this.saveHadithCache(
+          collectionKey,
+          requestedNumber,
+          translatedHadith
+        );
+
+        if (activeRequestId === this.requestId) {
+          this.currentHadith = translatedHadith;
+          this.translationLoading = false;
+          this.translationError = '';
+          this.cacheStatus =
+            'Hadis dan terjemahan disimpan dalam cache browser.';
+        }
+      },
+
+      error: err => {
+        console.error('Google Translate error:', err);
+
+        if (activeRequestId === this.requestId) {
+          this.translationLoading = false;
+          this.translationError =
+            'Terjemahan gagal. Google mungkin menyekat permintaan browser atau berlaku ralat CORS.';
+        }
+      }
+    });
+  }
+
+  retryTranslation(): void {
+    if (!this.currentHadith) {
+      return;
+    }
+
+    this.translateArabicToMalay(
+      this.currentHadith,
+      this.selectedCollection,
+      this.selectedNumber,
+      this.requestId
+    );
+  }
+
+  // ==============================
+  // NAVIGATION
+  // ==============================
 
   goToNumber(): void {
     this.loadHadith(this.searchNumber);
@@ -713,7 +871,10 @@ export class HadithHafazanComponent implements OnInit {
           throw new Error('Koleksi dalam backup tidak sah.');
         }
 
-        if (parsed.hadithCache) {
+        if (
+          parsed.hadithCache &&
+          typeof parsed.hadithCache === 'object'
+        ) {
           this.hadithCache = parsed.hadithCache;
           this.persistHadithCache();
         }

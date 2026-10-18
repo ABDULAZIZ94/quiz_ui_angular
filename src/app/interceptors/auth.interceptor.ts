@@ -11,6 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     req.url.includes('alquran.cloud') ||
     req.url.includes('quizapi.ezcigu.online') ||
     req.url.includes('quizcsv') ||
+    req.url.includes('translate.googleapis.com') ||
     req.url.includes('script.google.com');
 
   // API luaran: teruskan tanpa Authorization
