@@ -1,0 +1,324 @@
+
+<div class="hafazan-page">
+
+  <header class="page-header">
+    <div class="header-icon">۞</div>
+    <div>
+      <h1>Hadith Hafazan</h1>
+      <p dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+      <span>Program bacaan dan hafazan hadis</span>
+    </div>
+  </header>
+
+  <!-- Pilihan koleksi -->
+  <section class="panel collection-panel">
+    <label for="collection">Pilih koleksi hadis</label>
+
+    <select
+      id="collection"
+      [value]="selectedCollection"
+      (change)="selectCollection($any($event.target).value)">
+
+      <option
+        *ngFor="let item of collections"
+        [value]="item.key">
+        {{ item.name }} — {{ item.total_hadiths }} hadis
+      </option>
+    </select>
+
+    <div class="collection-info">
+      <h2 dir="rtl">{{ collection.arabic_name }}</h2>
+      <p>{{ collection.name }}</p>
+      <span class="reliability">{{ collection.reliability }}</span>
+      <p class="author">Pengarang: {{ collection.author }}</p>
+    </div>
+  </section>
+
+  <!-- Kemajuan hafazan -->
+  <section class="panel progress-panel">
+    <div class="progress-heading">
+      <div>
+        <span class="muted">Kemajuan hafazan</span>
+        <h2>{{ memorizedCount }} / {{ totalHadiths }}</h2>
+      </div>
+      <strong>{{ progress }}%</strong>
+    </div>
+
+    <div
+      class="progress-track"
+      role="progressbar"
+      [attr.aria-valuenow]="progress"
+      aria-valuemin="0"
+      aria-valuemax="100">
+      <div
+        class="progress-fill"
+        [style.width.%]="progress">
+      </div>
+    </div>
+
+    <p>{{ memorizedCount }} hadis ditandakan sudah dihafal.</p>
+  </section>
+
+  <!-- Simpanan browser -->
+  <section class="panel browser-data-panel">
+    <div class="section-heading">
+      <div>
+        <h3>Data Browser</h3>
+        <p class="muted">
+          Hafazan, nota dan cache hadis disimpan pada peranti ini.
+        </p>
+      </div>
+      <span class="storage-icon">▤</span>
+    </div>
+
+    <div class="browser-data-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="saveBrowserData()">
+        Simpan Data
+      </button>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="exportBrowserData()">
+        Eksport Backup
+      </button>
+
+      <label class="import-button">
+        Import Backup
+        <input
+          type="file"
+          accept=".json,application/json"
+          (change)="importBrowserData($event)" />
+      </label>
+    </div>
+
+    <p
+      *ngIf="saveMessage"
+      class="save-message"
+      role="status">
+      {{ saveMessage }}
+    </p>
+
+    <label for="hadithNote" class="field-label">
+      Nota hafazan hadis ini
+    </label>
+
+    <textarea
+      id="hadithNote"
+      rows="3"
+      [value]="currentNote"
+      (input)="saveNote($any($event.target).value)"
+      placeholder="Catatan, kata kunci atau bahagian yang perlu diulang...">
+    </textarea>
+  </section>
+
+  <!-- Navigasi nombor hadis -->
+  <section class="panel number-panel">
+    <div class="section-heading">
+      <h3>Pilih nombor hadis</h3>
+      <span class="muted">
+        Hadis {{ selectedNumber }} / {{ totalHadiths }}
+      </span>
+    </div>
+
+    <form
+      class="number-search"
+      (submit)="$event.preventDefault(); goToNumber()">
+
+      <input
+        type="number"
+        name="hadithNumber"
+        [(ngModel)]="searchNumber"
+        min="1"
+        [max]="totalHadiths"
+        placeholder="Nombor hadis"
+        aria-label="Nombor hadis" />
+
+      <button type="submit" class="primary-small">
+        Pergi
+      </button>
+    </form>
+
+    <div class="number-list">
+      <button
+        *ngFor="let number of visibleNumbers"
+        type="button"
+        class="number-button"
+        [class.active]="number === selectedNumber"
+        [class.memorized]="isNumberMemorized(number)"
+        [attr.aria-label]="'Hadis ' + number"
+        [attr.aria-current]="number === selectedNumber ? 'page' : null"
+        (click)="loadHadith(number)">
+
+        {{ number }}
+
+        <span
+          *ngIf="isNumberMemorized(number)"
+          class="number-check">
+          ✓
+        </span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Status loading -->
+  <div *ngIf="loading" class="status-message">
+    <span class="spinner"></span>
+    <p>Sedang mendapatkan hadis...</p>
+  </div>
+
+  <!-- Ralat -->
+  <div
+    *ngIf="error"
+    class="error-message"
+    role="alert">
+    {{ error }}
+  </div>
+
+  <!-- Satu hadis pada satu masa -->
+  <article
+    *ngIf="currentHadith"
+    class="panel hadith-card">
+
+    <div class="card-top">
+      <div>
+        <span class="eyebrow">KOLEKSI HADIS</span>
+        <h3>{{ collection.name }}</h3>
+      </div>
+
+      <span
+        class="status-badge"
+        [class.completed]="isMemorized">
+        {{ isMemorized ? '✓ Dah hafal' : 'Belum hafal' }}
+      </span>
+    </div>
+
+    <!-- Status cache -->
+    <div
+      *ngIf="cacheStatus"
+      class="cache-status"
+      role="status">
+      <span class="cache-dot"></span>
+      {{ cacheStatus }}
+    </div>
+
+    <div class="hadith-number">
+      <span>HADIS</span>
+      <strong>{{ currentHadith.number }}</strong>
+    </div>
+
+    <!-- Matan Arab -->
+    <section class="arabic-section">
+      <div class="text-label">
+        <span dir="rtl">مَتْنُ الْحَدِيثِ</span>
+        <span>Matan hadis</span>
+      </div>
+
+      <p
+        class="arabic-text"
+        dir="rtl"
+        lang="ar">
+        {{ currentHadith.arabic || 'النَّصُّ الْعَرَبِيُّ غَيْرُ مُتَوَفِّرٍ' }}
+      </p>
+    </section>
+
+    <!-- Terjemahan Inggeris -->
+    <section
+      *ngIf="showMeaning && currentHadith.english"
+      class="translation-section">
+
+      <div class="text-label">
+        <span>English translation</span>
+      </div>
+
+      <p class="translation-text">
+        {{ currentHadith.english }}
+      </p>
+    </section>
+
+    <!-- Terjemahan Melayu -->
+    <section
+      *ngIf="showMeaning"
+      class="translation-section">
+
+      <div class="text-label">
+        <span>Maksud dalam Bahasa Melayu</span>
+      </div>
+
+      <p
+        *ngIf="currentHadith.malay; else noMalay"
+        class="translation-text malay-text">
+        {{ currentHadith.malay }}
+      </p>
+
+      <ng-template #noMalay>
+        <p class="unavailable">
+          Terjemahan Melayu tidak tersedia daripada respons API ini.
+        </p>
+      </ng-template>
+    </section>
+
+    <button
+      type="button"
+      class="meaning-button"
+      (click)="toggleMeaning()">
+      {{ showMeaning ? 'Sembunyikan terjemahan' : 'Paparkan terjemahan' }}
+    </button>
+
+    <div
+      *ngIf="currentHadith.narrator"
+      class="narrator">
+      <strong>Perawi:</strong>
+      {{ currentHadith.narrator }}
+    </div>
+
+    <div class="source-line">
+      <span>Sumber</span>
+      <span>{{ currentHadith.source }}</span>
+    </div>
+
+    <!-- Butang hafazan -->
+    <button
+      type="button"
+      class="memorized-button"
+      [class.is-memorized]="isMemorized"
+      (click)="toggleMemorized()">
+
+      <span>{{ isMemorized ? '✓' : '○' }}</span>
+
+      {{
+        isMemorized
+          ? 'Sudah Dihafal — Batalkan'
+          : 'Saya Dah Hafal Hadis Ini'
+      }}
+    </button>
+
+    <!-- Navigasi hadis -->
+    <div class="navigation">
+      <button
+        type="button"
+        class="nav-button"
+        [disabled]="selectedNumber <= 1"
+        (click)="previousHadith()">
+        ← Sebelumnya
+      </button>
+
+      <span>{{ selectedNumber }} / {{ totalHadiths }}</span>
+
+      <button
+        type="button"
+        class="nav-button next-button"
+        [disabled]="selectedNumber >= totalHadiths"
+        (click)="nextHadith()">
+        Seterusnya →
+      </button>
+    </div>
+  </article>
+
+  <footer class="page-footer">
+    Data hadis: Ummah API · Cache browser: 30 hari
+  </footer>
+</div>

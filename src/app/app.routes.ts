@@ -74,6 +74,10 @@ export const routes: Routes = [
     loadComponent: () => import('./components/quranweb/quranweb.component').then(m => m.QuranwebComponent),
   },
   {
+    path: 'hadithweb',
+    loadComponent: () => import('./components/hadith-hafazan/hadith-hafazan.component').then(m => m.HadithHafazanComponent),
+  },
+  {
     path: 'arabic-quiz',
     loadComponent: () => import('./components/arabic-quiz/arabic-quiz.component').then(m => m.ArabicQuizComponent),
   },
