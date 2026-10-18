@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
 export interface AyatQuran {
   surahNo: string;
@@ -18,7 +19,10 @@ export interface AyatQuran {
   styleUrls: ['./quranweb.component.css']
 })
 export class QuranwebComponent implements OnInit {
-  csvUrl: string = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS91-d01z7LUoPmnmxiBE_7gbBlAaRZcgjcQk8A9X3KE1b7UDc32-e5ylGxlPetbljIywgT3zsk3izV/pub?gid=708503811&single=true&output=csv';
+  // Menggunakan endpoint gabungan (complete qran) teks asal arab & terjemahan melayu
+  private apiArabicUrl: string = 'https://api.alquran.cloud/v1/quran/quran-uthmani';
+  private apiMalayUrl: string = 'https://api.alquran.cloud/v1/quran/quran-melayu';
+  
   storageKey: string = 'quran_data_cache';
   hafalKey: string = 'quran_hafal_list';
 
@@ -28,11 +32,9 @@ export class QuranwebComponent implements OnInit {
   senaraiSurahNo: number[] = Array.from({ length: 114 }, (_, i) => i + 1);
   surahDipilih: number = 0;
 
-  // Indeks ayat yang sedang dipaparkan
   currentIndex: number = 0;
   isFullscreen: boolean = false;
 
-  // Set simpanan kunci ayat yang dah dihafal (Cth: "1:2" untuk Surah 1 Ayat 2)
   setHafal: Set<string> = new Set<string>();
 
   isLoading: boolean = false;
@@ -68,67 +70,70 @@ export class QuranwebComponent implements OnInit {
       }
     }
     
-    this.fetchAndSaveCsv();
+    this.fetchAndSaveFromApi();
   }
 
-  fetchAndSaveCsv(): void {
+  // Menggantikan fungsi fetchAndSaveCsv lama
+  fetchAndSaveFromApi(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.http.get(this.csvUrl, { responseType: 'text' }).subscribe({
-      next: (dataCsv: string) => {
-        this.senaraiAyat = this.parseCsvData(dataCsv);
+    // Memanggil kedua-dua API teks arab dan terjemahan serentak
+    const araRequest = this.http.get<any>(this.apiArabicUrl);
+    const malRequest = this.http.get<any>(this.apiMalayUrl);
 
-        if (this.senaraiAyat.length > 0) {
-          localStorage.setItem(this.storageKey, JSON.stringify(this.senaraiAyat));
-          this.susunDanTapisAyat();
+    forkJoin([araRequest, malRequest]).subscribe({
+      next: ([arabicRes, malayRes]) => {
+        if (arabicRes?.status === 'OK' && malayRes?.status === 'OK') {
+          this.senaraiAyat = this.gabungDataApi(arabicRes.data, malayRes.data);
+
+          if (this.senaraiAyat.length > 0) {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.senaraiAyat));
+            this.susunDanTapisAyat();
+          } else {
+            this.errorMessage = 'Data berjaya dimuat turun tetapi gagal diproses.';
+          }
         } else {
-          this.errorMessage = 'Data berjaya dimuat turun tetapi tiada rekod sah ditemui.';
+          this.errorMessage = 'Respons daripada API Al-Quran tidak sah.';
         }
-        
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Ralat CSV:', err);
-        this.errorMessage = 'Gagal memuat turun data Quran. Sila cuba lagi.';
+        console.error('Ralat API Quran:', err);
+        this.errorMessage = 'Gagal memuat turun data Quran daripada API. Sila cuba lagi.';
         this.isLoading = false;
       }
     });
   }
 
-  parseCsvData(csvText: string): AyatQuran[] {
-    const cleanCsv = csvText.replace(/\r/g, '');
-    const lines = cleanCsv.split('\n');
+  // Fungsi utiliti baru untuk memetakan JSON API alquran.cloud ke struktur data anda
+  private gabungDataApi(arabicData: any, malayData: any): AyatQuran[] {
     const result: AyatQuran[] = [];
+    const surahsArabic = arabicData.surahs || [];
+    const surahsMalay = malayData.surahs || [];
 
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
+    // Loop setiap surah (1 hingga 114)
+    for (let i = 0; i < surahsArabic.length; i++) {
+      const sArab = surahsArabic[i];
+      const sMalay = surahsMalay[i];
 
-      const cleanLine = line.replace(/^"(.*)"$/, '$1');
-      let columns = cleanLine.includes('\t') ? cleanLine.split('\t') : cleanLine.split('","');
+      if (!sArab || !sMalay) continue;
 
-      if (columns.length < 2) {
-        columns = cleanLine.split(',');
-      }
+      // Loop setiap ayat dalam surah tersebut
+      for (let j = 0; j < sArab.ayahs.length; j++) {
+        const aArab = sArab.ayahs[j];
+        const aMalay = sMalay.ayahs[j];
 
-      columns = columns.map(c => c.replace(/^"|"$/g, '').trim());
-
-      if (columns.length >= 2) {
-        const arabParts = columns[0].split('|');
-        const malayParts = columns[1].split('|');
-
-        if (arabParts.length >= 3 && malayParts.length >= 3) {
+        if (aArab && aMalay) {
           result.push({
-            surahNo: arabParts[0].trim(),
-            ayatNo: arabParts[1].trim(),
-            teksArab: arabParts[2].trim(),
-            terjemahan: malayParts[2].trim()
+            surahNo: sArab.number.toString(),
+            ayatNo: aArab.numberInSurah.toString(),
+            teksArab: aArab.text,
+            terjemahan: aMalay.text
           });
         }
       }
     }
-
     return result;
   }
 
@@ -157,7 +162,6 @@ export class QuranwebComponent implements OnInit {
     }
   }
 
-  // Fungsi Navigasi (Menukar indeks tanpa trigger scroll)
   pilihAyat(index: number, event?: Event): void {
     if (event) {
       event.preventDefault();
@@ -181,7 +185,6 @@ export class QuranwebComponent implements OnInit {
     this.isFullscreen = !this.isFullscreen;
   }
 
-  // Pengurusan Tanda Dah Hafal
   getAyatKey(item: AyatQuran): string {
     return `${item.surahNo}:${item.ayatNo}`;
   }
@@ -219,6 +222,6 @@ export class QuranwebComponent implements OnInit {
     this.senaraiAyat = [];
     this.senaraiAyatDitapis = [];
     this.currentIndex = 0;
-    this.fetchAndSaveCsv();
+    this.fetchAndSaveFromApi();
   }
 }
