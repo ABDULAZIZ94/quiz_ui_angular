@@ -21,7 +21,7 @@ export interface AyatQuran {
 export class QuranwebComponent implements OnInit {
   // Menggunakan endpoint gabungan (complete qran) teks asal arab & terjemahan melayu
   private apiArabicUrl: string = 'https://api.alquran.cloud/v1/quran/quran-uthmani';
-  private apiMalayUrl: string = 'https://api.alquran.cloud/v1/quran/quran-melayu';
+  private apiMalayUrl: string = 'https://api.alquran.cloud/v1/quran/ms.basmeih';
   
   storageKey: string = 'quran_data_cache';
   hafalKey: string = 'quran_hafal_list';
