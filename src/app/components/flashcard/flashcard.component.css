@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 480px; /* Dikurangkan sedikit supaya lebih kemas */
-  height: 100dvh;
+  height: 50dvh;
   margin: 0 auto;
   padding: 8px;
   box-sizing: border-box;
@@ -177,7 +177,7 @@
 
 /* Container Kad (Diminimumkan Saiz Ketinggian) */
 .card-container {
-  perspective: 1400px;
+  perspective: 1000px;
   width: 100%;
   flex-grow: 1;
   display: flex;
@@ -185,14 +185,14 @@
   align-items: center;
   padding-bottom: 4px;
   overflow: hidden;
-  max-height: calc(100dvh - 55px);
+  max-height: calc(60dvh - 55px);
 }
 
 .card-wrapper-3d {
   width: 100%;
   height: 100%;
   max-height: 410px; /* Dihadkan supaya kad tidak terlalu tinggi/besar */
-  perspective: 1400px;
+  perspective: auto;
 }
 
 .card {
@@ -236,7 +236,7 @@
 
 .image-wrapper {
   width: 100%;
-  max-height: 75px; /* Gambar dikecilkan untuk jimat ruang */
+  max-height: 200px; /* Gambar dikecilkan untuk jimat ruang */
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 4px;
