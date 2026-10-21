@@ -19,8 +19,11 @@ export interface AuthResponse {
   };
 }
 
+export type UserRole = 'users' | 'admin' | 'manager' | 'manage';
+
 export interface User {
-  id: string | number;
+  id: string; // uid daripada Firebase
   username: string;
-  email?: string;
+  email: string;
+  role?: UserRole;
 }

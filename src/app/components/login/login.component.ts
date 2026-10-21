@@ -1,110 +1,131 @@
-import { Component } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment'; // Sesuaikan path jika perlu
+import { User, UserRole } from '../../models/auth.model';
 
-export interface LoginPayload {
-  username: string;
-  password: string;
-}
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
-export interface AuthResponse {
-  status?: string;
-  result?: string;
-  message?: string;
-  success?: boolean;
-  [key: string]: any;
-}
+  // Inisialisasi Firebase menggunakan data daripada environment.ts
+  private firebaseApp = initializeApp(environment.firebase);
+  private auth = getAuth(this.firebaseApp);
 
-@Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
-})
-export class LoginComponent {
-  private apiUrl = 'https://script.google.com/macros/s/AKfycbxtY2Zm9EhX3GiHRzQMTL00wnqT2jjAz59JxPvz6VvG7nnJKYmU26BWiXygoUp0IT97rA/exec';
+  private readonly tokenKey = 'jwt_token';
+  private readonly userKey = 'current_user';
 
-  credentials: LoginPayload = {
-    username: '',
-    password: ''
-  };
+  // URL Google Sheets terbitan CSV
+  private readonly userRoleCsvUrl = 
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKWtbMLJSVbWpND4vwURlMwlMzRkznLtQigaoYN1_D9uHMUj-Jtk9_JYFZrhzmDaXMnxhCOKp6-S7C/pub?gid=1442251816&single=true&output=csv';
 
-  isLoading = false;
-  errorMessage: string | null = null;
+  readonly token = signal<string | null>(localStorage.getItem(this.tokenKey));
+  readonly currentUser = signal<User | null>(
+    JSON.parse(localStorage.getItem(this.userKey) || 'null')
+  );
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {}
+  readonly isLoggedIn = computed(() => this.token() !== null);
+  readonly userRole = computed<UserRole>(() => this.currentUser()?.role || 'users');
 
-  onLogin(form?: NgForm) {
-    if (form && form.invalid) {
-      this.errorMessage = 'Silakan isi nama pengguna dan kata sandi.';
-      return;
+  /**
+   * Log masuk menggunakan Google Pop-up Firebase
+   */
+  async loginWithGoogle(): Promise<void> {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(this.auth, provider);
+      const firebaseUser = result.user;
+
+      const token = await firebaseUser.getIdToken();
+
+      // Semak role pengguna daripada Google Sheets CSV
+      const role = await this.fetchUserRoleFromSheet(firebaseUser.uid);
+
+      const userData: User = {
+        id: firebaseUser.uid,
+        username: firebaseUser.email || '',
+        email: firebaseUser.email || '',
+        role: role
+      };
+
+      this.setSession(token, userData);
+      this.router.navigate(['/aboutme']);
+    } catch (error: any) {
+      console.error('Ralat log masuk Google:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Ambil data CSV daripada Google Sheets dan cari role berdasarkan UID
+   */
+  async fetchUserRoleFromSheet(uid: string): Promise<UserRole> {
+    try {
+      const csvData = await firstValueFrom(
+        this.http.get(this.userRoleCsvUrl, { responseType: 'text' })
+      );
+
+      const rolesMap = this.parseCsvToRoleMap(csvData);
+      const roleFound = rolesMap.get(uid);
+
+      if (roleFound && ['users', 'admin', 'manage'].includes(roleFound)) {
+        return roleFound as UserRole;
+      }
+
+      return 'users'; // Default jika uid tiada dalam rekod
+    } catch (error) {
+      console.error('Ralat mengambil data role daripada Google Sheets CSV:', error);
+      return 'users'; // Default role jika sambungan ralat
+    }
+  }
+
+  /**
+   * Menukar teks CSV kepada Map(uid -> role)
+   */
+  private parseCsvToRoleMap(csvText: string): Map<string, string> {
+    const roleMap = new Map<string, string>();
+    const lines = csvText.split(/\r?\n/);
+
+    if (lines.length <= 1) return roleMap;
+
+    // Garis pertama adalah tajuk kolum (header): uid, role
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const [uid, role] = line.split(',').map(item => item.trim().replace(/^"|"$/g, ''));
+      if (uid && role) {
+        roleMap.set(uid, role.toLowerCase());
+      }
     }
 
-    this.isLoading = true;
-    this.errorMessage = null;
+    return roleMap;
+  }
 
-    // Menggunakan text/plain untuk mengontrol CORS Preflight di Google Apps Script
-    const headers = new HttpHeaders({
-      'Content-Type': 'text/plain;charset=utf-8'
-    });
+  /**
+   * Logout — padam sesi Firebase dan storan tempatan
+   */
+  async logout(): Promise<void> {
+    try {
+      await signOut(this.auth);
+      this.token.set(null);
+      this.currentUser.set(null);
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.userKey);
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Ralat logout:', error);
+    }
+  }
 
-    const payload = JSON.stringify(this.credentials);
-
-    this.http.post(this.apiUrl, payload, { headers, responseType: 'text' }).subscribe({
-      next: (responseText: string) => {
-        this.isLoading = false;
-        console.log('Respons mentah dari server:', responseText);
-
-        // 1. Cek jika respons mengembalikan HTML (biasanya halaman error Google atau login Google)
-        if (responseText.trim().startsWith('<') || responseText.includes('<!DOCTYPE html>')) {
-          console.error('Menerima respons HTML alih-alih JSON:', responseText);
-          this.errorMessage = 'Akses Google Apps Script ditolak atau mengembalikan halaman HTML. Pastikan deployment diatur ke "Anyone".';
-          return;
-        }
-
-        try {
-          const res: AuthResponse = JSON.parse(responseText);
-          console.log('Hasil JSON parse:', res);
-
-          // 2. Evaluasi berbagai format status berhasil dari Google Apps Script
-          const isSuccess = 
-            res.status === 'authenticated' || 
-            res.status === 'success' || 
-            res.result === 'success' || 
-            res.success === true;
-
-          if (isSuccess) {
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('username', this.credentials.username);
-            
-            console.log('Login berhasil! Mengalihkan ke /quizgenerator...');
-            
-            // Pengalihan halaman ke route /quizgenerator
-            this.router.navigate(['/quizgenerator']).then(navigated => {
-              if (!navigated) {
-                console.warn('Pengalihan halaman gagal. Memperbarui lokasi secara manual...');
-                window.location.href = '/quizgenerator';
-              }
-            });
-          } else {
-            this.errorMessage = res.message || 'Log masuk gagal: Pengguna atau kata sandi tidak sah.';
-          }
-        } catch (e) {
-          console.error('Ralat Parsing JSON:', e, responseText);
-          this.errorMessage = 'Format respons dari server tidak sah atau tidak dapat diproses.';
-        }
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('HTTP Error:', err);
-        this.errorMessage = 'Ralat rangkaian atau masalah akses Google Script. Sila cuba lagi.';
-      }
-    });
+  private setSession(token: string, user: User): void {
+    this.token.set(token);
+    this.currentUser.set(user);
+    localStorage.setItem(this.tokenKey, token);
+    localStorage.setItem(this.userKey, JSON.stringify(user));
   }
 }
