@@ -72,6 +72,14 @@
             <a href="/resume" class="start-btn">
                 Resume
             </a>
+
+            <!-- HANYA PAPAR JIKA ADMIN -->
+            <a *ngIf="userRole() === 'admin'" href="/generateslide" class="start-btn">
+                Generate Slide
+            </a>
+            <a *ngIf="userRole() === 'admin'" href="/quizgenerator" class="start-btn">
+                Quiz Generator
+            </a>
         </div>
 
     </main>
