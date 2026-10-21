@@ -1,85 +1,133 @@
 <div class="landing">
 
+    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="logo">
-            PopQuiz
+            <span class="logo-icon">⚡</span> PopQuiz
         </div>
-
         <a href="/login" class="login-btn">
-            Login
+            <span>Login</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
         </a>
     </nav>
 
+    <!-- HERO SECTION -->
     <main class="hero">
 
-        <div class="hero-content">
-
+        <div class="hero-header">
+            <div class="badge">🚀 Platform Pembelajaran Interaktif</div>
             <h1>
-                Learn.
-                Practice.
-                <span>Challenge Yourself.</span>
+                Learn. Practice. <br />
+                <span class="gradient-text">Challenge Yourself.</span>
             </h1>
-
             <p>
-                Test your knowledge with fun and interactive quizzes.
+                Uji pengetahuan anda dengan kuiz interaktif, kad imbasan, dan modul pembelajaran pelbagai bahasa.
             </p>
+        </div>
 
-            <a href="/quiz" class="start-btn">
-                Start Quiz
-            </a>
-            <a href="/testabcd" class="start-btn">
-                Test ABCD
-            </a>
-            <a href="/question" class="start-btn">
-                Questions
-            </a>
-            <a href="/highscore" class="start-btn">
-                High Scores
-            </a>
-            <a href="/quizslider" class="start-btn">
-                Quiz Slider
-            </a>
-            <!-- <a href="/rph-flow" class="start-btn">
-                RPH
-            </a> -->
-            <a href="/flashcard2" class="start-btn">
-                Flash Card 2
-            </a>
-            <a href="/rph-form" class="start-btn">
-                RPH Kafa
-            </a>
-            <a href="/rph-bulk" class="start-btn">
-                RPH Bulk
-            </a>
-            <a href="/quranweb" class="start-btn">
-                Quran Web
-            </a>
-            <a href="/hadithweb" class="start-btn">
-                Hadithweb
-            </a>
-            <a href="/arabic-quiz" class="start-btn">
-                Arabic Quiz
-            </a>
-            <a href="/urdu-quiz" class="start-btn">
-                Urdu Quiz
-            </a>
-            <a href="/chinese-card" class="start-btn">
-                Chinese Card
-            </a>
-            <a href="/chinese-quiz" class="start-btn">
-                Chinese Quiz
-            </a>
-            <a href="/resume" class="start-btn">
-                Resume
-            </a>
+        <!-- QUICK ACTIONS / NAVIGATION GRID -->
+        <div class="navigation-wrapper">
 
-            <!-- HANYA PAPAR JIKA ADMIN -->
-            <a *ngIf="userRole() === 'admin'" href="/generateslide" class="start-btn">
-                Generate Slide
-            </a>
-            <a *ngIf="userRole() === 'admin'" href="/quizgenerator" class="start-btn">
-                Quiz Generator
-            </a>
+            <!-- Kategori 1: Kuiz & Cabaran Utama -->
+            <div class="nav-section">
+                <h2 class="section-title">🎮 Kuiz & Cabaran</h2>
+                <div class="card-grid">
+                    <a href="/quiz" class="feature-card primary-card">
+                        <div class="card-content">
+                            <span class="card-title">Start Quiz</span>
+                            <span class="card-desc">Mula kuiz utama sekarang</span>
+                        </div>
+                        <span class="arrow-icon">→</span>
+                    </a>
+
+                    <a href="/quizslider" class="feature-card">
+                        <div class="card-content">
+                            <span class="card-title">Quiz Slider</span>
+                        </div>
+                    </a>
+
+                    <a href="/highscore" class="feature-card">
+                        <div class="card-content">
+                            <span class="card-title">High Scores 🏆</span>
+                        </div>
+                    </a>
+
+                    <a href="/testabcd" class="feature-card">
+                        <div class="card-content">
+                            <span class="card-title">Test ABCD</span>
+                        </div>
+                    </a>
+
+                    <a href="/question" class="feature-card">
+                        <div class="card-content">
+                            <span class="card-title">Questions Bank</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kategori 2: Modul Bahasa & Agama -->
+            <div class="nav-section">
+                <h2 class="section-title">📚 Bahasa & Pengajian Islam</h2>
+                <div class="card-grid">
+                    <a href="/flashcard2" class="feature-card">
+                        <span class="card-title">Flash Cards</span>
+                    </a>
+                    <a href="/arabic-quiz" class="feature-card">
+                        <span class="card-title">Arabic Quiz 🌙</span>
+                    </a>
+                    <a href="/urdu-quiz" class="feature-card">
+                        <span class="card-title">Urdu Quiz</span>
+                    </a>
+                    <a href="/chinese-card" class="feature-card">
+                        <span class="card-title">Chinese Card 🏮</span>
+                    </a>
+                    <a href="/chinese-quiz" class="feature-card">
+                        <span class="card-title">Chinese Quiz</span>
+                    </a>
+                    <a href="/quranweb" class="feature-card">
+                        <span class="card-title">Quran Web 📖</span>
+                    </a>
+                    <a href="/hadithweb" class="feature-card">
+                        <span class="card-title">Hadith Web</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kategori 3: Pengurusan & RPH -->
+            <div class="nav-section">
+                <h2 class="section-title">📝 Modul Guru & Utiliti</h2>
+                <div class="card-grid">
+                    <a href="/rph-form" class="feature-card">
+                        <span class="card-title">RPH Kafa</span>
+                    </a>
+                    <a href="/rph-bulk" class="feature-card">
+                        <span class="card-title">RPH Bulk</span>
+                    </a>
+                    <a href="/resume" class="feature-card">
+                        <span class="card-title">Resume Builder</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Kategori 4: Admin Tools (Hanya Admin) -->
+            <div class="nav-section admin-section" *ngIf="userRole() === 'admin'">
+                <h2 class="section-title admin-title">⚡ Admin Tools</h2>
+                <div class="card-grid">
+                    <a href="/generateslide" class="feature-card admin-card">
+                        <span class="card-title">Generate Slide 📊</span>
+                    </a>
+                    <a href="/quizgenerator" class="feature-card admin-card">
+                        <span class="card-title">Quiz Generator 🤖</span>
+                    </a>
+                </div>
+            </div>
+
         </div>
 
     </main>
