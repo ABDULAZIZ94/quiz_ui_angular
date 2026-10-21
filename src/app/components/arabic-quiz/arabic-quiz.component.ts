@@ -27,7 +27,6 @@ export interface Question {
 
 @Component({
   selector: 'app-arabic-quiz',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './arabic-quiz.component.html',
   styleUrls: ['./arabic-quiz.component.css']
@@ -48,7 +47,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   currentIndex: number = 0;
   score: number = 0;
 
-  // Time Attack Settings (Tiada had maksimum untuk timeLeft)
+  // Time Attack Settings
   timeLeft: number = 15;
   timer: any;
   private freeTimer: any; 
@@ -75,7 +74,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initThreeJS();
   }
 
-  // Listener untuk papan kekunci (Keyboard Shortcuts)
+  // Pintasan Papan Kekunci (Keyboard Shortcuts: 1-4 untuk pilihan, Enter untuk soalan seterusnya)
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
     if (!this.isPlaying) return;
@@ -83,7 +82,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     const currentQ = this.filteredQuestions[this.currentIndex];
     if (!currentQ) return;
 
-    // Jika belum jawab, tekan 1, 2, 3, 4 untuk pilih A, B, C, D
     if (!this.isAnswerChecked) {
       let optionIndex = -1;
       if (event.key === '1') optionIndex = 0;
@@ -94,9 +92,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       if (optionIndex !== -1 && currentQ.options[optionIndex]) {
         this.selectAnswer(currentQ.options[optionIndex]);
       }
-    } 
-    // Jika sudah jawab (sedang masa jeda 10 saat), tekan Enter untuk skip jeda
-    else {
+    } else {
       if (event.key === 'Enter') {
         this.proceedToNextQuestion();
       }
@@ -104,6 +100,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   initThreeJS(): void {
+    if (!this.threeCanvas) return;
     const canvas = this.threeCanvas.nativeElement;
     this.scene = new THREE.Scene();
 
@@ -144,7 +141,9 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       this.particlesMesh.rotation.x += 0.001;
       this.particlesMesh.rotation.y += 0.0015;
     }
-    this.renderer.render(this.scene, this.camera);
+    if (this.renderer && this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   onWindowResize(): void {
@@ -256,7 +255,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isAnswerChecked = false;
     this.selectedOption = null;
     this.isTimeAdded = false;
-    this.timeLeft = 15; // Permulaan 15 saat, tanpa had maksimum
+    this.timeLeft = 15;
 
     this.startTimer();
   }
@@ -278,13 +277,13 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.isAnswerChecked = true;
     this.selectedOption = option;
-    clearInterval(this.timer); // Jeda masa (Free 10 seconds)
+    clearInterval(this.timer);
 
     const currentQ = this.filteredQuestions[this.currentIndex];
     
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
-      this.timeLeft += 5; // Betul: Tambah 5 saat tanpa had maksimum (unlimited accumulation)
+      this.timeLeft += 5; // Tambah 5 saat bonus
       
       this.isTimeAdded = true;
       setTimeout(() => {
@@ -292,7 +291,6 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1500);
     }
 
-    // Tunggu 10 saat sebelum ke soalan seterusnya secara automatik
     this.freeTimer = setTimeout(() => {
       this.proceedToNextQuestion();
     }, 10000);
@@ -306,7 +304,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.currentIndex++;
 
     if (this.currentIndex < this.filteredQuestions.length) {
-      this.startTimer(); // Sambung semula baki masa terkumpul (tanpa reset ke 15 saat)
+      this.startTimer();
     } else {
       this.endGame();
     }

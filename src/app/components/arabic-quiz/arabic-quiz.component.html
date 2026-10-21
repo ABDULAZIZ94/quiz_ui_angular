@@ -26,7 +26,6 @@
                 <span>Soalan: {{ currentIndex + 1 }} / {{ filteredQuestions.length }}</span>
                 <span class="score-badge">🏆 Markah: {{ score }}</span>
 
-                <!-- Timer tanpa had (unlimited), bertambah dan menyambung baki masa -->
                 <span class="timer" [ngClass]="{'warning': timeLeft <= 5, 'time-bounce': isTimeAdded}">
                     ⏱️ {{ timeLeft }}s
                     <span *ngIf="isTimeAdded" class="time-bonus-pop">+5s 🚀</span>
@@ -34,6 +33,7 @@
             </div>
 
             <div class="question-section">
+                <!-- Atribut dir="rtl" dan kelas arabic-text untuk paparan jelas -->
                 <p class="arabic-text" dir="rtl">{{ filteredQuestions[currentIndex].arabicWord }}</p>
 
                 <div *ngIf="filteredQuestions[currentIndex].image" class="image-container">
@@ -41,33 +41,23 @@
                 </div>
             </div>
 
-            <!-- Pilihan jawapan dipetakan ke A, B, C, D dengan petunjuk kekunci 1, 2, 3, 4 -->
             <div class="options-section">
                 <button *ngFor="let option of filteredQuestions[currentIndex].options; let i = index"
-                    (click)="selectAnswer(option)" [disabled]="isAnswerChecked" class="btn-option"
-                    style="text-align: left; justify-content: flex-start; display: flex; align-items: center; gap: 12px; padding-left: 20px;"
-                    [ngClass]="{
+                    (click)="selectAnswer(option)" [disabled]="isAnswerChecked" class="btn-option" [ngClass]="{
                         'correct': isAnswerChecked && option === filteredQuestions[currentIndex].answer,
                         'wrong': isAnswerChecked && selectedOption === option && option !== filteredQuestions[currentIndex].answer
                     }">
-                    <span style="font-weight: bold; min-width: 24px; color: #3b82f6;">{{ ['A', 'B', 'C', 'D'][i]
-                        }}.</span>
-                    <span style="flex-grow: 1;">{{ option }}</span>
-                    <span
-                        style="font-size: 0.75rem; color: #888; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">[{{
-                        i + 1 }}]</span>
+                    <span class="option-label">{{ ['A', 'B', 'C', 'D'][i] }}.</span>
+                    <span class="option-text">{{ option }}</span>
+                    <span class="option-shortcut">[{{ i + 1 }}]</span>
                 </button>
             </div>
 
-            <!-- Panduan & Butang Skip Jeda / Tamatkan Kuiz -->
-            <div class="end-quiz-section"
-                style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                <button (click)="proceedToNextQuestion()" *ngIf="isAnswerChecked" class="btn-skip"
-                    style="background-color: #22c55e; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none;">
+            <div class="end-quiz-section">
+                <button (click)="proceedToNextQuestion()" *ngIf="isAnswerChecked" class="btn-skip">
                     ➡️ Tekan [Enter] untuk Seterusnya
                 </button>
-                <span *ngIf="!isAnswerChecked" style="font-size: 0.8rem; color: #aaa;">Guna kekunci 1-4 pada papan
-                    kekunci</span>
+                <span *ngIf="!isAnswerChecked" class="keyboard-hint">Guna kekunci 1-4 pada papan kekunci</span>
 
                 <button (click)="endGame()" class="btn-end-quiz">Tamatkan Kuiz</button>
             </div>
@@ -81,52 +71,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* Animasi indikator masa bertambah */
-    @keyframes popIn {
-        0% {
-            transform: scale(1);
-            opacity: 0;
-        }
-
-        50% {
-            transform: scale(1.3);
-            opacity: 1;
-            color: #22c55e;
-        }
-
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    .time-bonus-pop {
-        display: inline-block;
-        font-weight: bold;
-        color: #22c55e;
-        margin-left: 5px;
-        animation: popIn 0.6s ease-in-out;
-    }
-
-    .time-bounce {
-        animation: pulseTimer 0.5s ease-in-out;
-        border-color: #22c55e !important;
-    }
-
-    @keyframes pulseTimer {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.08);
-            background-color: rgba(34, 197, 94, 0.2);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-</style>
