@@ -53,7 +53,7 @@ export class AuthService {
       };
 
       this.setSession(token, userData);
-      this.router.navigate(['/aboutme']);
+      this.router.navigate(['/landing']); // Navigasi ke halaman selepas log masuk berjaya
     } catch (error: any) {
       console.error('Ralat log masuk Google:', error);
       throw error;
