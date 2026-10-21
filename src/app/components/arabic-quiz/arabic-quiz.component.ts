@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import * as THREE from 'three';
 
 export interface ArabicItem {
-  w: string;
+  Arabic: string;
   English?: string;
   Malay: string;
   Rohingya?: string;
@@ -27,6 +27,7 @@ export interface Question {
 
 @Component({
   selector: 'app-arabic-quiz',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './arabic-quiz.component.html',
   styleUrls: ['./arabic-quiz.component.css']
@@ -74,7 +75,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initThreeJS();
   }
 
-  // Pintasan Papan Kekunci (Keyboard Shortcuts: 1-4 untuk pilihan, Enter untuk soalan seterusnya)
+  // Pintasan Papan Kekunci (1-4 untuk pilihan, Enter untuk seterusnya)
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
     if (!this.isPlaying) return;
@@ -228,7 +229,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
       const options = [item.Malay, ...wrongOptions].sort(() => 0.5 - Math.random());
 
       return {
-        arabicWord: item.w,
+        arabicWord: item.Arabic || (item as any).w, // Menyokong lajur 'Arabic' atau 'w'
         image: item.ImageURL || '',
         options: options,
         answer: item.Malay,
@@ -283,7 +284,7 @@ export class ArabicQuizComponent implements OnInit, OnDestroy, AfterViewInit {
     
     if (option === currentQ.answer) {
       this.score += 10 + (this.timeLeft * 2);
-      this.timeLeft += 5; // Tambah 5 saat bonus
+      this.timeLeft += 5; // Bonus masa
       
       this.isTimeAdded = true;
       setTimeout(() => {
