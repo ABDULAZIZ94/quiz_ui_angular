@@ -19,9 +19,9 @@
                 </option>
             </select>
 
-            <!-- Carian Nama -->
+            <!-- Carian Nama (Hadkan kepada 20 aksara) -->
             <input type="text" placeholder="Cari nama pengguna..." [(ngModel)]="searchTerm"
-                (ngModelChange)="onFilterChange()" class="search-input" />
+                (ngModelChange)="onFilterChange()" class="search-input" maxlength="20" />
 
             <!-- Butang Susunan Skor -->
             <button (click)="toggleSort()" class="sort-btn">
@@ -53,7 +53,7 @@
                             <span *ngIf="i > 2">{{ i + 1 }}</span>
                         </td>
                         <td>{{ record.timestamp }}</td>
-                        <td><strong>{{ record.name }}</strong></td>
+                        <td class="name-column"><strong [title]="record.name">{{ record.name }}</strong></td>
                         <td><span class="subject-badge">{{ record.subject }}</span></td>
                         <td><span class="score-badge-val">{{ record.score }}</span></td>
                     </tr>

@@ -139,7 +139,7 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const headers = this.parseCsvLine(lines[0]);
     
-    const timestampIdx = headers.findIndex(h => h.toLowerCase().includes('timestamp') || h.toLowerCase().includes('tarikh'));
+    const timestampIdx = headers.findIndex(h => h.toLowerCase().includes('time') || h.toLowerCase().includes('tarikh'));
     const scoreIdx = headers.findIndex(h => h.toLowerCase().includes('score') || h.toLowerCase().includes('skor'));
     const nameIdx = headers.findIndex(h => h.toLowerCase().includes('name') || h.toLowerCase().includes('nama'));
     const subjectIdx = headers.findIndex(h => h.toLowerCase().includes('subject') || h.toLowerCase().includes('subjek') || h.toLowerCase().includes('quiz'));
@@ -149,26 +149,31 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
       const timestampRaw = values[timestampIdx >= 0 ? timestampIdx : 0] || '';
       const scoreVal = Number(values[scoreIdx >= 0 ? scoreIdx : 1]) || 0;
       
+      // Buang special characters, trim, dan hadkan kepada maksimum 20 huruf
+      const rawName = values[nameIdx >= 0 ? nameIdx : 2] || 'Tanpa Nama';
+      const cleanedName = rawName
+        .replace(/[^\p{L}\p{N}\s]/gu, '')
+        .trim()
+        .substring(0, 20);
+
       return {
         timestamp: timestampRaw,
         score: scoreVal,
-        name: values[nameIdx >= 0 ? nameIdx : 2] || 'Tanpa Nama',
+        name: cleanedName || 'Tanpa Nama',
         subject: values[subjectIdx >= 0 ? subjectIdx : 3] || 'Umum',
-        parsedDate: new Date(timestampRaw) 
+        parsedDate: this.parseTimestamp(timestampRaw)
       };
     });
 
-    // LOGIK BAHARU: Buang duplikasi & ambil skor tertinggi bagi setiap pemain (mengikut nama & subjek)
+    // Buang duplikasi & ambil skor tertinggi bagi setiap pemain (mengikut nama & subjek)
     const map = new Map<string, ScoreRecord>();
     rawRecords.forEach(record => {
-      // Gunakan kunci gabungan nama dan subjek (supaya skor pemain berbeza subjek tidak bercampur)
-      const key = `${record.name.trim().toLowerCase()}_${record.subject.trim().toLowerCase()}`;
+      const key = `${record.name.toLowerCase()}_${record.subject.trim().toLowerCase()}`;
       
       if (!map.has(key)) {
         map.set(key, record);
       } else {
         const existing = map.get(key)!;
-        // Jika skor baharu lebih tinggi, atau skor sama tetapi tarikh lebih baharu, gantikan
         if (record.score > existing.score) {
           map.set(key, record);
         } else if (record.score === existing.score && record.parsedDate.getTime() > existing.parsedDate.getTime()) {
@@ -184,6 +189,25 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.applyFilterAndSort();
     this.isLoading = false;
+  }
+
+  parseTimestamp(timestampStr: string): Date {
+    if (!timestampStr) return new Date(0);
+    
+    let d = new Date(timestampStr);
+    if (!isNaN(d.getTime())) return d;
+
+    const parts = timestampStr.split(' ');
+    if (parts.length > 0) {
+      const dateParts = parts[0].split('/');
+      if (dateParts.length === 3) {
+        const isoStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1] || '00:00:00'}`;
+        d = new Date(isoStr);
+        if (!isNaN(d.getTime())) return d;
+      }
+    }
+    
+    return new Date(0);
   }
 
   parseCsvLine(text: string): string[] {
@@ -211,18 +235,15 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
   applyFilterAndSort(): void {
     let result = [...this.allData];
 
-    // 1. Tapisan Subjek
     if (this.selectedSubject !== '') {
       result = result.filter(item => item.subject === this.selectedSubject);
     }
 
-    // 2. Carian Nama
     if (this.searchTerm.trim() !== '') {
       const lowerSearch = this.searchTerm.toLowerCase();
       result = result.filter(item => item.name.toLowerCase().includes(lowerSearch));
     }
 
-    // 3. Susunan mengikut Markah (Score)
     result.sort((a, b) => {
       if (a.score !== b.score) {
         return this.sortDescendingScore ? b.score - a.score : a.score - b.score;
