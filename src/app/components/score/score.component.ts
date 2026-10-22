@@ -201,7 +201,7 @@ export class ScoreComponent implements OnInit, OnDestroy, AfterViewInit {
     if (parts.length > 0) {
       const dateParts = parts[0].split('/');
       if (dateParts.length === 3) {
-        const isoStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1] || '00:00:00'}`;
+        const isoStr = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]} ${parts[1] || '00:00:00'}`;
         d = new Date(isoStr);
         if (!isNaN(d.getTime())) return d;
       }
