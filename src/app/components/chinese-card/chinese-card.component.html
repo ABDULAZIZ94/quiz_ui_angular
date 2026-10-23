@@ -1,39 +1,124 @@
 <div class="card-list-container">
-    <h2>Senarai Kad Bahasa Cina (Chinese Card)</h2>
+
+    <!-- Header Bertheme Cina -->
+    <header class="card-header">
+        <div class="lantern-row">
+            <span class="lantern">🏮</span>
+            <h2>Chinese Flash Card</h2>
+            <span class="lantern">🏮</span>
+        </div>
+        <div class="header-divider">
+            <span class="divider-line"></span>
+            <span class="divider-seal">卡</span>
+            <span class="divider-line"></span>
+        </div>
+        <p class="header-sub">Tekan kad untuk flip · Tekan ✓ untuk tanda dah hafal</p>
+    </header>
 
     <!-- Kotak Carian -->
     <div class="search-box">
+        <span class="search-icon">🔍</span>
         <input type="text" [(ngModel)]="searchTerm" (input)="filterCards()"
             placeholder="Cari Hanzi, Pinyin, atau Maksud..." />
+        <button *ngIf="searchTerm" class="clear-btn" (click)="clearSearch()" aria-label="Kosongkan carian">✕</button>
+    </div>
+
+    <!-- Penapis Hafalan -->
+    <div class="filter-chips">
+        <button type="button" class="chip" [class.active]="filterMode === 'all'" (click)="setFilterMode('all')">
+            Semua
+        </button>
+        <button type="button" class="chip" [class.active]="filterMode === 'belum'" (click)="setFilterMode('belum')">
+            Belum Hafal
+        </button>
+        <button type="button" class="chip" [class.active]="filterMode === 'hafal'" (click)="setFilterMode('hafal')">
+            Dah Hafal ✓
+        </button>
+    </div>
+
+    <!-- Kemajuan Hafalan -->
+    <div class="progress-wrap" *ngIf="!loading && !error">
+        <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="memorizedPercent"></div>
+        </div>
+        <span class="progress-text">
+            🎓 Dah hafal <strong>{{ memorizedCount }}</strong> / {{ cardList.length }} kad ({{ memorizedPercent }}%)
+        </span>
+        <span class="card-count" *ngIf="totalShown !== cardList.length">
+            Menunjukkan {{ totalShown }} kad
+        </span>
     </div>
 
     <!-- Status Memuatkan -->
     <div *ngIf="loading" class="loading-msg">
-        Memuatkan senarai kad dari pangkalan data... ⏳
+        <span class="loader-spinner"></span>
+        Memuatkan senarai kad dari pangkalan data...
     </div>
 
-    <!-- Grid Senarai Kad -->
-    <div *ngIf="!loading" class="cards-grid">
-        <div *ngFor="let card of filteredCardList" class="flashcard-item" [class.flipped]="card.isFlipped"
-            (click)="flipCard(card)">
+    <!-- Status Ralat -->
+    <div *ngIf="!loading && error" class="error-msg">
+        <span>⚠️</span> Ralat memuatkan data. Sila cuba lagi.
+        <button class="btn-retry" (click)="loadCardData()">Cuba Semula</button>
+    </div>
 
-            <div class="card-inner">
-                <div class="card-front">
-                    <h1>{{ card.hanzi }}</h1>
-                    <p class="hint">Tekan untuk lihat maksud</p>
-                </div>
+    <!-- Kumpulan Senarai Kad -->
+    <div class="card-groups" *ngIf="!loading && !error">
 
-                <div class="card-back">
-                    <h3>{{ card.pinyin }}</h3>
-                    <p class="meaning">{{ card.meaning }}</p>
-                    <p class="hint">Tekan semula untuk kembali</p>
+        <section *ngFor="let g of groupsOfCards" class="cn-group" [class.open]="g.open">
+            <!-- Kepala Kumpulan -->
+            <button type="button" class="group-header" (click)="toggleGroup(g)">
+                <span class="g-icon">{{ g.icon }}</span>
+                <span class="g-name">{{ g.name }}</span>
+                <span class="g-badge">
+                    {{ g.memorizedCount }}/{{ g.total }} hafal
+                </span>
+                <span class="g-progress">
+                    <span class="g-progress-fill" [style.width.%]="g.total ? (g.memorizedCount / g.total * 100) : 0"></span>
+                </span>
+                <span class="g-arrow">▾</span>
+            </button>
+
+            <!-- Card -->
+            <div class="group-body" *ngIf="g.open">
+                <div class="cards-grid">
+                    <div *ngFor="let card of g.cards" class="flashcard-item" [class.flipped]="card.isFlipped"
+                        [class.done]="card.memorized" (click)="flipCard(card)">
+
+                        <div class="card-inner">
+                            <!-- Depan: Hanzi -->
+                            <div class="card-front">
+                                <div class="corner-deco top-left">❖</div>
+                                <div class="corner-deco top-right">❖</div>
+                                <span *ngIf="card.memorized" class="done-star">✓</span>
+                                <h1 class="hanzi">{{ card.hanzi }}</h1>
+                                <div class="front-footer">
+                                    <span class="gold-dot"></span><span class="gold-dot"></span><span class="gold-dot"></span>
+                                </div>
+                                <p class="hint">Tekan untuk lihat maksud</p>
+                            </div>
+
+                            <!-- Belakang: Pinyin & Maksud -->
+                            <div class="card-back">
+                                <button type="button" class="mem-btn" [class.memorized]="card.memorized"
+                                    (click)="toggleMemorized($event, card)">
+                                    {{ card.memorized ? '✓ Dah hafal' : '✓ Hafal' }}
+                                </button>
+                                <div class="pinyin-seal">{{ card.pinyin }}</div>
+                                <p class="meaning">{{ card.malay }}</p>
+                                <p class="meaning-en" *ngIf="card.english">{{ card.english }}</p>
+                                <p class="hint">Tekan semula untuk kembali</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </section>
+
+        <div *ngIf="groupsOfCards.length === 0" class="no-result">
+            <span class="no-result-icon">🈳</span>
+            <p>Tiada kad yang sepadan dengan carian anda.</p>
+            <button class="btn-retry" (click)="clearSearch()">Kosongkan Carian</button>
         </div>
     </div>
 
-    <!-- Jika tiada keputusan carian -->
-    <div *ngIf="!loading && filteredCardList.length === 0" class="no-result">
-        Tiada kad yang sepadan dengan carian anda.
-    </div>
 </div>
